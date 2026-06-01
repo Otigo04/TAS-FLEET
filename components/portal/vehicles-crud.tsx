@@ -31,6 +31,8 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
   const [vehicles, setVehicles] = useState<VehicleRow[]>(initialVehicles)
   const [isBusy, setIsBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | VehicleRow['status']>('all')
 
   const [licensePlate, setLicensePlate] = useState('')
   const [model, setModel] = useState('')
@@ -141,6 +143,15 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
     setIsBusy(false)
   }
 
+  const filteredVehicles = vehicles.filter((vehicle) => {
+    const matchSearch =
+      search.trim().length === 0 ||
+      vehicle.license_plate.toLowerCase().includes(search.toLowerCase()) ||
+      vehicle.model.toLowerCase().includes(search.toLowerCase())
+    const matchStatus = statusFilter === 'all' || vehicle.status === statusFilter
+    return matchSearch && matchStatus
+  })
+
   return (
     <section className="animate-fade-up-delay grid gap-6 xl:grid-cols-[360px_1fr]">
       <Card className="surface-card">
@@ -192,13 +203,33 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
           <CardDescription>CRUD mit Realtime. Aenderungen sind sofort fuer alle sichtbar.</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 grid gap-3 rounded-lg border border-slate-200/80 bg-white/70 p-3 md:grid-cols-2">
+            <Input
+              placeholder="Suche Kennzeichen oder Modell"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            <select
+              className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value as 'all' | VehicleRow['status'])}
+            >
+              <option value="all">Alle Status</option>
+              {statuses.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
 
           <div className="space-y-4">
-            {vehicles.length === 0 ? (
+            {filteredVehicles.length === 0 ? (
               <p className="text-sm text-slate-500">Noch keine Fahrzeuge vorhanden.</p>
             ) : (
-              vehicles.map((vehicle) => {
+              filteredVehicles.map((vehicle) => {
                 const isEditing = editingId === vehicle.id
 
                 return (

@@ -31,6 +31,9 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
   const [drivers, setDrivers] = useState<DriverRow[]>(initialDrivers)
   const [isBusy, setIsBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+  const [filterShift, setFilterShift] = useState('alle')
+  const [filterDistrict, setFilterDistrict] = useState('alle')
 
   const [name, setName] = useState('')
   const [pscheinValidUntil, setPscheinValidUntil] = useState('')
@@ -181,6 +184,19 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
     setIsBusy(false)
   }
 
+  const districtOptions = Array.from(new Set(drivers.map((driver) => driver.district))).sort()
+  const filteredDrivers = drivers.filter((driver) => {
+    const matchSearch =
+      search.trim().length === 0 ||
+      driver.name.toLowerCase().includes(search.toLowerCase()) ||
+      (driver.notes ?? []).some((note) => note.toLowerCase().includes(search.toLowerCase()))
+
+    const matchShift = filterShift === 'alle' || driver.current_shift === filterShift
+    const matchDistrict = filterDistrict === 'alle' || driver.district === filterDistrict
+
+    return matchSearch && matchShift && matchDistrict
+  })
+
   return (
     <section className="animate-fade-up-delay grid gap-6 xl:grid-cols-[360px_1fr]">
       <Card className="surface-card">
@@ -270,13 +286,45 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
           <CardDescription>CRUD mit Realtime. Last Write Wins gilt bei gleichzeitigen Aenderungen.</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 grid gap-3 rounded-lg border border-slate-200/80 bg-white/70 p-3 md:grid-cols-3">
+            <Input
+              placeholder="Suche Name oder Notiz"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            <select
+              className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+              value={filterShift}
+              onChange={(event) => setFilterShift(event.target.value)}
+            >
+              <option value="alle">Alle Schichten</option>
+              {shifts.map((shift) => (
+                <option key={shift} value={shift}>
+                  {shift}
+                </option>
+              ))}
+            </select>
+            <select
+              className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+              value={filterDistrict}
+              onChange={(event) => setFilterDistrict(event.target.value)}
+            >
+              <option value="alle">Alle Bezirke</option>
+              {districtOptions.map((districtOption) => (
+                <option key={districtOption} value={districtOption}>
+                  {districtOption}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
 
           <div className="space-y-4">
-            {drivers.length === 0 ? (
+            {filteredDrivers.length === 0 ? (
               <p className="text-sm text-slate-500">Noch keine Fahrer vorhanden.</p>
             ) : (
-              drivers.map((driver) => {
+              filteredDrivers.map((driver) => {
                 const isEditing = editingId === driver.id
 
                 return (
