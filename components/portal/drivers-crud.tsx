@@ -141,8 +141,8 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
   }
 
   return (
-    <section className="grid gap-6 xl:grid-cols-[360px_1fr]">
-      <Card>
+    <section className="animate-fade-up-delay grid gap-6 xl:grid-cols-[360px_1fr]">
+      <Card className="surface-card">
         <CardHeader>
           <CardTitle>Neuen Fahrer anlegen</CardTitle>
           <CardDescription>Alle Felder sind Pflichtfelder fuer die Disposition.</CardDescription>
@@ -195,7 +195,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="surface-card">
         <CardHeader>
           <CardTitle>Fahrerliste</CardTitle>
           <CardDescription>CRUD mit Realtime. Last Write Wins gilt bei gleichzeitigen Aenderungen.</CardDescription>
@@ -211,7 +211,10 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                 const isEditing = editingId === driver.id
 
                 return (
-                  <div key={driver.id} className="rounded-lg border border-slate-200 p-4">
+                  <div
+                    key={driver.id}
+                    className="rounded-lg border border-slate-200/80 bg-white/70 p-4 transition-transform duration-200 hover:-translate-y-0.5"
+                  >
                     {isEditing ? (
                       <div className="grid gap-3 md:grid-cols-2">
                         <Input value={editName} onChange={(event) => setEditName(event.target.value)} />

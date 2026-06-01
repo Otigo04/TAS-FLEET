@@ -4,13 +4,58 @@
 
 :root {
   color-scheme: light;
+  --portal-bg: #eef2f7;
+  --portal-ink: #0f172a;
+  --portal-accent: #0f766e;
+  --portal-surface: rgba(255, 255, 255, 0.86);
 }
 
 body {
   font-family: var(--font-space-grotesk), 'Segoe UI', sans-serif;
   background:
-    radial-gradient(circle at 10% 10%, rgba(15, 118, 110, 0.06) 0%, rgba(15, 118, 110, 0) 40%),
-    radial-gradient(circle at 90% 90%, rgba(15, 23, 42, 0.06) 0%, rgba(15, 23, 42, 0) 40%),
-    #f1f5f9;
+    radial-gradient(circle at 8% 8%, rgba(15, 118, 110, 0.18) 0%, rgba(15, 118, 110, 0) 40%),
+    radial-gradient(circle at 90% 85%, rgba(15, 23, 42, 0.12) 0%, rgba(15, 23, 42, 0) 45%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.8), rgba(236, 253, 245, 0.6)),
+    var(--portal-bg);
   @apply text-ink antialiased;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes softPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.12);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(15, 118, 110, 0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s ease-out both;
+}
+
+.animate-fade-up-delay {
+  animation: fadeUp 0.7s ease-out both;
+}
+
+.surface-card {
+  background: var(--portal-surface);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 20px 45px -25px rgba(15, 23, 42, 0.45);
+}
+
+.status-pulse {
+  animation: softPulse 1.9s ease-in-out infinite;
 }

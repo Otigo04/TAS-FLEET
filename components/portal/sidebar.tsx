@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Car, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { CompanyLogo } from '@/components/branding/company-logo'
 
 const items = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -15,10 +16,12 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="w-full border-b border-slate-200 bg-white p-4 lg:w-64 lg:border-b-0 lg:border-r">
-      <div className="mb-6 hidden lg:block">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">ON Mobility</p>
-        <p className="mt-1 text-lg font-bold text-slate-900">Admin Portal</p>
+    <aside className="surface-card w-full border-b border-slate-200/70 p-4 lg:w-72 lg:border-b-0 lg:border-r">
+      <div className="mb-6 rounded-xl bg-gradient-to-br from-slate-900 to-teal-800 p-4 text-white">
+        <CompanyLogo />
+        <p className="mt-4 text-xs leading-relaxed text-slate-200">
+          Realtime-Management fuer Fahrer und Flotte in einer klaren Admin-Oberflaeche.
+        </p>
       </div>
 
       <nav className="flex gap-2 lg:flex-col">
@@ -31,10 +34,10 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                'inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200',
                 isActive
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'status-pulse bg-slate-900 text-white'
+                  : 'text-slate-600 hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900'
               )}
             >
               <Icon className="h-4 w-4" />

@@ -135,8 +135,8 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
   }
 
   return (
-    <section className="grid gap-6 xl:grid-cols-[360px_1fr]">
-      <Card>
+    <section className="animate-fade-up-delay grid gap-6 xl:grid-cols-[360px_1fr]">
+      <Card className="surface-card">
         <CardHeader>
           <CardTitle>Neues Fahrzeug anlegen</CardTitle>
           <CardDescription>Kennzeichen, Modell und Status direkt erfassen.</CardDescription>
@@ -179,7 +179,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="surface-card">
         <CardHeader>
           <CardTitle>Fahrzeugliste</CardTitle>
           <CardDescription>CRUD mit Realtime. Aenderungen sind sofort fuer alle sichtbar.</CardDescription>
@@ -195,7 +195,10 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
                 const isEditing = editingId === vehicle.id
 
                 return (
-                  <div key={vehicle.id} className="rounded-lg border border-slate-200 p-4">
+                  <div
+                    key={vehicle.id}
+                    className="rounded-lg border border-slate-200/80 bg-white/70 p-4 transition-transform duration-200 hover:-translate-y-0.5"
+                  >
                     {isEditing ? (
                       <div className="grid gap-3 md:grid-cols-2">
                         <Input
