@@ -42,6 +42,123 @@ export interface Database {
         }
         Relationships: []
       }
+      shift_assignments: {
+        Row: {
+          id: string
+          shift_date: string
+          shift_slot: 'Frueh' | 'Spaet' | 'Nacht'
+          driver_id: string
+          vehicle_id: string
+          uber_zone: string
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          shift_date: string
+          shift_slot: 'Frueh' | 'Spaet' | 'Nacht'
+          driver_id: string
+          vehicle_id: string
+          uber_zone: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          shift_date?: string
+          shift_slot?: 'Frueh' | 'Spaet' | 'Nacht'
+          driver_id?: string
+          vehicle_id?: string
+          uber_zone?: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      compliance_documents: {
+        Row: {
+          id: string
+          scope_type: 'driver' | 'vehicle'
+          driver_id: string | null
+          vehicle_id: string | null
+          doc_type: 'pschein' | 'hu' | 'versicherung' | 'uber_freigabe'
+          due_date: string
+          status: 'valid' | 'expiring' | 'expired' | 'pending'
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          scope_type: 'driver' | 'vehicle'
+          driver_id?: string | null
+          vehicle_id?: string | null
+          doc_type: 'pschein' | 'hu' | 'versicherung' | 'uber_freigabe'
+          due_date: string
+          status: 'valid' | 'expiring' | 'expired' | 'pending'
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          scope_type?: 'driver' | 'vehicle'
+          driver_id?: string | null
+          vehicle_id?: string | null
+          doc_type?: 'pschein' | 'hu' | 'versicherung' | 'uber_freigabe'
+          due_date?: string
+          status?: 'valid' | 'expiring' | 'expired' | 'pending'
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      incidents: {
+        Row: {
+          id: string
+          incident_type: 'schaeden' | 'bussgelder' | 'sperrungen'
+          driver_id: string | null
+          vehicle_id: string | null
+          occurred_on: string
+          severity: 'low' | 'medium' | 'high'
+          status: 'open' | 'in_progress' | 'resolved'
+          description: string
+          cost_eur: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          incident_type: 'schaeden' | 'bussgelder' | 'sperrungen'
+          driver_id?: string | null
+          vehicle_id?: string | null
+          occurred_on: string
+          severity: 'low' | 'medium' | 'high'
+          status: 'open' | 'in_progress' | 'resolved'
+          description: string
+          cost_eur?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          incident_type?: 'schaeden' | 'bussgelder' | 'sperrungen'
+          driver_id?: string | null
+          vehicle_id?: string | null
+          occurred_on?: string
+          severity?: 'low' | 'medium' | 'high'
+          status?: 'open' | 'in_progress' | 'resolved'
+          description?: string
+          cost_eur?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       vehicles: {
         Row: {
           id: string

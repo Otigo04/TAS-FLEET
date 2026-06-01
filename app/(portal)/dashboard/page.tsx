@@ -1,7 +1,7 @@
 import { requireUser } from '@/lib/auth'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { OperationsBoard } from '@/components/portal/operations-board'
 
 function daysUntil(dateString: string) {
   const now = new Date()
@@ -35,12 +35,6 @@ export default async function DashboardPage() {
   })
 
   const readinessScore = activeVehicles === 0 ? 0 : Math.min(100, Math.round((validDrivers / activeVehicles) * 100))
-
-  const defaultTasks = [
-    'Uber-Schichtplanung fuer Morgen freigeben',
-    'Fahrer mit bald ablaufendem P-Schein kontaktieren',
-    'Wartungsfahrzeuge fuer Werkstattfenster koordinieren',
-  ]
 
   return (
     <main className="space-y-6">
@@ -140,11 +134,25 @@ export default async function DashboardPage() {
         </Card>
       </section>
 
-      <OperationsBoard
-        defaultTasks={defaultTasks}
-        expiringSoon={expiringSoonDrivers.length}
-        maintenanceCount={maintenanceVehicles}
-      />
+      <section className="grid gap-4 md:grid-cols-3">
+        <Link href="/schichtplanung" className="surface-card animate-fade-up-delay rounded-xl p-5 transition-transform hover:-translate-y-1">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Disposition</p>
+          <h3 className="mt-2 text-lg font-semibold text-slate-900">Schichtplanung</h3>
+          <p className="mt-1 text-sm text-slate-600">Fahrer-Zuweisung pro Fahrzeug im Tageskalender.</p>
+        </Link>
+
+        <Link href="/compliance" className="surface-card animate-fade-up-delay-2 rounded-xl p-5 transition-transform hover:-translate-y-1">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Fristen</p>
+          <h3 className="mt-2 text-lg font-semibold text-slate-900">Compliance-Center</h3>
+          <p className="mt-1 text-sm text-slate-600">P-Schein, HU, Versicherung und Uber-Freigaben verwalten.</p>
+        </Link>
+
+        <Link href="/incidents" className="surface-card animate-fade-up-delay-3 rounded-xl p-5 transition-transform hover:-translate-y-1">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Risikolog</p>
+          <h3 className="mt-2 text-lg font-semibold text-slate-900">Incident-Log</h3>
+          <p className="mt-1 text-sm text-slate-600">Schaeden, Bussgelder und Sperrungen mit Status nachhalten.</p>
+        </Link>
+      </section>
     </main>
   )
 }
