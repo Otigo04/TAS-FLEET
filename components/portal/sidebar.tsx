@@ -16,7 +16,7 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="surface-card w-full border-b border-slate-200/70 p-4 lg:w-72 lg:border-b-0 lg:border-r">
+    <aside className="surface-card w-72 border-b border-slate-200/70 p-4 lg:border-b-0 lg:border-r">
       <div className="mb-6 rounded-xl bg-gradient-to-br from-slate-900 to-teal-800 p-4 text-white">
         <CompanyLogo />
         <p className="mt-4 text-xs leading-relaxed text-slate-200">

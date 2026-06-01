@@ -2,7 +2,10 @@
 
 ## 1) SQL Migration ausfuehren
 
-Fuehre den Inhalt von supabase/migrations/0001_mvp_schema.sql im Supabase SQL Editor aus.
+Fuehre die Migrationen in dieser Reihenfolge im Supabase SQL Editor aus:
+
+1. supabase/migrations/0001_mvp_schema.sql
+2. supabase/migrations/0002_driver_notes.sql
 
 ## 2) Auth aktivieren
 

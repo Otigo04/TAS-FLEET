@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +19,12 @@ interface DriversCrudProps {
 
 const shifts = ['Frueh', 'Spaet', 'Nacht']
 
+function shiftVariant(shift: string): 'secondary' | 'warning' | 'danger' {
+  if (shift === 'Frueh') return 'secondary'
+  if (shift === 'Spaet') return 'warning'
+  return 'danger'
+}
+
 export function DriversCrud({ initialDrivers }: DriversCrudProps) {
   const supabase = useMemo(() => createClient(), [])
 
@@ -29,12 +36,16 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
   const [pscheinValidUntil, setPscheinValidUntil] = useState('')
   const [district, setDistrict] = useState('')
   const [currentShift, setCurrentShift] = useState(shifts[0])
+  const [notes, setNotes] = useState<string[]>([])
+  const [noteInput, setNoteInput] = useState('')
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editPscheinValidUntil, setEditPscheinValidUntil] = useState('')
   const [editDistrict, setEditDistrict] = useState('')
   const [editCurrentShift, setEditCurrentShift] = useState(shifts[0])
+  const [editNotes, setEditNotes] = useState<string[]>([])
+  const [editNoteInput, setEditNoteInput] = useState('')
 
   async function refreshDrivers() {
     const { data, error: fetchError } = await supabase
@@ -73,6 +84,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
       pschein_valid_until: pscheinValidUntil,
       district,
       current_shift: currentShift,
+      notes,
     }
 
     const { error: insertError } = await supabase.from('drivers').insert(payload)
@@ -87,7 +99,31 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
     setPscheinValidUntil('')
     setDistrict('')
     setCurrentShift(shifts[0])
+    setNotes([])
+    setNoteInput('')
     setIsBusy(false)
+  }
+
+  function addCreateNote() {
+    const value = noteInput.trim()
+    if (!value) return
+    setNotes((prev) => [...prev, value])
+    setNoteInput('')
+  }
+
+  function removeCreateNote(index: number) {
+    setNotes((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  function addEditNote() {
+    const value = editNoteInput.trim()
+    if (!value) return
+    setEditNotes((prev) => [...prev, value])
+    setEditNoteInput('')
+  }
+
+  function removeEditNote(index: number) {
+    setEditNotes((prev) => prev.filter((_, i) => i !== index))
   }
 
   function startEdit(driver: DriverRow) {
@@ -96,10 +132,14 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
     setEditPscheinValidUntil(driver.pschein_valid_until)
     setEditDistrict(driver.district)
     setEditCurrentShift(driver.current_shift)
+    setEditNotes(driver.notes ?? [])
+    setEditNoteInput('')
   }
 
   function cancelEdit() {
     setEditingId(null)
+    setEditNotes([])
+    setEditNoteInput('')
   }
 
   async function handleSave(id: string) {
@@ -111,6 +151,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
       pschein_valid_until: editPscheinValidUntil,
       district: editDistrict,
       current_shift: editCurrentShift,
+      notes: editNotes,
     }
 
     const { error: updateError } = await supabase.from('drivers').update(payload).eq('id', id)
@@ -188,6 +229,34 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
               </select>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="driver-note">Notizpunkt</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="driver-note"
+                  value={noteInput}
+                  onChange={(event) => setNoteInput(event.target.value)}
+                  placeholder="z. B. bevorzugt Bezirk Zentrum"
+                />
+                <Button type="button" variant="secondary" onClick={addCreateNote}>
+                  Hinzufuegen
+                </Button>
+              </div>
+
+              {notes.length > 0 ? (
+                <ul className="space-y-2 rounded-md border border-slate-200/80 bg-white/70 p-3">
+                  {notes.map((note, index) => (
+                    <li key={`${note}-${index}`} className="flex items-center justify-between gap-3 text-sm text-slate-700">
+                      <span>{note}</span>
+                      <Button type="button" variant="outline" size="sm" onClick={() => removeCreateNote(index)}>
+                        Entfernen
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+
             <Button type="submit" className="w-full" disabled={isBusy}>
               Fahrer speichern
             </Button>
@@ -236,6 +305,44 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                           ))}
                         </select>
 
+                        <div className="md:col-span-2 space-y-2 rounded-md border border-slate-200 bg-white p-3">
+                          <Label htmlFor={`edit-driver-note-${driver.id}`}>Notizpunkte</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              id={`edit-driver-note-${driver.id}`}
+                              value={editNoteInput}
+                              onChange={(event) => setEditNoteInput(event.target.value)}
+                              placeholder="Neuen Punkt hinzufuegen"
+                            />
+                            <Button type="button" variant="secondary" onClick={addEditNote}>
+                              Hinzufuegen
+                            </Button>
+                          </div>
+
+                          {editNotes.length > 0 ? (
+                            <ul className="space-y-2">
+                              {editNotes.map((note, index) => (
+                                <li
+                                  key={`${note}-${index}`}
+                                  className="flex items-center justify-between gap-3 rounded-md border border-slate-100 px-2 py-1 text-sm text-slate-700"
+                                >
+                                  <span>{note}</span>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => removeEditNote(index)}
+                                  >
+                                    Entfernen
+                                  </Button>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-xs text-slate-500">Noch keine Notizpunkte.</p>
+                          )}
+                        </div>
+
                         <div className="md:col-span-2 flex gap-2">
                           <Button onClick={() => void handleSave(driver.id)} disabled={isBusy}>
                             Speichern
@@ -249,10 +356,21 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
                         <div>
                           <p className="font-semibold text-slate-900">{driver.name}</p>
-                          <p className="text-sm text-slate-600">
-                            Bezirk: {driver.district} | Schicht: {driver.current_shift}
-                          </p>
+                          <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
+                            <span>Bezirk: {driver.district}</span>
+                            <Badge variant={shiftVariant(driver.current_shift)}>{driver.current_shift}</Badge>
+                          </div>
                           <p className="text-xs text-slate-500">P-Schein bis: {driver.pschein_valid_until}</p>
+
+                          {driver.notes && driver.notes.length > 0 ? (
+                            <ul className="mt-2 space-y-1 text-xs text-slate-600">
+                              {driver.notes.map((note, index) => (
+                                <li key={`${driver.id}-note-${index}`} className="rounded bg-slate-100 px-2 py-1">
+                                  {note}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : null}
                         </div>
 
                         <div className="flex gap-2">

@@ -20,7 +20,7 @@ export default async function DashboardPage() {
       </div>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <Card className="surface-card transition-transform duration-200 hover:-translate-y-1">
+        <Card className="surface-card animate-fade-up-delay transition-transform duration-200 hover:-translate-y-1">
           <CardHeader>
             <CardTitle>Fahrer gesamt</CardTitle>
             <CardDescription>Aktive Datensaetze in der Fahrerverwaltung</CardDescription>
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="surface-card transition-transform duration-200 hover:-translate-y-1">
+        <Card className="surface-card animate-fade-up-delay-2 transition-transform duration-200 hover:-translate-y-1">
           <CardHeader>
             <CardTitle>Fahrzeuge gesamt</CardTitle>
             <CardDescription>Aktive Datensaetze in der Flotte</CardDescription>

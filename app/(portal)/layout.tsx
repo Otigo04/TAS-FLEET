@@ -1,4 +1,5 @@
 import { Sidebar } from '@/components/portal/sidebar'
+import { MobileSidebar } from '@/components/portal/mobile-sidebar'
 import { LogoutButton } from '@/components/portal/logout-button'
 import { requireUser } from '@/lib/auth'
 import { CompanyLogo } from '@/components/branding/company-logo'
@@ -9,15 +10,25 @@ export default async function PortalLayout({ children }: { children: React.React
   return (
     <div className="min-h-screen">
       <div className="mx-auto flex min-h-screen w-full max-w-[1400px] flex-col lg:flex-row">
-        <Sidebar />
+        <div className="hidden lg:block">
+          <Sidebar />
+        </div>
 
         <div className="flex flex-1 flex-col">
           <header className="surface-card animate-fade-up mx-4 mt-4 flex items-center justify-between rounded-2xl px-6 py-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Angemeldet als</p>
-              <p className="text-sm font-semibold text-slate-900">{user.email}</p>
+            <div className="flex items-center gap-3">
+              <MobileSidebar />
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Angemeldet als</p>
+                <p className="text-sm font-semibold text-slate-900">{user.email}</p>
+              </div>
             </div>
-            <LogoutButton />
+
+            <div className="flex items-center gap-2">
+              <CompanyLogo compact className="hidden sm:inline-flex" />
+              <LogoutButton />
+            </div>
           </header>
 
           <div className="animate-fade-up-delay flex-1 p-6">{children}</div>

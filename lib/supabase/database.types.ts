@@ -16,6 +16,7 @@ export interface Database {
           pschein_valid_until: string
           district: string
           current_shift: string
+          notes: string[]
           created_at: string
           updated_at: string
         }
@@ -25,6 +26,7 @@ export interface Database {
           pschein_valid_until: string
           district: string
           current_shift: string
+          notes?: string[]
           created_at?: string
           updated_at?: string
         }
@@ -34,6 +36,7 @@ export interface Database {
           pschein_valid_until?: string
           district?: string
           current_shift?: string
+          notes?: string[]
           created_at?: string
           updated_at?: string
         }

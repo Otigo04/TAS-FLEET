@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,6 +18,12 @@ interface VehiclesCrudProps {
 }
 
 const statuses: VehicleRow['status'][] = ['active', 'maintenance', 'offline']
+
+function statusVariant(status: VehicleRow['status']): 'success' | 'warning' | 'danger' {
+  if (status === 'active') return 'success'
+  if (status === 'maintenance') return 'warning'
+  return 'danger'
+}
 
 export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
   const supabase = useMemo(() => createClient(), [])
@@ -231,9 +238,10 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
                       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
                         <div>
                           <p className="font-semibold text-slate-900">{vehicle.license_plate}</p>
-                          <p className="text-sm text-slate-600">
-                            Modell: {vehicle.model} | Status: {vehicle.status}
-                          </p>
+                          <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
+                            <span>Modell: {vehicle.model}</span>
+                            <Badge variant={statusVariant(vehicle.status)}>{vehicle.status}</Badge>
+                          </div>
                         </div>
 
                         <div className="flex gap-2">
