@@ -38,7 +38,7 @@ export function LoginForm() {
     <Card className="surface-card w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>Mit deinem Admin-Konto im ON Mobility Portal anmelden.</CardDescription>
+        <CardDescription>Konto anmelden</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleLogin} className="space-y-4">
@@ -67,7 +67,7 @@ export function LoginForm() {
 
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-          <Button type="submit" className="w-full bg-gradient-to-r from-slate-900 to-teal-700" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Anmeldung laeuft...' : 'Einloggen'}
           </Button>
         </form>

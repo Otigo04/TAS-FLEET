@@ -145,7 +145,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
       <Card className="surface-card animate-fade-up-delay">
         <CardHeader>
           <CardTitle>Incident erfassen</CardTitle>
-          <CardDescription>Schaeden, Bussgelder und Sperrungen dokumentieren.</CardDescription>
+          <CardDescription>Neuer Eintrag</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreate} className="space-y-4">
@@ -262,7 +262,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
       <Card className="surface-card animate-fade-up-delay-2">
         <CardHeader>
           <CardTitle>Incident-Log</CardTitle>
-          <CardDescription>Historie und Bearbeitungsstatus zentral verfolgen.</CardDescription>
+          <CardDescription>Alle Eintraege</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 grid gap-3 md:grid-cols-2">

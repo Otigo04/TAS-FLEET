@@ -19,14 +19,14 @@ export default async function FahrzeugePage() {
     <main className="space-y-6">
       <div className="animate-fade-up">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Fahrzeuge</h1>
-        <p className="mt-1 text-slate-600">Anlegen, bearbeiten und loeschen von Flottendaten.</p>
+        <p className="mt-1 text-slate-600">Flottendaten verwalten.</p>
       </div>
 
       <section className="grid gap-4 md:grid-cols-4">
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Gesamt</CardTitle>
-            <CardDescription>Erfasste Fahrzeuge</CardDescription>
+            <CardDescription>Eintraege</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-slate-900">{vehicleRows.length}</p>
@@ -35,7 +35,7 @@ export default async function FahrzeugePage() {
         <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
             <CardTitle>Aktiv</CardTitle>
-            <CardDescription>Direkt verfuegbar</CardDescription>
+            <CardDescription>Im Einsatz</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-slate-900">{active}</p>
@@ -44,7 +44,7 @@ export default async function FahrzeugePage() {
         <Card className="surface-card animate-fade-up-delay-3">
           <CardHeader>
             <CardTitle>Wartung</CardTitle>
-            <CardDescription>Werkstatt oder Check</CardDescription>
+            <CardDescription>In Wartung</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-slate-900">{maintenance}</p>
@@ -53,7 +53,7 @@ export default async function FahrzeugePage() {
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Offline</CardTitle>
-            <CardDescription>Aktuell nicht im Einsatz</CardDescription>
+            <CardDescription>Nicht verfuegbar</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-slate-900">{offline}</p>

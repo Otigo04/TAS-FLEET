@@ -23,14 +23,14 @@ export default async function IncidentsPage() {
     <main className="space-y-6">
       <div className="animate-fade-up">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Incident-Log</h1>
-        <p className="mt-1 text-slate-600">Schaeden, Bussgelder und Sperrungen transparent dokumentieren.</p>
+        <p className="mt-1 text-slate-600">Vorfalle dokumentieren.</p>
       </div>
 
       <section className="grid gap-4 md:grid-cols-3">
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Offene Faelle</CardTitle>
-            <CardDescription>Offen oder in Bearbeitung</CardDescription>
+            <CardDescription>Offen</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{openIncidents}</p>
@@ -39,7 +39,7 @@ export default async function IncidentsPage() {
         <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
             <CardTitle>Hohe Prioritaet</CardTitle>
-            <CardDescription>Schwere Vorfaelle</CardDescription>
+            <CardDescription>Prioritaet hoch</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{highPriority}</p>
@@ -48,7 +48,7 @@ export default async function IncidentsPage() {
         <Card className="surface-card animate-fade-up-delay-3">
           <CardHeader>
             <CardTitle>Gesamtkosten</CardTitle>
-            <CardDescription>Summe aller Vorfaelle</CardDescription>
+            <CardDescription>Summe</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{totalCost.toFixed(2)} EUR</p>

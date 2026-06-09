@@ -19,7 +19,7 @@ export default async function SchichtplanungPage() {
     <main className="space-y-6">
       <div className="animate-fade-up">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Schichtplanung</h1>
-        <p className="mt-1 text-slate-600">Fahrer-Zuweisung pro Fahrzeug mit Tageskalender fuer den operativen Betrieb.</p>
+        <p className="mt-1 text-slate-600">Schichten planen und zuteilen.</p>
       </div>
 
       <section className="grid gap-4 md:grid-cols-3">
@@ -35,7 +35,7 @@ export default async function SchichtplanungPage() {
         <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
             <CardTitle>Verfuegbare Fahrer</CardTitle>
-            <CardDescription>Pool fuer Disposition</CardDescription>
+            <CardDescription>Fahrerpool</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{drivers.length}</p>
@@ -44,7 +44,7 @@ export default async function SchichtplanungPage() {
         <Card className="surface-card animate-fade-up-delay-3">
           <CardHeader>
             <CardTitle>Aktive Flotte</CardTitle>
-            <CardDescription>Fahrzeuge im Bestand</CardDescription>
+            <CardDescription>Fahrzeuge</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{vehicles.length}</p>

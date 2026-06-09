@@ -150,7 +150,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
       <Card className="surface-card animate-fade-up-delay">
         <CardHeader>
           <CardTitle>Frist eintragen</CardTitle>
-          <CardDescription>Compliance fuer P-Schein, HU, Versicherung und Uber-Freigaben.</CardDescription>
+          <CardDescription>Neuer Eintrag</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreate} className="space-y-4">
@@ -255,7 +255,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
       <Card className="surface-card animate-fade-up-delay-2">
         <CardHeader>
           <CardTitle>Compliance-Center</CardTitle>
-          <CardDescription>Fristen verfolgen, Status aktualisieren und Engpaesse vermeiden.</CardDescription>
+          <CardDescription>Alle Eintraege</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 grid gap-3 md:grid-cols-2">

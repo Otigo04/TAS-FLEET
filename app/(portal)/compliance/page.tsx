@@ -33,7 +33,7 @@ export default async function CompliancePage() {
     <main className="space-y-6">
       <div className="animate-fade-up">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dokumenten-Compliance</h1>
-        <p className="mt-1 text-slate-600">Fristen fuer P-Schein, HU, Versicherung und Uber-Freigaben zentral steuern.</p>
+        <p className="mt-1 text-slate-600">Dokumente und Fristen verwalten.</p>
       </div>
 
       <section className="grid gap-4 md:grid-cols-3">
@@ -58,7 +58,7 @@ export default async function CompliancePage() {
         <Card className="surface-card animate-fade-up-delay-3">
           <CardHeader>
             <CardTitle>Ueberfaellig</CardTitle>
-            <CardDescription>Sofortiger Handlungsbedarf</CardDescription>
+            <CardDescription>Faelligkeit ueberschritten</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{expired}</p>

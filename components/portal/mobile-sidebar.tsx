@@ -17,7 +17,11 @@ const items = [
   { href: '/incidents', label: 'Incidents', icon: AlertTriangle },
 ]
 
-export function MobileSidebar() {
+interface MobileSidebarProps {
+  displayName?: string
+}
+
+export function MobileSidebar({ displayName }: MobileSidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
@@ -34,7 +38,7 @@ export function MobileSidebar() {
 
           <aside className="animate-fade-up absolute left-0 top-0 h-full w-80 max-w-[90vw] border-r border-slate-200 bg-white p-5 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
-              <CompanyLogo compact={false} className="[&_*]:text-slate-900" />
+              <CompanyLogo compact={false} className="[&_*]:text-slate-900" displayName={displayName} />
               <Button variant="outline" size="sm" onClick={() => setIsOpen(false)}>
                 <X className="h-4 w-4" />
               </Button>

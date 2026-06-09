@@ -128,7 +128,7 @@ export function ShiftPlanner({ initialShifts, drivers, vehicles }: ShiftPlannerP
       <Card className="surface-card animate-fade-up-delay">
         <CardHeader>
           <CardTitle>Schicht zuweisen</CardTitle>
-          <CardDescription>Fahrer pro Fahrzeug und Tag planen.</CardDescription>
+          <CardDescription>Neue Zuweisung</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreate} className="space-y-4">
@@ -207,7 +207,7 @@ export function ShiftPlanner({ initialShifts, drivers, vehicles }: ShiftPlannerP
       <Card className="surface-card animate-fade-up-delay-2">
         <CardHeader>
           <CardTitle>Tageskalender</CardTitle>
-          <CardDescription>Zuweisungen pro Tag mit direkter Bearbeitung.</CardDescription>
+          <CardDescription>Zuweisungen pro Tag</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center gap-3">

@@ -1,4 +1,4 @@
-import { requireUser } from '@/lib/auth'
+import { requireCompletedUser } from '@/lib/auth'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,7 +12,9 @@ function daysUntil(dateString: string) {
 }
 
 export default async function DashboardPage() {
-  const { supabase, user } = await requireUser()
+  const { supabase, user, profile } = await requireCompletedUser()
+  const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
+  const displayName = fullName || user.email || 'dein Team'
 
   const [driversResult, vehiclesResult] = await Promise.all([
     supabase.from('drivers').select('*').order('pschein_valid_until', { ascending: true }),
@@ -40,44 +42,44 @@ export default async function DashboardPage() {
     <main className="space-y-6">
       <div className="animate-fade-up">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
-        <p className="mt-1 text-slate-600">Willkommen zurueck, {user.email}. Hier ist dein aktueller Ueberblick.</p>
+        <p className="mt-1 text-slate-600">Willkommen, {displayName}.</p>
       </div>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="surface-card animate-fade-up-delay transition-transform duration-200 hover:-translate-y-1">
+        <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Fahrer gesamt</CardTitle>
-            <CardDescription>Aktive Datensaetze in der Fahrerverwaltung</CardDescription>
+            <CardDescription>Aktive Eintraege</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-slate-900">{driversCount}</p>
           </CardContent>
         </Card>
 
-        <Card className="surface-card animate-fade-up-delay-2 transition-transform duration-200 hover:-translate-y-1">
+        <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
             <CardTitle>Fahrzeuge gesamt</CardTitle>
-            <CardDescription>Aktive Datensaetze in der Flotte</CardDescription>
+            <CardDescription>Aktive Eintraege</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-slate-900">{vehiclesCount}</p>
           </CardContent>
         </Card>
 
-        <Card className="surface-card animate-fade-up-delay transition-transform duration-200 hover:-translate-y-1">
+        <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Uber Readiness</CardTitle>
-            <CardDescription>Verhaeltnis verfuegbare Fahrer zu aktiven Fahrzeugen</CardDescription>
+            <CardDescription>Fahrer zu aktiven Fahrzeugen</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-slate-900">{readinessScore}%</p>
           </CardContent>
         </Card>
 
-        <Card className="surface-card animate-fade-up-delay-2 transition-transform duration-200 hover:-translate-y-1">
+        <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
             <CardTitle>P-Schein Warnungen</CardTitle>
-            <CardDescription>Ablauf innerhalb der naechsten 30 Tage</CardDescription>
+            <CardDescription>Naechste 30 Tage</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-slate-900">{expiringSoonDrivers.length}</p>
@@ -89,7 +91,7 @@ export default async function DashboardPage() {
         <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
             <CardTitle>Flottenstatus</CardTitle>
-            <CardDescription>Live-Verteilung fuer operative Entscheidungen</CardDescription>
+            <CardDescription>Aktueller Status</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between rounded-md border border-slate-200 bg-white/70 p-3">
@@ -110,7 +112,7 @@ export default async function DashboardPage() {
         <Card className="surface-card animate-fade-up-delay-3">
           <CardHeader>
             <CardTitle>Kritische Fahrertermine</CardTitle>
-            <CardDescription>Handlungsbedarf fuer Genehmigungen und P-Schein-Verlaengerung</CardDescription>
+            <CardDescription>Ablaufdaten</CardDescription>
           </CardHeader>
           <CardContent>
             {expiringSoonDrivers.length === 0 ? (
@@ -135,22 +137,22 @@ export default async function DashboardPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <Link href="/schichtplanung" className="surface-card animate-fade-up-delay rounded-xl p-5 transition-transform hover:-translate-y-1">
+        <Link href="/schichtplanung" className="surface-card animate-fade-up-delay rounded-xl p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Disposition</p>
           <h3 className="mt-2 text-lg font-semibold text-slate-900">Schichtplanung</h3>
-          <p className="mt-1 text-sm text-slate-600">Fahrer-Zuweisung pro Fahrzeug im Tageskalender.</p>
+          <p className="mt-1 text-sm text-slate-600">Schichten planen</p>
         </Link>
 
-        <Link href="/compliance" className="surface-card animate-fade-up-delay-2 rounded-xl p-5 transition-transform hover:-translate-y-1">
+        <Link href="/compliance" className="surface-card animate-fade-up-delay-2 rounded-xl p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Fristen</p>
           <h3 className="mt-2 text-lg font-semibold text-slate-900">Compliance-Center</h3>
-          <p className="mt-1 text-sm text-slate-600">P-Schein, HU, Versicherung und Uber-Freigaben verwalten.</p>
+          <p className="mt-1 text-sm text-slate-600">Dokumente und Fristen</p>
         </Link>
 
-        <Link href="/incidents" className="surface-card animate-fade-up-delay-3 rounded-xl p-5 transition-transform hover:-translate-y-1">
+        <Link href="/incidents" className="surface-card animate-fade-up-delay-3 rounded-xl p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Risikolog</p>
           <h3 className="mt-2 text-lg font-semibold text-slate-900">Incident-Log</h3>
-          <p className="mt-1 text-sm text-slate-600">Schaeden, Bussgelder und Sperrungen mit Status nachhalten.</p>
+          <p className="mt-1 text-sm text-slate-600">Vorfalle erfassen</p>
         </Link>
       </section>
     </main>

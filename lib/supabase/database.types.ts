@@ -13,6 +13,23 @@ export interface Database {
         Row: {
           id: string
           name: string
+          first_name: string | null
+          last_name: string | null
+          street: string | null
+          street_number: string | null
+          postal_code: string | null
+          city: string | null
+          birth_date: string | null
+          nationality: string | null
+          marital_status: string | null
+          tax_class: string | null
+          tax_id: string | null
+          social_security_number: string | null
+          health_insurance: string | null
+          employment_start_date: string | null
+          employed_as: string | null
+          bank_name: string | null
+          iban: string | null
           pschein_valid_until: string
           district: string
           current_shift: string
@@ -23,6 +40,23 @@ export interface Database {
         Insert: {
           id?: string
           name: string
+          first_name?: string | null
+          last_name?: string | null
+          street?: string | null
+          street_number?: string | null
+          postal_code?: string | null
+          city?: string | null
+          birth_date?: string | null
+          nationality?: string | null
+          marital_status?: string | null
+          tax_class?: string | null
+          tax_id?: string | null
+          social_security_number?: string | null
+          health_insurance?: string | null
+          employment_start_date?: string | null
+          employed_as?: string | null
+          bank_name?: string | null
+          iban?: string | null
           pschein_valid_until: string
           district: string
           current_shift: string
@@ -33,6 +67,23 @@ export interface Database {
         Update: {
           id?: string
           name?: string
+          first_name?: string | null
+          last_name?: string | null
+          street?: string | null
+          street_number?: string | null
+          postal_code?: string | null
+          city?: string | null
+          birth_date?: string | null
+          nationality?: string | null
+          marital_status?: string | null
+          tax_class?: string | null
+          tax_id?: string | null
+          social_security_number?: string | null
+          health_insurance?: string | null
+          employment_start_date?: string | null
+          employed_as?: string | null
+          bank_name?: string | null
+          iban?: string | null
           pschein_valid_until?: string
           district?: string
           current_shift?: string
@@ -190,16 +241,22 @@ export interface Database {
         Row: {
           id: string
           role: 'admin'
+          first_name: string | null
+          last_name: string | null
           created_at: string
         }
         Insert: {
           id: string
           role?: 'admin'
+          first_name?: string | null
+          last_name?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           role?: 'admin'
+          first_name?: string | null
+          last_name?: string | null
           created_at?: string
         }
         Relationships: []

@@ -1,0 +1,18 @@
+alter table public.drivers
+add column if not exists first_name text,
+add column if not exists last_name text,
+add column if not exists street text,
+add column if not exists street_number text,
+add column if not exists postal_code text,
+add column if not exists city text,
+add column if not exists birth_date date,
+add column if not exists nationality text,
+add column if not exists marital_status text,
+add column if not exists tax_class text,
+add column if not exists tax_id text,
+add column if not exists social_security_number text,
+add column if not exists health_insurance text,
+add column if not exists employment_start_date date,
+add column if not exists employed_as text,
+add column if not exists bank_name text,
+add column if not exists iban text;

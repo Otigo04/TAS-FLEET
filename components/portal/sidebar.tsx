@@ -15,16 +15,17 @@ const items = [
   { href: '/incidents', label: 'Incidents', icon: AlertTriangle },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  displayName?: string
+}
+
+export function Sidebar({ displayName }: SidebarProps) {
   const pathname = usePathname()
 
   return (
-    <aside className="surface-card w-72 border-b border-slate-200/70 p-4 lg:border-b-0 lg:border-r">
-      <div className="mb-6 rounded-xl bg-gradient-to-br from-slate-900 to-teal-800 p-4 text-white">
-        <CompanyLogo />
-        <p className="mt-4 text-xs leading-relaxed text-slate-200">
-          Realtime-Management fuer Fahrer und Flotte in einer klaren Admin-Oberflaeche.
-        </p>
+    <aside className="surface-card w-72 border-b border-slate-200 p-4 lg:border-b-0 lg:border-r">
+      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4">
+        <CompanyLogo displayName={displayName} className="[&_*]:text-slate-900" />
       </div>
 
       <nav className="flex gap-2 lg:flex-col">
@@ -37,10 +38,10 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200',
+                'inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                 isActive
-                  ? 'status-pulse bg-slate-900 text-white'
-                  : 'text-slate-600 hover:-translate-y-0.5 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'status-pulse bg-emerald-50 text-emerald-800'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               )}
             >
               <Icon className="h-4 w-4" />

@@ -30,12 +30,33 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
 
   const [drivers, setDrivers] = useState<DriverRow[]>(initialDrivers)
   const [isBusy, setIsBusy] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [importStatus, setImportStatus] = useState<string | null>(null)
+  const [importWarnings, setImportWarnings] = useState<string[]>([])
+  const [importFile, setImportFile] = useState<File | null>(null)
   const [search, setSearch] = useState('')
   const [filterShift, setFilterShift] = useState('alle')
   const [filterDistrict, setFilterDistrict] = useState('alle')
 
   const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [street, setStreet] = useState('')
+  const [streetNumber, setStreetNumber] = useState('')
+  const [postalCode, setPostalCode] = useState('')
+  const [city, setCity] = useState('')
+  const [birthDate, setBirthDate] = useState('')
+  const [nationality, setNationality] = useState('')
+  const [maritalStatus, setMaritalStatus] = useState('')
+  const [taxClass, setTaxClass] = useState('')
+  const [taxId, setTaxId] = useState('')
+  const [socialSecurityNumber, setSocialSecurityNumber] = useState('')
+  const [healthInsurance, setHealthInsurance] = useState('')
+  const [employmentStartDate, setEmploymentStartDate] = useState('')
+  const [employedAs, setEmployedAs] = useState('')
+  const [bankName, setBankName] = useState('')
+  const [iban, setIban] = useState('')
   const [pscheinValidUntil, setPscheinValidUntil] = useState('')
   const [district, setDistrict] = useState('')
   const [currentShift, setCurrentShift] = useState(shifts[0])
@@ -44,6 +65,23 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
+  const [editFirstName, setEditFirstName] = useState('')
+  const [editLastName, setEditLastName] = useState('')
+  const [editStreet, setEditStreet] = useState('')
+  const [editStreetNumber, setEditStreetNumber] = useState('')
+  const [editPostalCode, setEditPostalCode] = useState('')
+  const [editCity, setEditCity] = useState('')
+  const [editBirthDate, setEditBirthDate] = useState('')
+  const [editNationality, setEditNationality] = useState('')
+  const [editMaritalStatus, setEditMaritalStatus] = useState('')
+  const [editTaxClass, setEditTaxClass] = useState('')
+  const [editTaxId, setEditTaxId] = useState('')
+  const [editSocialSecurityNumber, setEditSocialSecurityNumber] = useState('')
+  const [editHealthInsurance, setEditHealthInsurance] = useState('')
+  const [editEmploymentStartDate, setEditEmploymentStartDate] = useState('')
+  const [editEmployedAs, setEditEmployedAs] = useState('')
+  const [editBankName, setEditBankName] = useState('')
+  const [editIban, setEditIban] = useState('')
   const [editPscheinValidUntil, setEditPscheinValidUntil] = useState('')
   const [editDistrict, setEditDistrict] = useState('')
   const [editCurrentShift, setEditCurrentShift] = useState(shifts[0])
@@ -84,6 +122,23 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
 
     const payload: DriverInsert = {
       name,
+      first_name: firstName || null,
+      last_name: lastName || null,
+      street: street || null,
+      street_number: streetNumber || null,
+      postal_code: postalCode || null,
+      city: city || null,
+      birth_date: birthDate || null,
+      nationality: nationality || null,
+      marital_status: maritalStatus || null,
+      tax_class: taxClass || null,
+      tax_id: taxId || null,
+      social_security_number: socialSecurityNumber || null,
+      health_insurance: healthInsurance || null,
+      employment_start_date: employmentStartDate || null,
+      employed_as: employedAs || null,
+      bank_name: bankName || null,
+      iban: iban || null,
       pschein_valid_until: pscheinValidUntil,
       district,
       current_shift: currentShift,
@@ -99,6 +154,23 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
     }
 
     setName('')
+    setFirstName('')
+    setLastName('')
+    setStreet('')
+    setStreetNumber('')
+    setPostalCode('')
+    setCity('')
+    setBirthDate('')
+    setNationality('')
+    setMaritalStatus('')
+    setTaxClass('')
+    setTaxId('')
+    setSocialSecurityNumber('')
+    setHealthInsurance('')
+    setEmploymentStartDate('')
+    setEmployedAs('')
+    setBankName('')
+    setIban('')
     setPscheinValidUntil('')
     setDistrict('')
     setCurrentShift(shifts[0])
@@ -132,6 +204,23 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
   function startEdit(driver: DriverRow) {
     setEditingId(driver.id)
     setEditName(driver.name)
+    setEditFirstName(driver.first_name ?? '')
+    setEditLastName(driver.last_name ?? '')
+    setEditStreet(driver.street ?? '')
+    setEditStreetNumber(driver.street_number ?? '')
+    setEditPostalCode(driver.postal_code ?? '')
+    setEditCity(driver.city ?? '')
+    setEditBirthDate(driver.birth_date ?? '')
+    setEditNationality(driver.nationality ?? '')
+    setEditMaritalStatus(driver.marital_status ?? '')
+    setEditTaxClass(driver.tax_class ?? '')
+    setEditTaxId(driver.tax_id ?? '')
+    setEditSocialSecurityNumber(driver.social_security_number ?? '')
+    setEditHealthInsurance(driver.health_insurance ?? '')
+    setEditEmploymentStartDate(driver.employment_start_date ?? '')
+    setEditEmployedAs(driver.employed_as ?? '')
+    setEditBankName(driver.bank_name ?? '')
+    setEditIban(driver.iban ?? '')
     setEditPscheinValidUntil(driver.pschein_valid_until)
     setEditDistrict(driver.district)
     setEditCurrentShift(driver.current_shift)
@@ -151,6 +240,23 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
 
     const payload: DriverUpdate = {
       name: editName,
+      first_name: editFirstName || null,
+      last_name: editLastName || null,
+      street: editStreet || null,
+      street_number: editStreetNumber || null,
+      postal_code: editPostalCode || null,
+      city: editCity || null,
+      birth_date: editBirthDate || null,
+      nationality: editNationality || null,
+      marital_status: editMaritalStatus || null,
+      tax_class: editTaxClass || null,
+      tax_id: editTaxId || null,
+      social_security_number: editSocialSecurityNumber || null,
+      health_insurance: editHealthInsurance || null,
+      employment_start_date: editEmploymentStartDate || null,
+      employed_as: editEmployedAs || null,
+      bank_name: editBankName || null,
+      iban: editIban || null,
       pschein_valid_until: editPscheinValidUntil,
       district: editDistrict,
       current_shift: editCurrentShift,
@@ -184,6 +290,75 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
     setIsBusy(false)
   }
 
+  async function handleImport(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError(null)
+    setImportStatus(null)
+    setImportWarnings([])
+
+    if (!importFile) {
+      setError('Bitte zuerst ein Personalstammblatt auswaehlen.')
+      return
+    }
+
+    setIsImporting(true)
+
+    const body = new FormData()
+    body.append('file', importFile)
+
+    try {
+      const response = await fetch('/api/import-driver-sheet', {
+        method: 'POST',
+        body,
+      })
+
+      const result = (await response.json()) as {
+        error?: string
+        warnings?: string[]
+        driver?: DriverRow
+      }
+
+      if (!response.ok) {
+        setError(result.error ?? 'Import fehlgeschlagen.')
+        setImportWarnings(result.warnings ?? [])
+        setIsImporting(false)
+        return
+      }
+
+      setImportFile(null)
+      setImportWarnings(result.warnings ?? [])
+      setImportStatus(result.driver ? `Import erfolgreich: ${result.driver.name}` : 'Import erfolgreich.')
+      if (result.driver) {
+        setName(result.driver.name)
+        setFirstName(result.driver.first_name ?? '')
+        setLastName(result.driver.last_name ?? '')
+        setStreet(result.driver.street ?? '')
+        setStreetNumber(result.driver.street_number ?? '')
+        setPostalCode(result.driver.postal_code ?? '')
+        setCity(result.driver.city ?? '')
+        setBirthDate(result.driver.birth_date ?? '')
+        setNationality(result.driver.nationality ?? '')
+        setMaritalStatus(result.driver.marital_status ?? '')
+        setTaxClass(result.driver.tax_class ?? '')
+        setTaxId(result.driver.tax_id ?? '')
+        setSocialSecurityNumber(result.driver.social_security_number ?? '')
+        setHealthInsurance(result.driver.health_insurance ?? '')
+        setEmploymentStartDate(result.driver.employment_start_date ?? '')
+        setEmployedAs(result.driver.employed_as ?? '')
+        setBankName(result.driver.bank_name ?? '')
+        setIban(result.driver.iban ?? '')
+        setPscheinValidUntil(result.driver.pschein_valid_until)
+        setDistrict(result.driver.district)
+        setCurrentShift(result.driver.current_shift)
+      }
+      await refreshDrivers()
+    } catch (importError) {
+      setError(importError instanceof Error ? importError.message : 'Import fehlgeschlagen.')
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
   const districtOptions = Array.from(new Set(drivers.map((driver) => driver.district))).sort()
   const filteredDrivers = drivers.filter((driver) => {
     const matchSearch =
@@ -202,13 +377,123 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
       <Card className="surface-card">
         <CardHeader>
           <CardTitle>Neuen Fahrer anlegen</CardTitle>
-          <CardDescription>Alle Felder sind Pflichtfelder fuer die Disposition.</CardDescription>
+          <CardDescription>Neuer Eintrag</CardDescription>
         </CardHeader>
         <CardContent>
+          <form onSubmit={handleImport} className="mb-6 space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div className="space-y-2">
+              <Label htmlFor="driver-sheet">Personalstammblatt importieren</Label>
+              <Input
+                id="driver-sheet"
+                type="file"
+                accept=".pdf,image/*"
+                onChange={(event) => setImportFile(event.target.files?.[0] ?? null)}
+              />
+              <p className="text-xs text-slate-500">PDF oder Bild hochladen. Daten werden automatisch ausgelesen.</p>
+            </div>
+
+            <Button type="submit" variant="secondary" className="w-full" disabled={isImporting}>
+              {isImporting ? 'Import laeuft...' : 'Stammblatt lesen und Fahrer anlegen'}
+            </Button>
+
+            {importStatus ? <p className="text-sm text-emerald-700">{importStatus}</p> : null}
+            {importWarnings.length > 0 ? (
+              <ul className="space-y-1 text-xs text-amber-700">
+                {importWarnings.map((warning, index) => (
+                  <li key={`${warning}-${index}`}>- {warning}</li>
+                ))}
+              </ul>
+            ) : null}
+          </form>
+
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="driver-name">Name</Label>
               <Input id="driver-name" value={name} onChange={(event) => setName(event.target.value)} required />
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="driver-first-name">Vorname</Label>
+                <Input id="driver-first-name" value={firstName} onChange={(event) => setFirstName(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-last-name">Nachname</Label>
+                <Input id="driver-last-name" value={lastName} onChange={(event) => setLastName(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-street">Strasse</Label>
+                <Input id="driver-street" value={street} onChange={(event) => setStreet(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-street-number">Strassennr</Label>
+                <Input id="driver-street-number" value={streetNumber} onChange={(event) => setStreetNumber(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-postal-code">PLZ</Label>
+                <Input id="driver-postal-code" value={postalCode} onChange={(event) => setPostalCode(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-city">Ort</Label>
+                <Input id="driver-city" value={city} onChange={(event) => setCity(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-birth-date">Geburtsdatum</Label>
+                <Input id="driver-birth-date" type="date" value={birthDate} onChange={(event) => setBirthDate(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-nationality">Staatsangehoerigkeit</Label>
+                <Input id="driver-nationality" value={nationality} onChange={(event) => setNationality(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-marital-status">Familienstand</Label>
+                <Input id="driver-marital-status" value={maritalStatus} onChange={(event) => setMaritalStatus(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-tax-class">Steuerklasse</Label>
+                <Input id="driver-tax-class" value={taxClass} onChange={(event) => setTaxClass(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-tax-id">Steuer Identifikationsnummer</Label>
+                <Input id="driver-tax-id" value={taxId} onChange={(event) => setTaxId(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-social-security">Sozialversicherungsnummer</Label>
+                <Input
+                  id="driver-social-security"
+                  value={socialSecurityNumber}
+                  onChange={(event) => setSocialSecurityNumber(event.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-health-insurance">Krankenkasse</Label>
+                <Input
+                  id="driver-health-insurance"
+                  value={healthInsurance}
+                  onChange={(event) => setHealthInsurance(event.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-employment-start">Eintritt am</Label>
+                <Input
+                  id="driver-employment-start"
+                  type="date"
+                  value={employmentStartDate}
+                  onChange={(event) => setEmploymentStartDate(event.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-employed-as">Beschaeftigt als</Label>
+                <Input id="driver-employed-as" value={employedAs} onChange={(event) => setEmployedAs(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-bank-name">Name der Bank</Label>
+                <Input id="driver-bank-name" value={bankName} onChange={(event) => setBankName(event.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver-iban">IBAN</Label>
+                <Input id="driver-iban" value={iban} onChange={(event) => setIban(event.target.value)} />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="driver-pschein">P-Schein gueltig bis</Label>
@@ -283,7 +568,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
       <Card className="surface-card">
         <CardHeader>
           <CardTitle>Fahrerliste</CardTitle>
-          <CardDescription>CRUD mit Realtime. Last Write Wins gilt bei gleichzeitigen Aenderungen.</CardDescription>
+          <CardDescription>Eintraege</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 grid gap-3 rounded-lg border border-slate-200/80 bg-white/70 p-3 md:grid-cols-3">
@@ -330,11 +615,40 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                 return (
                   <div
                     key={driver.id}
-                    className="rounded-lg border border-slate-200/80 bg-white/70 p-4 transition-transform duration-200 hover:-translate-y-0.5"
+                    className="rounded-lg border border-slate-200 bg-white p-4"
                   >
                     {isEditing ? (
                       <div className="grid gap-3 md:grid-cols-2">
                         <Input value={editName} onChange={(event) => setEditName(event.target.value)} />
+                        <Input value={editFirstName} onChange={(event) => setEditFirstName(event.target.value)} placeholder="Vorname" />
+                        <Input value={editLastName} onChange={(event) => setEditLastName(event.target.value)} placeholder="Nachname" />
+                        <Input value={editStreet} onChange={(event) => setEditStreet(event.target.value)} placeholder="Strasse" />
+                        <Input value={editStreetNumber} onChange={(event) => setEditStreetNumber(event.target.value)} placeholder="Strassennr" />
+                        <Input value={editPostalCode} onChange={(event) => setEditPostalCode(event.target.value)} placeholder="PLZ" />
+                        <Input value={editCity} onChange={(event) => setEditCity(event.target.value)} placeholder="Ort" />
+                        <Input type="date" value={editBirthDate} onChange={(event) => setEditBirthDate(event.target.value)} />
+                        <Input value={editNationality} onChange={(event) => setEditNationality(event.target.value)} placeholder="Staatsangehoerigkeit" />
+                        <Input value={editMaritalStatus} onChange={(event) => setEditMaritalStatus(event.target.value)} placeholder="Familienstand" />
+                        <Input value={editTaxClass} onChange={(event) => setEditTaxClass(event.target.value)} placeholder="Steuerklasse" />
+                        <Input value={editTaxId} onChange={(event) => setEditTaxId(event.target.value)} placeholder="Steuer Identifikationsnummer" />
+                        <Input
+                          value={editSocialSecurityNumber}
+                          onChange={(event) => setEditSocialSecurityNumber(event.target.value)}
+                          placeholder="Sozialversicherungsnummer"
+                        />
+                        <Input
+                          value={editHealthInsurance}
+                          onChange={(event) => setEditHealthInsurance(event.target.value)}
+                          placeholder="Krankenkasse"
+                        />
+                        <Input
+                          type="date"
+                          value={editEmploymentStartDate}
+                          onChange={(event) => setEditEmploymentStartDate(event.target.value)}
+                        />
+                        <Input value={editEmployedAs} onChange={(event) => setEditEmployedAs(event.target.value)} placeholder="Beschaeftigt als" />
+                        <Input value={editBankName} onChange={(event) => setEditBankName(event.target.value)} placeholder="Name der Bank" />
+                        <Input value={editIban} onChange={(event) => setEditIban(event.target.value)} placeholder="IBAN" />
                         <Input
                           type="date"
                           value={editPscheinValidUntil}
@@ -403,7 +717,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                     ) : (
                       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
                         <div>
-                          <p className="font-semibold text-slate-900">{driver.name}</p>
+                          <p className="font-semibold text-slate-900">{[driver.first_name, driver.last_name].filter(Boolean).join(' ') || driver.name}</p>
                           <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
                             <span>Bezirk: {driver.district}</span>
                             <Badge variant={shiftVariant(driver.current_shift)}>{driver.current_shift}</Badge>

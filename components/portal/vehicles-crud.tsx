@@ -157,7 +157,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
       <Card className="surface-card">
         <CardHeader>
           <CardTitle>Neues Fahrzeug anlegen</CardTitle>
-          <CardDescription>Kennzeichen, Modell und Status direkt erfassen.</CardDescription>
+          <CardDescription>Neuer Eintrag</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreate} className="space-y-4">
@@ -200,7 +200,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
       <Card className="surface-card">
         <CardHeader>
           <CardTitle>Fahrzeugliste</CardTitle>
-          <CardDescription>CRUD mit Realtime. Aenderungen sind sofort fuer alle sichtbar.</CardDescription>
+          <CardDescription>Eintraege</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 grid gap-3 rounded-lg border border-slate-200/80 bg-white/70 p-3 md:grid-cols-2">
@@ -235,7 +235,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
                 return (
                   <div
                     key={vehicle.id}
-                    className="rounded-lg border border-slate-200/80 bg-white/70 p-4 transition-transform duration-200 hover:-translate-y-0.5"
+                    className="rounded-lg border border-slate-200 bg-white p-4"
                   >
                     {isEditing ? (
                       <div className="grid gap-3 md:grid-cols-2">
