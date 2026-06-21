@@ -1,15 +1,17 @@
 import { requireUser } from '@/lib/auth'
+import { requireActiveCompany } from '@/lib/tenant'
 import { IncidentLog } from '@/components/portal/incident-log'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 export default async function IncidentsPage() {
   const { supabase } = await requireUser()
+  const company = await requireActiveCompany()
 
   const [incidentsResult, driversResult, vehiclesResult, settingsResult] = await Promise.all([
-    supabase.from('incidents').select('*').order('occurred_on', { ascending: false }),
-    supabase.from('drivers').select('*').order('name'),
-    supabase.from('vehicles').select('*').order('license_plate'),
-    supabase.from('settings').select('*'),
+    supabase.from('incidents').select('*').eq('company_id', company.id).order('occurred_on', { ascending: false }),
+    supabase.from('drivers').select('*').eq('company_id', company.id).order('name'),
+    supabase.from('vehicles').select('*').eq('company_id', company.id).order('license_plate'),
+    supabase.from('settings').select('*').eq('company_id', company.id),
   ])
 
   const incidents = incidentsResult.data ?? []

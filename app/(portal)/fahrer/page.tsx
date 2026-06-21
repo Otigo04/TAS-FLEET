@@ -1,13 +1,16 @@
 import { requireUser } from '@/lib/auth'
+import { requireActiveCompany } from '@/lib/tenant'
 import { DriversCrud } from '@/components/portal/drivers-crud'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function FahrerPage() {
   const { supabase } = await requireUser()
+  const company = await requireActiveCompany()
 
   const { data: drivers } = await supabase
     .from('drivers')
     .select('*')
+    .eq('company_id', company.id)
     .order('created_at', { ascending: false })
 
   const driverRows = drivers ?? []

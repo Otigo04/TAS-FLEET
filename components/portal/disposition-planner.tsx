@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { useActiveCompanyId } from '@/components/portal/tenant-provider'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
@@ -32,6 +33,7 @@ function shiftLabel(slot: string) {
 
 export function DispositionPlanner({ initialShifts, drivers, vehicles }: ShiftPlannerProps) {
   const supabase = useMemo(() => createClient(), [])
+  const companyId = useActiveCompanyId()
 
   const [shifts, setShifts] = useState<ShiftRow[]>(initialShifts)
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
@@ -43,6 +45,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles }: ShiftPl
     const { data, error: fetchError } = await supabase
       .from('shift_assignments')
       .select('*')
+      .eq('company_id', companyId)
       .order('shift_date', { ascending: true })
 
     if (fetchError) {
@@ -78,6 +81,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles }: ShiftPl
     }
 
     const { error: insertError } = await supabase.from('shift_assignments').insert({
+      company_id: companyId,
       shift_date: date,
       shift_slot: slot as 'Frueh' | 'Spaet' | 'Nacht',
       vehicle_id: vehicleId,

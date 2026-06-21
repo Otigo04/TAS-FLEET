@@ -38,7 +38,7 @@ export async function requireCompletedUser() {
   if (!isProfileComplete(context.profile)) {
     redirect('/profile-setup')
   }
-2
+
   return context
 }
 

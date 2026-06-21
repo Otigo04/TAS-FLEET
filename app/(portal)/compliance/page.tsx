@@ -1,4 +1,5 @@
 import { requireUser } from '@/lib/auth'
+import { requireActiveCompany } from '@/lib/tenant'
 import { ComplianceCenter } from '@/components/portal/compliance-center'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
@@ -12,12 +13,13 @@ function daysUntil(dateString: string) {
 
 export default async function CompliancePage() {
   const { supabase } = await requireUser()
+  const company = await requireActiveCompany()
 
   const [documentsResult, driversResult, vehiclesResult, settingsResult] = await Promise.all([
-    supabase.from('compliance_documents').select('*').order('due_date', { ascending: true }),
-    supabase.from('drivers').select('*').order('name'),
-    supabase.from('vehicles').select('*').order('license_plate'),
-    supabase.from('settings').select('*')
+    supabase.from('compliance_documents').select('*').eq('company_id', company.id).order('due_date', { ascending: true }),
+    supabase.from('drivers').select('*').eq('company_id', company.id).order('name'),
+    supabase.from('vehicles').select('*').eq('company_id', company.id).order('license_plate'),
+    supabase.from('settings').select('*').eq('company_id', company.id)
   ])
 
   const documents = documentsResult.data ?? []

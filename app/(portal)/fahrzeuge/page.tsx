@@ -1,13 +1,15 @@
 import { requireUser } from '@/lib/auth'
+import { requireActiveCompany } from '@/lib/tenant'
 import { VehiclesCrud } from '@/components/portal/vehicles-crud'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function FahrzeugePage() {
   const { supabase } = await requireUser()
+  const company = await requireActiveCompany()
 
   const [vehiclesResult, settingsResult] = await Promise.all([
-    supabase.from('vehicles').select('*').order('created_at', { ascending: false }),
-    supabase.from('settings').select('*')
+    supabase.from('vehicles').select('*').eq('company_id', company.id).order('created_at', { ascending: false }),
+    supabase.from('settings').select('*').eq('company_id', company.id)
   ])
 
   const vehicleRows = vehiclesResult.data ?? []

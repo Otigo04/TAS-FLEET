@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, Plus, User, Mail, ShieldCheck, Phone, Building2, Clock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
@@ -10,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { AvatarUploadCrop } from '@/components/ui/avatar-upload-crop'
+import { useActiveCompanyId } from '@/components/portal/tenant-provider'
 import { cn } from '@/lib/utils'
 
 type SettingsRow = Database['public']['Tables']['settings']['Row']
@@ -34,7 +36,7 @@ interface SettingsCrudProps {
   avatarUrl: string | null
 }
 
-export function SettingsCrud({
+function SettingsCrudInner({
   initialSettings,
   userId,
   firstName,
@@ -43,8 +45,24 @@ export function SettingsCrud({
   role,
   avatarUrl: initialAvatarUrl,
 }: SettingsCrudProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = useMemo(() => createClient(), [])
-  const [activeTab, setActiveTab] = useState<Tab>('account')
+  const companyId = useActiveCompanyId()
+
+  const urlTab = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState<Tab>(urlTab === 'werte' ? 'werte' : 'account')
+
+  // Sync state when URL changes (sidebar navigation)
+  useEffect(() => {
+    const tab = searchParams.get('tab') === 'werte' ? 'werte' : 'account'
+    setActiveTab(tab)
+  }, [searchParams])
+
+  function handleTabChange(tab: Tab) {
+    setActiveTab(tab)
+    router.replace(`/einstellungen?tab=${tab}`, { scroll: false })
+  }
 
   // --- Account state ---
   const [profileAvatar, setProfileAvatar] = useState<string | null>(initialAvatarUrl)
@@ -80,7 +98,10 @@ export function SettingsCrud({
   const showBusySpinner = useDelayedLoading(isBusy)
 
   async function refreshSettings() {
-    const { data, error: fetchError } = await supabase.from('settings').select('*')
+    const { data, error: fetchError } = await supabase
+      .from('settings')
+      .select('*')
+      .eq('company_id', companyId)
     if (fetchError) { setError(fetchError.message); return }
     setSettings(data ?? [])
   }
@@ -104,11 +125,10 @@ export function SettingsCrud({
   async function updateSetting(key: string, values: string[]) {
     setIsBusy(true)
     setError(null)
-    const { error: updateError } = await supabase.from('settings').update({ value: values }).eq('key', key)
-    if (updateError) {
-      const { error: upsertError } = await supabase.from('settings').upsert({ key, value: values })
-      if (upsertError) setError(upsertError.message)
-    }
+    const { error: upsertError } = await supabase
+      .from('settings')
+      .upsert({ company_id: companyId, key, value: values }, { onConflict: 'company_id,key' })
+    if (upsertError) setError(upsertError.message)
     await refreshSettings()
     setIsBusy(false)
   }
@@ -137,7 +157,7 @@ export function SettingsCrud({
           <button
             key={tab.id}
             type="button"
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => handleTabChange(tab.id)}
             className={cn(
               'rounded-lg px-5 py-2 text-sm font-medium transition-all',
               activeTab === tab.id
@@ -312,5 +332,13 @@ export function SettingsCrud({
         </div>
       )}
     </div>
+  )
+}
+
+export function SettingsCrud(props: SettingsCrudProps) {
+  return (
+    <Suspense fallback={<div className="h-12 animate-pulse rounded-xl bg-slate-100" />}>
+      <SettingsCrudInner {...props} />
+    </Suspense>
   )
 }

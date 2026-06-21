@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { Database } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/server'
+import { resolveActiveCompany } from '@/lib/tenant'
 import { extractPdfFormFieldHints, extractTextFromSheet, parseDriverSheetText } from '@/lib/driver-sheet-parser'
 
 export const runtime = 'nodejs'
@@ -50,6 +51,11 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: 'Nicht authentifiziert.' }, { status: 401 })
+    }
+
+    const activeCompany = await resolveActiveCompany()
+    if (!activeCompany) {
+      return NextResponse.json({ error: 'Kein aktives Unternehmen gefunden.' }, { status: 400 })
     }
 
     const formData = await request.formData()
@@ -103,6 +109,7 @@ export async function POST(request: Request) {
     }
 
     const payload: DriverInsert = {
+      company_id: activeCompany.id,
       name: canonicalName,
       first_name: parsed.firstName,
       last_name: parsed.lastName,

@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { Upload, User, X, Check, ZoomIn } from 'lucide-react'
+import { useId, useRef, useState } from 'react'
+import { Upload, User, X, Check, ZoomIn, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface AvatarUploadCropProps {
@@ -11,6 +11,7 @@ interface AvatarUploadCropProps {
 }
 
 export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadCropProps) {
+  const maskId = useId()
   const [isOpen, setIsOpen] = useState(false)
   const [imageSrc, setImageSrc] = useState<string | null>(null)
   const [displaySize, setDisplaySize] = useState(260)
@@ -41,8 +42,9 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
   }
 
   function handleImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
-    // Measure actual rendered container width so all pixel calculations match reality
-    const ds = cropRef.current?.offsetWidth || 260
+    // Use getBoundingClientRect for sub-pixel accurate width
+    const rect = cropRef.current?.getBoundingClientRect()
+    const ds = rect ? Math.round(rect.width) : 260
     const { naturalWidth: w, naturalHeight: h } = e.currentTarget
     const ms = Math.max(ds / w, ds / h)
     setDisplaySize(ds)
@@ -54,7 +56,6 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
 
   function clamp(ox: number, oy: number, s: number, ds = displaySize) {
     if (naturalSize.w === 0 || ds === 0) return { x: ox, y: oy }
-    // Maximum offset before the image edge leaves the crop area
     const hw = Math.max(0, (naturalSize.w * s - ds) / 2)
     const hh = Math.max(0, (naturalSize.h * s - ds) / 2)
     return {
@@ -83,7 +84,6 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
 
   function handleScaleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const newScale = Number(e.target.value)
-    // Zoom from center: scale offset proportionally so the visible center stays fixed
     const ratio = scale > 0 ? newScale / scale : 1
     setOffset((prev) => clamp(prev.x * ratio, prev.y * ratio, newScale))
     setScale(newScale)
@@ -101,7 +101,6 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
 
     const img = new Image()
     img.onload = () => {
-      // Map the visible crop square back to source pixel coordinates
       const imgLeft = displaySize / 2 - (naturalSize.w * scale) / 2 + offset.x
       const imgTop = displaySize / 2 - (naturalSize.h * scale) / 2 + offset.y
       ctx.drawImage(
@@ -131,12 +130,12 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
       <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
       <canvas ref={canvasRef} className="sr-only" />
 
-      {/* Trigger: clickable avatar circle */}
-      <div className="relative inline-block">
+      {/* Trigger: clickable avatar circle with persistent pencil badge */}
+      <div className="relative inline-block mr-4">
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="group relative h-20 w-20 overflow-hidden rounded-full border-2 border-dashed border-slate-300 transition-colors hover:border-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+          className="group relative h-20 w-20 overflow-hidden rounded-full border-2 border-slate-400 bg-slate-100 shadow-sm transition-all hover:border-slate-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
         >
           {value ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -151,11 +150,16 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
           </div>
         </button>
 
+        {/* Pencil edit badge — always visible */}
+        <div className="pointer-events-none absolute -bottom-1 -right-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-slate-800 shadow ring-2 ring-white">
+          <Pencil className="h-3 w-3 text-white" />
+        </div>
+
         {value && (
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="absolute -right-2.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow transition-colors hover:bg-red-600"
+            className="absolute -top-1 -right-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow transition-colors hover:bg-red-600"
           >
             <X className="h-3 w-3" />
           </button>
@@ -180,7 +184,7 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
               </button>
             </div>
 
-            {/* Crop preview: responsive square, image moves under fixed circular mask */}
+            {/* Crop preview — image moves under fixed circular SVG mask */}
             <div
               ref={cropRef}
               className="relative mx-auto aspect-square w-full max-w-[260px] overflow-hidden rounded-xl bg-slate-200 select-none"
@@ -205,6 +209,8 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
                           top: imgY,
                           width: naturalSize.w * scale,
                           height: naturalSize.h * scale,
+                          maxWidth: 'none',
+                          maxHeight: 'none',
                           pointerEvents: 'none',
                           userSelect: 'none',
                         }
@@ -213,14 +219,31 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
                 />
               )}
 
-              {/* Circular overlay via box-shadow — clipped to container by overflow-hidden */}
-              <div
-                className="pointer-events-none absolute inset-0 rounded-full"
-                style={{
-                  boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)',
-                  border: '1.5px dashed rgba(255,255,255,0.75)',
-                }}
-              />
+              {/* SVG circular overlay — explicitly centered at 50% 50% to avoid any CSS rounding drift */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="pointer-events-none absolute inset-0 h-full w-full"
+                aria-hidden="true"
+              >
+                <defs>
+                  <mask id={maskId}>
+                    <rect width="100%" height="100%" fill="white" />
+                    <circle cx="50%" cy="50%" r="50%" fill="black" />
+                  </mask>
+                </defs>
+                {/* Dark overlay outside the circle */}
+                <rect width="100%" height="100%" fill="rgba(0,0,0,0.55)" mask={`url(#${maskId})`} />
+                {/* Dashed circle border */}
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="49.5%"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.8)"
+                  strokeWidth="1.5"
+                  strokeDasharray="5 3"
+                />
+              </svg>
             </div>
 
             {/* Zoom */}

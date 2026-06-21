@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AvatarUploadCrop } from '@/components/ui/avatar-upload-crop'
+import { useActiveCompanyId } from '@/components/portal/tenant-provider'
 
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
 type VehicleInsert = Database['public']['Tables']['vehicles']['Insert']
@@ -31,6 +32,7 @@ function statusVariant(status: string): 'success' | 'warning' | 'danger' | 'seco
 
 export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
   const supabase = useMemo(() => createClient(), [])
+  const companyId = useActiveCompanyId()
 
   const statuses = useMemo(() => {
     const s = settings.find(s => s.key === 'vehicle_statuses')
@@ -61,6 +63,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
     const { data, error: fetchError } = await supabase
       .from('vehicles')
       .select('*')
+      .eq('company_id', companyId)
       .order('created_at', { ascending: false })
 
     if (fetchError) {
@@ -90,6 +93,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
     setError(null)
 
     const payload: VehicleInsert = {
+      company_id: companyId,
       license_plate: licensePlate,
       model,
       status,
@@ -274,7 +278,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
                           onChange={(event) => setEditLicensePlate(event.target.value.toUpperCase().replace(/[^A-Z0-9\-\s]/g, ''))}
                         />
                         <Input value={editModel} onChange={(event) => setEditModel(event.target.value)} />
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-6">
                           <AvatarUploadCrop value={editAvatarUrl} onChange={setEditAvatarUrl} placeholder={<Car className="h-5 w-5" />} />
                           <span className="text-xs text-slate-500">Fahrzeugbild</span>
                         </div>

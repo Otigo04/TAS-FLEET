@@ -6,12 +6,57 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type CompanyRole = 'owner' | 'admin' | 'member'
+
 export interface Database {
   public: {
     Tables: {
+      companies: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      company_users: {
+        Row: {
+          company_id: string
+          user_id: string
+          role: CompanyRole
+          created_at: string
+        }
+        Insert: {
+          company_id: string
+          user_id: string
+          role?: CompanyRole
+          created_at?: string
+        }
+        Update: {
+          company_id?: string
+          user_id?: string
+          role?: CompanyRole
+          created_at?: string
+        }
+        Relationships: []
+      }
       drivers: {
         Row: {
           id: string
+          company_id: string
           name: string
           first_name: string | null
           last_name: string | null
@@ -40,6 +85,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          company_id: string
           name: string
           first_name?: string | null
           last_name?: string | null
@@ -68,6 +114,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          company_id?: string
           name?: string
           first_name?: string | null
           last_name?: string | null
@@ -99,6 +146,7 @@ export interface Database {
       shift_assignments: {
         Row: {
           id: string
+          company_id: string
           shift_date: string
           shift_slot: 'Frueh' | 'Spaet' | 'Nacht'
           driver_id: string
@@ -110,6 +158,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          company_id: string
           shift_date: string
           shift_slot: 'Frueh' | 'Spaet' | 'Nacht'
           driver_id: string
@@ -121,6 +170,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          company_id?: string
           shift_date?: string
           shift_slot?: 'Frueh' | 'Spaet' | 'Nacht'
           driver_id?: string
@@ -135,6 +185,7 @@ export interface Database {
       compliance_documents: {
         Row: {
           id: string
+          company_id: string
           scope_type: 'driver' | 'vehicle'
           driver_id: string | null
           vehicle_id: string | null
@@ -147,6 +198,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          company_id: string
           scope_type: 'driver' | 'vehicle'
           driver_id?: string | null
           vehicle_id?: string | null
@@ -159,6 +211,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          company_id?: string
           scope_type?: 'driver' | 'vehicle'
           driver_id?: string | null
           vehicle_id?: string | null
@@ -174,6 +227,7 @@ export interface Database {
       incidents: {
         Row: {
           id: string
+          company_id: string
           incident_type: string
           driver_id: string | null
           vehicle_id: string | null
@@ -187,6 +241,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          company_id: string
           incident_type: string
           driver_id?: string | null
           vehicle_id?: string | null
@@ -200,6 +255,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          company_id?: string
           incident_type?: string
           driver_id?: string | null
           vehicle_id?: string | null
@@ -216,6 +272,7 @@ export interface Database {
       vehicles: {
         Row: {
           id: string
+          company_id: string
           license_plate: string
           model: string
           status: string
@@ -225,6 +282,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          company_id: string
           license_plate: string
           model: string
           status: string
@@ -234,6 +292,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          company_id?: string
           license_plate?: string
           model?: string
           status?: string
@@ -250,6 +309,7 @@ export interface Database {
           first_name: string | null
           last_name: string | null
           avatar_url: string | null
+          is_superadmin: boolean
           created_at: string
         }
         Insert: {
@@ -258,6 +318,7 @@ export interface Database {
           first_name?: string | null
           last_name?: string | null
           avatar_url?: string | null
+          is_superadmin?: boolean
           created_at?: string
         }
         Update: {
@@ -266,22 +327,26 @@ export interface Database {
           first_name?: string | null
           last_name?: string | null
           avatar_url?: string | null
+          is_superadmin?: boolean
           created_at?: string
         }
         Relationships: []
       }
       settings: {
         Row: {
+          company_id: string
           key: string
           value: Json
           updated_at: string
         }
         Insert: {
+          company_id: string
           key: string
           value?: Json
           updated_at?: string
         }
         Update: {
+          company_id?: string
           key?: string
           value?: Json
           updated_at?: string
@@ -293,10 +358,26 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_company_with_owner: {
+        Args: { company_name: string }
+        Returns: {
+          id: string
+          name: string
+          slug: string
+          created_at: string
+        }
+      }
+      get_user_company_ids: {
+        Args: Record<string, never>
+        Returns: string[]
+      }
+      get_user_admin_company_ids: {
+        Args: Record<string, never>
+        Returns: string[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      company_role: CompanyRole
     }
     CompositeTypes: {
       [_ in never]: never

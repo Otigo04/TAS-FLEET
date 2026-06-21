@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { useActiveCompanyId } from '@/components/portal/tenant-provider'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
@@ -26,6 +27,7 @@ interface IncidentLogProps {
 
 export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: IncidentLogProps) {
   const supabase = useMemo(() => createClient(), [])
+  const companyId = useActiveCompanyId()
 
   const incidentTypes = useMemo(() => {
     const s = settings.find(s => s.key === 'incident_types')
@@ -67,6 +69,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
     const { data, error: fetchError } = await supabase
       .from('incidents')
       .select('*')
+      .eq('company_id', companyId)
       .order('occurred_on', { ascending: false })
 
     if (fetchError) {
@@ -96,6 +99,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
     setIsBusy(true)
 
     const payload: IncidentInsert = {
+      company_id: companyId,
       incident_type: incidentType,
       driver_id: driverId || null,
       vehicle_id: vehicleId || null,

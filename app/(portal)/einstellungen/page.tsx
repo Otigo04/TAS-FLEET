@@ -1,12 +1,13 @@
 import { SettingsCrud } from '@/components/portal/settings-crud'
-import { createClient } from '@/lib/supabase/server'
 import { requireCompletedUser } from '@/lib/auth'
+import { requireActiveCompany } from '@/lib/tenant'
 
 export default async function EinstellungenPage() {
   const { supabase, user, profile } = await requireCompletedUser()
+  const company = await requireActiveCompany()
 
   const [settingsResult, profileResult] = await Promise.all([
-    supabase.from('settings').select('*'),
+    supabase.from('settings').select('*').eq('company_id', company.id),
     supabase.from('profiles').select('avatar_url').eq('id', user.id).single(),
   ])
 

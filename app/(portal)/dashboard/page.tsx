@@ -1,4 +1,5 @@
 import { requireCompletedUser } from '@/lib/auth'
+import { requireActiveCompany } from '@/lib/tenant'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,13 +15,14 @@ function daysUntil(dateString: string | null) {
 
 export default async function DashboardPage() {
   const { supabase, user, profile } = await requireCompletedUser()
+  const company = await requireActiveCompany()
   const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
   const displayName = fullName || user.email || 'dein Team'
 
   const [driversResult, vehiclesResult, docsResult] = await Promise.all([
-    supabase.from('drivers').select('*').order('pschein_valid_until', { ascending: true }),
-    supabase.from('vehicles').select('*').order('created_at', { ascending: false }),
-    supabase.from('compliance_documents').select('*')
+    supabase.from('drivers').select('*').eq('company_id', company.id).order('pschein_valid_until', { ascending: true }),
+    supabase.from('vehicles').select('*').eq('company_id', company.id).order('created_at', { ascending: false }),
+    supabase.from('compliance_documents').select('*').eq('company_id', company.id)
   ])
 
   const drivers = driversResult.data ?? []

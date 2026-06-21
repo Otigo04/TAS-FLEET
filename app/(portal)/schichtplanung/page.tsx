@@ -1,13 +1,15 @@
 import { requireUser } from '@/lib/auth'
+import { requireActiveCompany } from '@/lib/tenant'
 import { ShiftPlanner } from '@/components/portal/shift-planner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 export default async function SchichtplanungPage() {
   const { supabase } = await requireUser()
+  const company = await requireActiveCompany()
 
   const [driversResult, shiftsResult] = await Promise.all([
-    supabase.from('drivers').select('*').order('name'),
-    supabase.from('shift_assignments').select('*').order('shift_date', { ascending: true }),
+    supabase.from('drivers').select('*').eq('company_id', company.id).order('name'),
+    supabase.from('shift_assignments').select('*').eq('company_id', company.id).order('shift_date', { ascending: true }),
   ])
 
   const drivers = driversResult.data ?? []

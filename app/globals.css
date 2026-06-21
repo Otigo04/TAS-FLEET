@@ -4,51 +4,109 @@
 
 :root {
   color-scheme: light;
-  --portal-bg: #f3f5f9;
-  --portal-ink: #0f172a;
-  --portal-accent: #10b981;
+  --portal-bg: #eef1f6;
+  --portal-bg-2: #e6eaf2;
+  --portal-ink: #0b1220;
+  --portal-muted: #51607a;
+  --portal-accent: #059669;
+  --portal-accent-2: #0d9488;
   --portal-surface: #ffffff;
+  --portal-border: #d6deea;
+  --portal-ring: rgba(5, 150, 105, 0.35);
 }
 
 body {
   font-family: var(--font-space-grotesk), 'Segoe UI', sans-serif;
-  background: linear-gradient(180deg, #f7f8fb 0%, var(--portal-bg) 100%);
+  background:
+    radial-gradient(1200px 600px at 100% -10%, rgba(13, 148, 136, 0.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 0%, rgba(5, 150, 105, 0.07), transparent 55%),
+    linear-gradient(180deg, #f6f8fc 0%, var(--portal-bg) 60%, var(--portal-bg-2) 100%);
+  background-attachment: fixed;
   @apply text-ink antialiased;
 }
 
+/* ---------- Animations ---------- */
 @keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+.animate-fade-up        { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-up-delay  { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both; }
+.animate-fade-up-delay-2{ animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both; }
+.animate-fade-up-delay-3{ animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both; }
+.animate-fade-in        { animation: fadeIn 0.4s ease-out both; }
+.animate-scale-in       { animation: scaleIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up, .animate-fade-up-delay, .animate-fade-up-delay-2,
+  .animate-fade-up-delay-3, .animate-fade-in, .animate-scale-in {
+    animation: none;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
-.animate-fade-up {
-  animation: fadeUp 0.25s ease-out both;
-}
-
-.animate-fade-up-delay {
-  animation: fadeUp 0.32s ease-out both;
-}
-
-.animate-fade-up-delay-2 {
-  animation: fadeUp 0.4s ease-out both;
-}
-
-.animate-fade-up-delay-3 {
-  animation: fadeUp 0.48s ease-out both;
-}
-
+/* ---------- Surfaces ---------- */
 .surface-card {
   background: var(--portal-surface);
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 8px 24px -18px rgba(15, 23, 42, 0.35);
+  border: 1px solid var(--portal-border);
+  border-radius: 0.85rem;
+  box-shadow:
+    0 1px 2px rgba(11, 18, 32, 0.04),
+    0 12px 32px -22px rgba(11, 18, 32, 0.45);
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+.surface-card:hover {
+  border-color: #c3cedd;
+  box-shadow:
+    0 1px 2px rgba(11, 18, 32, 0.05),
+    0 20px 44px -24px rgba(11, 18, 32, 0.5);
 }
 
+/* Subtle accent top-edge for emphasised cards */
+.surface-card-accent {
+  position: relative;
+  overflow: hidden;
+}
+.surface-card-accent::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--portal-accent), var(--portal-accent-2));
+}
+
+/* ---------- Bits ---------- */
 .status-pulse {
-  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(5, 150, 105, 0.3);
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #e8edf4;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+/* Focus visibility for keyboard users across the app */
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--portal-ring);
+  outline-offset: 2px;
 }

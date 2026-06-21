@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useActiveCompanyId } from '@/components/portal/tenant-provider'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type DriverInsert = Database['public']['Tables']['drivers']['Insert']
@@ -36,6 +37,7 @@ function shiftVariant(shift: string): 'secondary' | 'warning' | 'danger' {
 
 export function DriversCrud({ initialDrivers }: DriversCrudProps) {
   const supabase = useMemo(() => createClient(), [])
+  const companyId = useActiveCompanyId()
 
   const [drivers, setDrivers] = useState<DriverRow[]>(initialDrivers)
   const [isBusy, setIsBusy] = useState(false)
@@ -107,6 +109,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
     const { data, error: fetchError } = await supabase
       .from('drivers')
       .select('*')
+      .eq('company_id', companyId)
       .order('created_at', { ascending: false })
 
     if (fetchError) {
@@ -136,6 +139,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
     setError(null)
 
     const payload: DriverInsert = {
+      company_id: companyId,
       name,
       first_name: firstName || null,
       last_name: lastName || null,

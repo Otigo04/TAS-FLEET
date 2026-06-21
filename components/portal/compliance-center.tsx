@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { useActiveCompanyId } from '@/components/portal/tenant-provider'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
@@ -34,6 +35,7 @@ function daysUntil(dateString: string) {
 
 export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings }: ComplianceCenterProps) {
   const supabase = useMemo(() => createClient(), [])
+  const companyId = useActiveCompanyId()
 
   const docTypes = useMemo(() => {
     const s = settings.find(s => s.key === 'document_types')
@@ -68,6 +70,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
     const { data, error: fetchError } = await supabase
       .from('compliance_documents')
       .select('*')
+      .eq('company_id', companyId)
       .order('due_date', { ascending: true })
 
     if (fetchError) {
@@ -97,6 +100,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
     setIsBusy(true)
 
     const payload: DocInsert = {
+      company_id: companyId,
       scope_type: scopeType,
       driver_id: scopeType === 'driver' ? driverId : null,
       vehicle_id: scopeType === 'vehicle' ? vehicleId : null,

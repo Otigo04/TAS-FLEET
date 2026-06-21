@@ -1,14 +1,16 @@
 import { requireUser } from '@/lib/auth'
+import { requireActiveCompany } from '@/lib/tenant'
 import { DispositionPlanner } from '@/components/portal/disposition-planner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 export default async function DispositionPage() {
   const { supabase } = await requireUser()
+  const company = await requireActiveCompany()
 
   const [driversResult, vehiclesResult, shiftsResult] = await Promise.all([
-    supabase.from('drivers').select('*').order('name'),
-    supabase.from('vehicles').select('*').order('license_plate'),
-    supabase.from('shift_assignments').select('*').order('shift_date', { ascending: true }),
+    supabase.from('drivers').select('*').eq('company_id', company.id).order('name'),
+    supabase.from('vehicles').select('*').eq('company_id', company.id).order('license_plate'),
+    supabase.from('shift_assignments').select('*').eq('company_id', company.id).order('shift_date', { ascending: true }),
   ])
 
   const drivers = driversResult.data ?? []

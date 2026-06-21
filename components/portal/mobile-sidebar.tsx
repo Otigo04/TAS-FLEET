@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, LayoutDashboard, Users, Car, CalendarDays, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Users, Car, CalendarDays, ShieldCheck, AlertTriangle, ShieldAlert } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CompanyLogo } from '@/components/branding/company-logo'
 import { cn } from '@/lib/utils'
@@ -19,9 +19,10 @@ const items = [
 
 interface MobileSidebarProps {
   displayName?: string
+  isSuperadmin?: boolean
 }
 
-export function MobileSidebar({ displayName }: MobileSidebarProps) {
+export function MobileSidebar({ displayName, isSuperadmin }: MobileSidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
@@ -45,6 +46,16 @@ export function MobileSidebar({ displayName }: MobileSidebarProps) {
             </div>
 
             <nav className="space-y-2">
+              {isSuperadmin && (
+                <Link
+                  href="/superadmin"
+                  onClick={() => setIsOpen(false)}
+                  className="inline-flex w-full items-center gap-2 rounded-md bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-2 text-sm font-semibold text-slate-950"
+                >
+                  <ShieldAlert className="h-4 w-4" />
+                  Superadmin Konsole
+                </Link>
+              )}
               {items.map((item, index) => {
                 const Icon = item.icon
                 const isActive = pathname === item.href
