@@ -205,7 +205,12 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
             </div>
             <div className="space-y-2">
               <Label>Fahrzeugbild (optional)</Label>
-              <AvatarUploadCrop value={avatarUrl} onChange={setAvatarUrl} placeholder={<Car className="h-6 w-6" />} />
+              <div className="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+                <AvatarUploadCrop value={avatarUrl} onChange={setAvatarUrl} placeholder={<Car className="h-6 w-6" />} />
+                <p className="text-xs text-slate-500">
+                  Klicke auf den Kreis, um ein Bild hochzuladen und zuzuschneiden.
+                </p>
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="vehicle-status">Status</Label>

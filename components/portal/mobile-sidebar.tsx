@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, LayoutDashboard, Users, Car, CalendarDays, ShieldCheck, AlertTriangle, ShieldAlert } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { CompanyLogo } from '@/components/branding/company-logo'
+import { UserAvatar } from '@/components/branding/user-avatar'
 import { cn } from '@/lib/utils'
 
 const items = [
@@ -19,10 +19,11 @@ const items = [
 
 interface MobileSidebarProps {
   displayName?: string
+  avatarUrl?: string | null
   isSuperadmin?: boolean
 }
 
-export function MobileSidebar({ displayName, isSuperadmin }: MobileSidebarProps) {
+export function MobileSidebar({ displayName, avatarUrl, isSuperadmin }: MobileSidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
@@ -39,7 +40,13 @@ export function MobileSidebar({ displayName, isSuperadmin }: MobileSidebarProps)
 
           <aside className="animate-fade-up absolute left-0 top-0 h-full w-80 max-w-[90vw] border-r border-slate-200 bg-white p-5 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
-              <CompanyLogo compact={false} className="[&_*]:text-slate-900" displayName={displayName} />
+              <div className="flex items-center gap-3">
+                <UserAvatar avatarUrl={avatarUrl} name={displayName} size="lg" />
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600">YOT FLEET</p>
+                  {displayName ? <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p> : null}
+                </div>
+              </div>
               <Button variant="outline" size="sm" onClick={() => setIsOpen(false)}>
                 <X className="h-4 w-4" />
               </Button>

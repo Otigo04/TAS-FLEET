@@ -50,6 +50,7 @@ export type AdminCompany = {
   id: string
   name: string
   slug: string
+  logoUrl: string | null
   createdAt: string
   memberCount: number
 }
@@ -86,6 +87,7 @@ export async function listCompanies(): Promise<AdminCompany[]> {
     id: c.id,
     name: c.name,
     slug: c.slug,
+    logoUrl: c.logo_url,
     createdAt: c.created_at,
     memberCount: counts.get(c.id) ?? 0,
   }))

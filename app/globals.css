@@ -41,6 +41,10 @@ body {
 @keyframes shimmer {
   100% { transform: translateX(100%); }
 }
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 .animate-fade-up        { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .animate-fade-up-delay  { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both; }
@@ -48,12 +52,18 @@ body {
 .animate-fade-up-delay-3{ animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both; }
 .animate-fade-in        { animation: fadeIn 0.4s ease-out both; }
 .animate-scale-in       { animation: scaleIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-dropdown-in    { animation: dropdownIn 0.18s cubic-bezier(0.22, 1, 0.36, 1) both; }
+/* Invisible for 0.5s, then fades in — so quick loads never flash a spinner. */
+.animate-delayed-appear { opacity: 0; animation: fadeIn 0.35s ease-out 0.5s forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up, .animate-fade-up-delay, .animate-fade-up-delay-2,
-  .animate-fade-up-delay-3, .animate-fade-in, .animate-scale-in {
+  .animate-fade-up-delay-3, .animate-fade-in, .animate-scale-in,
+  .animate-dropdown-in, .animate-delayed-appear {
     animation: none;
   }
+  /* Without its fade-in animation, the loading screen must still be visible. */
+  .animate-delayed-appear { opacity: 1; }
 }
 
 /* ---------- Surfaces ---------- */

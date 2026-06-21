@@ -9,6 +9,7 @@ export type UserCompany = {
   id: string
   name: string
   slug: string
+  logoUrl: string | null
   role: CompanyRole
 }
 
@@ -43,7 +44,7 @@ export async function getUserCompanies(): Promise<UserCompany[]> {
   const ids = memberships.map((m) => m.company_id)
   const { data: companies } = await supabase
     .from('companies')
-    .select('id, name, slug')
+    .select('id, name, slug, logo_url')
     .in('id', ids)
 
   const byId = new Map((companies ?? []).map((c) => [c.id, c]))
@@ -52,7 +53,13 @@ export async function getUserCompanies(): Promise<UserCompany[]> {
     .map((m) => {
       const company = byId.get(m.company_id)
       if (!company) return null
-      return { id: company.id, name: company.name, slug: company.slug, role: m.role }
+      return {
+        id: company.id,
+        name: company.name,
+        slug: company.slug,
+        logoUrl: company.logo_url,
+        role: m.role,
+      }
     })
     .filter((c): c is UserCompany => c !== null)
 }

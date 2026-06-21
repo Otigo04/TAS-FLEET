@@ -5,6 +5,7 @@ type Profile = {
   id: string
   first_name: string | null
   last_name: string | null
+  avatar_url: string | null
   role: 'admin'
   created_at: string
 }
@@ -25,7 +26,7 @@ export async function requireUser() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name, role, created_at')
+    .select('id, first_name, last_name, avatar_url, role, created_at')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -51,7 +52,7 @@ export async function redirectIfAuthenticated() {
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('id, first_name, last_name, role, created_at')
+      .select('id, first_name, last_name, avatar_url, role, created_at')
       .eq('id', user.id)
       .maybeSingle()
 

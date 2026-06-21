@@ -537,7 +537,12 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
             <form onSubmit={handleCreate} className="space-y-6">
               <div className="space-y-2">
                 <Label className="text-slate-700">Profilbild (optional)</Label>
-                <AvatarUploadCrop value={avatarUrl} onChange={setAvatarUrl} />
+                <div className="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+                  <AvatarUploadCrop value={avatarUrl} onChange={setAvatarUrl} />
+                  <p className="text-xs text-slate-500">
+                    Klicke auf den Kreis, um ein Bild hochzuladen und zuzuschneiden.
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">

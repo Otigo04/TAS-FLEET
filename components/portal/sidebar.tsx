@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { LayoutDashboard, Car, Users, CalendarDays, ShieldCheck, AlertTriangle, Settings, ChevronRight, ShieldAlert } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { CompanyLogo } from '@/components/branding/company-logo'
+import { UserAvatar } from '@/components/branding/user-avatar'
 import { Suspense } from 'react'
 
 const items = [
@@ -28,19 +28,30 @@ const items = [
 
 interface SidebarProps {
   displayName?: string
+  avatarUrl?: string | null
   isSuperadmin?: boolean
 }
 
-function SidebarNav({ displayName, isSuperadmin }: SidebarProps) {
+function SidebarBrand({ displayName, avatarUrl }: { displayName?: string; avatarUrl?: string | null }) {
+  return (
+    <div className="mb-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+      <UserAvatar avatarUrl={avatarUrl} name={displayName} size="lg" />
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600">YOT FLEET</p>
+        {displayName ? <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p> : null}
+      </div>
+    </div>
+  )
+}
+
+function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const activeTab = searchParams.get('tab') ?? 'account'
 
   return (
     <aside className="surface-card w-72 border-b border-slate-200 p-4 lg:border-b-0 lg:border-r">
-      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4">
-        <CompanyLogo displayName={displayName} className="[&_*]:text-slate-900" />
-      </div>
+      <SidebarBrand displayName={displayName} avatarUrl={avatarUrl} />
 
       {isSuperadmin && (
         <Link
@@ -119,18 +130,16 @@ function SidebarNav({ displayName, isSuperadmin }: SidebarProps) {
   )
 }
 
-export function Sidebar({ displayName, isSuperadmin }: SidebarProps) {
+export function Sidebar({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
   return (
     <Suspense
       fallback={
         <aside className="surface-card w-72 border-b border-slate-200 p-4 lg:border-b-0 lg:border-r">
-          <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4">
-            <CompanyLogo displayName={displayName} className="[&_*]:text-slate-900" />
-          </div>
+          <SidebarBrand displayName={displayName} avatarUrl={avatarUrl} />
         </aside>
       }
     >
-      <SidebarNav displayName={displayName} isSuperadmin={isSuperadmin} />
+      <SidebarNav displayName={displayName} avatarUrl={avatarUrl} isSuperadmin={isSuperadmin} />
     </Suspense>
   )
 }

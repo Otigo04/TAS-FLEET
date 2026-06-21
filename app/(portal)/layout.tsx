@@ -4,7 +4,7 @@ import { MobileSidebar } from '@/components/portal/mobile-sidebar'
 import { LogoutButton } from '@/components/portal/logout-button'
 import { GlobalSearch } from '@/components/portal/global-search'
 import { requireCompletedUser } from '@/lib/auth'
-import { CompanyLogo } from '@/components/branding/company-logo'
+import { UserAvatar } from '@/components/branding/user-avatar'
 import { getUserCompanies, resolveActiveCompany } from '@/lib/tenant'
 import { getCurrentSuperadmin } from '@/lib/superadmin'
 import { TenantProvider } from '@/components/portal/tenant-provider'
@@ -14,6 +14,7 @@ export default async function PortalLayout({ children }: { children: React.React
   const { user, profile } = await requireCompletedUser()
   const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
   const displayName = fullName || user.email || 'Unbekannt'
+  const avatarUrl = profile?.avatar_url ?? null
 
   // Resolve the tenant context. Companies are created by superadmins only;
   // a regular user with no company sees an info page, a superadmin without a
@@ -34,13 +35,13 @@ export default async function PortalLayout({ children }: { children: React.React
         </div>
         <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col lg:flex-row">
           <div className="hidden lg:block">
-            <Sidebar displayName={displayName} isSuperadmin={isSuperadmin} />
+            <Sidebar displayName={displayName} avatarUrl={avatarUrl} isSuperadmin={isSuperadmin} />
           </div>
 
           <div className="flex flex-1 flex-col">
             <header className="surface-card animate-fade-up mx-4 mt-4 flex items-center justify-between rounded-xl px-6 py-4 gap-4">
               <div className="flex items-center gap-3 shrink-0">
-                <MobileSidebar displayName={displayName} isSuperadmin={isSuperadmin} />
+                <MobileSidebar displayName={displayName} avatarUrl={avatarUrl} isSuperadmin={isSuperadmin} />
 
                 <div className="hidden sm:block">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Angemeldet als</p>
@@ -52,7 +53,7 @@ export default async function PortalLayout({ children }: { children: React.React
 
               <div className="flex items-center gap-2 shrink-0">
                 <CompanySwitcher />
-                <CompanyLogo compact className="hidden sm:inline-flex" />
+                <UserAvatar avatarUrl={avatarUrl} name={displayName} size="md" className="hidden sm:inline-flex" />
                 <LogoutButton />
               </div>
             </header>
@@ -60,7 +61,10 @@ export default async function PortalLayout({ children }: { children: React.React
             <div className="animate-fade-up-delay flex-1 p-6">{children}</div>
 
             <footer className="mx-6 mb-6 mt-auto flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
-              <CompanyLogo compact className="scale-90" />
+              <div className="flex items-center gap-2">
+                <UserAvatar avatarUrl={avatarUrl} name={displayName} size="sm" />
+                <span className="font-semibold uppercase tracking-[0.22em] text-emerald-600">YOT FLEET</span>
+              </div>
               <p>Angemeldet als {displayName}</p>
             </footer>
           </div>

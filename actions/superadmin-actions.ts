@@ -81,6 +81,36 @@ export async function renameCompany(id: string, name: string): Promise<ActionRes
   return { success: true }
 }
 
+// Accept a cropped data URL (image/*) or null to clear the logo. Capped at
+// ~1.5MB encoded to keep the companies row reasonable.
+const companyLogoSchema = z.object({
+  companyId: z.uuid('Ungültige Unternehmens-ID.'),
+  logoUrl: z
+    .string()
+    .max(1_500_000, 'Bild ist zu groß.')
+    .regex(/^data:image\/(png|jpeg|webp);base64,/, 'Ungültiges Bildformat.')
+    .nullable(),
+})
+
+export async function setCompanyLogo(
+  companyId: string,
+  logoUrl: string | null,
+): Promise<ActionResult> {
+  const { admin } = await requireSuperadmin()
+  const parsed = companyLogoSchema.safeParse({ companyId, logoUrl })
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0]!.message }
+
+  const { error } = await admin
+    .from('companies')
+    .update({ logo_url: parsed.data.logoUrl })
+    .eq('id', parsed.data.companyId)
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/superadmin')
+  revalidatePath('/', 'layout')
+  return { success: true }
+}
+
 export async function deleteCompany(id: string): Promise<ActionResult> {
   const { admin } = await requireSuperadmin()
   if (!z.uuid().safeParse(id).success) return { success: false, error: 'Ungültige Unternehmens-ID.' }

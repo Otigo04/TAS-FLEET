@@ -130,8 +130,10 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
       <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={handleFileChange} />
       <canvas ref={canvasRef} className="sr-only" />
 
-      {/* Trigger: clickable avatar circle with persistent pencil badge */}
-      <div className="relative inline-block mr-4">
+      {/* Trigger: clickable avatar circle with persistent pencil badge.
+          Self-contained — no external margin; spacing is the parent's job.
+          A little padding keeps the overflowing badges off neighbouring text. */}
+      <div className="relative inline-block p-1">
         <button
           type="button"
           onClick={() => fileRef.current?.click()}

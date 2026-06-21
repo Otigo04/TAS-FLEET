@@ -9,9 +9,10 @@ import {
 import type { AdminCompany, AdminUser } from '@/lib/superadmin'
 import type { CompanyRole } from '@/lib/supabase/database.types'
 import {
-  createCompanyAsAdmin, renameCompany, deleteCompany,
+  createCompanyAsAdmin, renameCompany, deleteCompany, setCompanyLogo,
   createUser, updateUser, assignMembership, removeMembership, deleteUser,
 } from '@/actions/superadmin-actions'
+import { AvatarUploadCrop } from '@/components/ui/avatar-upload-crop'
 
 type Tab = 'companies' | 'users'
 const ROLES: CompanyRole[] = ['owner', 'admin', 'member']
@@ -166,9 +167,11 @@ function CompaniesPanel({ companies }: { companies: AdminCompany[] }) {
           <ul className="divide-y divide-white/10">
             {companies.map((c) => (
               <li key={c.id} className="flex items-center gap-4 p-4 hover:bg-white/[0.03]">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/5 text-amber-400">
-                  <Building2 className="h-5 w-5" />
-                </div>
+                <AvatarUploadCrop
+                  value={c.logoUrl}
+                  onChange={(url) => run(() => setCompanyLogo(c.id, url))}
+                  placeholder={<Building2 className="h-7 w-7" />}
+                />
 
                 {editingId === c.id ? (
                   <div className="flex flex-1 items-center gap-2">
