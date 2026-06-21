@@ -13,15 +13,17 @@ function daysUntil(dateString: string) {
 export default async function CompliancePage() {
   const { supabase } = await requireUser()
 
-  const [documentsResult, driversResult, vehiclesResult] = await Promise.all([
+  const [documentsResult, driversResult, vehiclesResult, settingsResult] = await Promise.all([
     supabase.from('compliance_documents').select('*').order('due_date', { ascending: true }),
     supabase.from('drivers').select('*').order('name'),
     supabase.from('vehicles').select('*').order('license_plate'),
+    supabase.from('settings').select('*')
   ])
 
   const documents = documentsResult.data ?? []
   const drivers = driversResult.data ?? []
   const vehicles = vehiclesResult.data ?? []
+  const settings = settingsResult.data ?? []
 
   const expired = documents.filter((doc) => daysUntil(doc.due_date) < 0).length
   const expiring = documents.filter((doc) => {
@@ -39,7 +41,7 @@ export default async function CompliancePage() {
       <section className="grid gap-4 md:grid-cols-3">
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
-            <CardTitle>Eintraege</CardTitle>
+            <CardTitle>Einträge</CardTitle>
             <CardDescription>Dokumente insgesamt</CardDescription>
           </CardHeader>
           <CardContent>
@@ -48,7 +50,7 @@ export default async function CompliancePage() {
         </Card>
         <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
-            <CardTitle>Bald faellig</CardTitle>
+            <CardTitle>Bald fällig</CardTitle>
             <CardDescription>Innerhalb 30 Tagen</CardDescription>
           </CardHeader>
           <CardContent>
@@ -57,8 +59,8 @@ export default async function CompliancePage() {
         </Card>
         <Card className="surface-card animate-fade-up-delay-3">
           <CardHeader>
-            <CardTitle>Ueberfaellig</CardTitle>
-            <CardDescription>Faelligkeit ueberschritten</CardDescription>
+            <CardTitle>Überfällig</CardTitle>
+            <CardDescription>Fälligkeit überschritten</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{expired}</p>
@@ -66,7 +68,7 @@ export default async function CompliancePage() {
         </Card>
       </section>
 
-      <ComplianceCenter initialDocuments={documents} drivers={drivers} vehicles={vehicles} />
+      <ComplianceCenter initialDocuments={documents} drivers={drivers} vehicles={vehicles} settings={settings} />
     </main>
   )
 }

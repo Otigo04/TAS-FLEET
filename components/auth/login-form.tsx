@@ -68,7 +68,7 @@ export function LoginForm() {
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Anmeldung laeuft...' : 'Einloggen'}
+            {isLoading ? 'Anmeldung läuft...' : 'Einloggen'}
           </Button>
         </form>
       </CardContent>

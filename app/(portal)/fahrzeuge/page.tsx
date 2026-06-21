@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 export default async function FahrzeugePage() {
   const { supabase } = await requireUser()
 
-  const { data: vehicles } = await supabase
-    .from('vehicles')
-    .select('*')
-    .order('created_at', { ascending: false })
+  const [vehiclesResult, settingsResult] = await Promise.all([
+    supabase.from('vehicles').select('*').order('created_at', { ascending: false }),
+    supabase.from('settings').select('*')
+  ])
 
-  const vehicleRows = vehicles ?? []
+  const vehicleRows = vehiclesResult.data ?? []
+  const settings = settingsResult.data ?? []
   const active = vehicleRows.filter((vehicle) => vehicle.status === 'active').length
   const maintenance = vehicleRows.filter((vehicle) => vehicle.status === 'maintenance').length
   const offline = vehicleRows.filter((vehicle) => vehicle.status === 'offline').length
@@ -26,7 +27,7 @@ export default async function FahrzeugePage() {
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Gesamt</CardTitle>
-            <CardDescription>Eintraege</CardDescription>
+            <CardDescription>Einträge</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-slate-900">{vehicleRows.length}</p>
@@ -53,7 +54,7 @@ export default async function FahrzeugePage() {
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Offline</CardTitle>
-            <CardDescription>Nicht verfuegbar</CardDescription>
+            <CardDescription>Nicht verfügbar</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-slate-900">{offline}</p>
@@ -61,7 +62,7 @@ export default async function FahrzeugePage() {
         </Card>
       </section>
 
-      <VehiclesCrud initialVehicles={vehicleRows} />
+      <VehiclesCrud initialVehicles={vehicleRows} settings={settings} />
     </main>
   )
 }

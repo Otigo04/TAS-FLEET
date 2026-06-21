@@ -12,6 +12,7 @@ export default async function FahrerPage() {
 
   const driverRows = drivers ?? []
   const expiringSoon = driverRows.filter((driver) => {
+    if (!driver.pschein_valid_until) return false
     const ms = new Date(driver.pschein_valid_until).getTime() - Date.now()
     const days = Math.ceil(ms / (1000 * 60 * 60 * 24))
     return days >= 0 && days <= 30
@@ -29,7 +30,7 @@ export default async function FahrerPage() {
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Fahrer insgesamt</CardTitle>
-            <CardDescription>Eintraege</CardDescription>
+            <CardDescription>Einträge</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-slate-900">{driverRows.length}</p>

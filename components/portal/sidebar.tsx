@@ -2,17 +2,19 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Car, Users, CalendarDays, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { LayoutDashboard, Car, Users, CalendarDays, ShieldCheck, AlertTriangle, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CompanyLogo } from '@/components/branding/company-logo'
 
 const items = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/schichtplanung', label: 'Schichtplanung', icon: CalendarDays },
+  { href: '/disposition', label: 'Disposition', icon: CalendarDays },
+  { href: '/schichtplanung', label: 'Schichtzettel', icon: CalendarDays },
   { href: '/fahrer', label: 'Fahrer', icon: Users },
   { href: '/fahrzeuge', label: 'Fahrzeuge', icon: Car },
   { href: '/compliance', label: 'Compliance', icon: ShieldCheck },
   { href: '/incidents', label: 'Incidents', icon: AlertTriangle },
+  { href: '/einstellungen', label: 'Einstellungen', icon: Settings },
 ]
 
 interface SidebarProps {

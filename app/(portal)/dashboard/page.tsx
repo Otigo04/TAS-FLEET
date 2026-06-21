@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-function daysUntil(dateString: string) {
+function daysUntil(dateString: string | null) {
+  if (!dateString) return -999999
   const now = new Date()
   now.setHours(0, 0, 0, 0)
   const target = new Date(dateString)
@@ -16,13 +17,15 @@ export default async function DashboardPage() {
   const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
   const displayName = fullName || user.email || 'dein Team'
 
-  const [driversResult, vehiclesResult] = await Promise.all([
+  const [driversResult, vehiclesResult, docsResult] = await Promise.all([
     supabase.from('drivers').select('*').order('pschein_valid_until', { ascending: true }),
     supabase.from('vehicles').select('*').order('created_at', { ascending: false }),
+    supabase.from('compliance_documents').select('*')
   ])
 
   const drivers = driversResult.data ?? []
   const vehicles = vehiclesResult.data ?? []
+  const docs = docsResult.data ?? []
 
   const driversCount = drivers.length
   const vehiclesCount = vehicles.length
@@ -30,13 +33,39 @@ export default async function DashboardPage() {
   const maintenanceVehicles = vehicles.filter((vehicle) => vehicle.status === 'maintenance').length
   const offlineVehicles = vehicles.filter((vehicle) => vehicle.status === 'offline').length
 
-  const validDrivers = drivers.filter((driver) => daysUntil(driver.pschein_valid_until) >= 0).length
-  const expiringSoonDrivers = drivers.filter((driver) => {
-    const days = daysUntil(driver.pschein_valid_until)
-    return days >= 0 && days <= 30
-  })
+  const criticalDates: { id: string; title: string; days: number }[] = []
 
-  const readinessScore = activeVehicles === 0 ? 0 : Math.min(100, Math.round((validDrivers / activeVehicles) * 100))
+  for (const driver of drivers) {
+    if (!driver.pschein_valid_until) continue
+    const days = daysUntil(driver.pschein_valid_until)
+    if (days >= 0 && days < 60) {
+      criticalDates.push({
+        id: `driver-${driver.id}`,
+        title: `P-Schein: ${driver.name}`,
+        days,
+      })
+    }
+  }
+
+  for (const doc of docs) {
+    if (!doc.due_date) continue
+    const days = daysUntil(doc.due_date)
+    if (days >= 0 && days < 60) {
+      let subject = 'Unbekannt'
+      if (doc.scope_type === 'driver') {
+        subject = drivers.find(d => d.id === doc.driver_id)?.name || 'Fahrer'
+      } else {
+        subject = vehicles.find(v => v.id === doc.vehicle_id)?.license_plate || 'Fahrzeug'
+      }
+      criticalDates.push({
+        id: `doc-${doc.id}`,
+        title: `${doc.doc_type}: ${subject}`,
+        days,
+      })
+    }
+  }
+
+  criticalDates.sort((a, b) => a.days - b.days)
 
   return (
     <main className="space-y-6">
@@ -45,11 +74,11 @@ export default async function DashboardPage() {
         <p className="mt-1 text-slate-600">Willkommen, {displayName}.</p>
       </div>
 
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-3">
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Fahrer gesamt</CardTitle>
-            <CardDescription>Aktive Eintraege</CardDescription>
+            <CardDescription>Aktive Einträge</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-slate-900">{driversCount}</p>
@@ -59,30 +88,20 @@ export default async function DashboardPage() {
         <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
             <CardTitle>Fahrzeuge gesamt</CardTitle>
-            <CardDescription>Aktive Eintraege</CardDescription>
+            <CardDescription>Aktive Einträge</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-4xl font-bold text-slate-900">{vehiclesCount}</p>
           </CardContent>
         </Card>
 
-        <Card className="surface-card animate-fade-up-delay">
+        <Card className="surface-card animate-fade-up-delay-3">
           <CardHeader>
-            <CardTitle>Uber Readiness</CardTitle>
-            <CardDescription>Fahrer zu aktiven Fahrzeugen</CardDescription>
+            <CardTitle>Kritische Termine</CardTitle>
+            <CardDescription>Fällig in 30 Tagen</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-slate-900">{readinessScore}%</p>
-          </CardContent>
-        </Card>
-
-        <Card className="surface-card animate-fade-up-delay-2">
-          <CardHeader>
-            <CardTitle>P-Schein Warnungen</CardTitle>
-            <CardDescription>Naechste 30 Tage</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-slate-900">{expiringSoonDrivers.length}</p>
+            <p className="text-4xl font-bold text-slate-900">{criticalDates.length}</p>
           </CardContent>
         </Card>
       </section>
@@ -111,22 +130,22 @@ export default async function DashboardPage() {
 
         <Card className="surface-card animate-fade-up-delay-3">
           <CardHeader>
-            <CardTitle>Kritische Fahrertermine</CardTitle>
-            <CardDescription>Ablaufdaten</CardDescription>
+            <CardTitle>Kritische Termine</CardTitle>
+            <CardDescription>Ablaufdaten (Fahrer & Fahrzeuge)</CardDescription>
           </CardHeader>
           <CardContent>
-            {expiringSoonDrivers.length === 0 ? (
+            {criticalDates.length === 0 ? (
               <p className="text-sm text-slate-500">Keine bevorstehenden Ablaufdaten in den naechsten 30 Tagen.</p>
             ) : (
               <ul className="space-y-2">
-                {expiringSoonDrivers.slice(0, 6).map((driver) => (
+                {criticalDates.slice(0, 6).map((item) => (
                   <li
-                    key={driver.id}
+                    key={item.id}
                     className="flex items-center justify-between rounded-md border border-slate-200 bg-white/70 p-3 text-sm"
                   >
-                    <span className="font-medium text-slate-800">{driver.name}</span>
-                    <Badge variant={daysUntil(driver.pschein_valid_until) <= 7 ? 'danger' : 'warning'}>
-                      {daysUntil(driver.pschein_valid_until)} Tage
+                    <span className="font-medium text-slate-800">{item.title}</span>
+                    <Badge variant={item.days <= 7 ? 'danger' : 'warning'}>
+                      {item.days} Tage
                     </Badge>
                   </li>
                 ))}
@@ -158,3 +177,4 @@ export default async function DashboardPage() {
     </main>
   )
 }
+

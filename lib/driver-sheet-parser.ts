@@ -6,6 +6,8 @@ export interface ParsedDriverSheet {
   name: string | null
   firstName: string | null
   lastName: string | null
+  streetAndNumber: string | null
+  postalCodeAndCity: string | null
   street: string | null
   streetNumber: string | null
   postalCode: string | null
@@ -226,6 +228,136 @@ function extractFromHeaderValueRows(lines: string[]) {
 
   return result
 }
+
+// ---------- Split-column PDF support ----------
+// Some PDF renderers output all left-column labels first, then all right-column
+// values (column-by-column). buildSplitColumnMap detects such blocks and pairs
+// them positionally so Vorname, Identifikationsnummer etc. can be found.
+
+const personalstammblattLabelSet = new Set([
+  'kunde', 'name', 'vorname', 'nachname',
+  'strasse/nr', 'straße/nr', 'strasse', 'straße', 'anschrift', 'adresse',
+  'plz/ort', 'plz ort', 'plz', 'ort', 'stadt',
+  'geburtsdatum', 'geburtsort/land', 'geburtsort', 'geburtsname',
+  'staatsangehorigkeit', 'staatsangehörigkeit',
+  'familienstand', 'steuerklasse', 'kinderfreibetrag', 'kirchensteuer',
+  'identifikationsnummer',
+  'steuer identifikationsnummer', 'steueridentifikationsnummer',
+  'sozialversicherungsnr', 'sozialversicherungsnummer',
+  'krankenkasse',
+  'eintritt am', 'eintrittsdatum',
+  'beschäftigt als', 'beschaftigt als',
+  'vertragsform',
+  'wochentliche stundenzahl', 'wöchentliche stundenzahl',
+  'befristet / unbefristet', 'befristet',
+  'renteversicherungsbefreiung liegt vor', 'renteversicherungsbefreiung',
+  'kontoinhaber', 'name der bank', 'bankname', 'iban',
+  'p-schein', 'pschein', 'bezirk', 'schicht',
+])
+
+function isPersonalstammblattLabel(line: string): boolean {
+  const stripped = normalizeForSearch(normalizeWhitespace(line))
+    .replace(/[\s:/.(]+$/, '')
+    .trim()
+  return personalstammblattLabelSet.has(stripped)
+}
+
+function isFormSectionHeader(line: string): boolean {
+  const norm = normalizeForSearch(normalizeWhitespace(line))
+  return (
+    norm === 'personalstammblatt' ||
+    norm.includes('persönliche angaben') ||
+    norm.includes('personliche angaben') ||
+    norm.includes('steuer und sozialversicherung') ||
+    norm.includes('steuer- und sozialversicherung') ||
+    norm.includes('angaben zum beschäftigung') ||
+    norm.includes('angaben zum beschaftigung') ||
+    norm.includes('bankverbindung')
+  )
+}
+
+function buildSplitColumnMap(lines: string[]): Record<string, string> {
+  const result: Record<string, string> = {}
+  let i = 0
+
+  while (i < lines.length) {
+    const currentLine = normalizeWhitespace(lines[i])
+
+    if (!currentLine || isFormSectionHeader(currentLine)) {
+      i++
+      continue
+    }
+
+    if (!isPersonalstammblattLabel(currentLine)) {
+      i++
+      continue
+    }
+
+    // Check if the next non-empty, non-header line is ALSO a label.
+    // That is the indicator of split-column PDF output.
+    let peekIndex = i + 1
+    while (peekIndex < lines.length && (!normalizeWhitespace(lines[peekIndex]) || isFormSectionHeader(normalizeWhitespace(lines[peekIndex])))) {
+      peekIndex++
+    }
+    const peekLine = normalizeWhitespace(lines[peekIndex] ?? '')
+    if (!peekLine || !isPersonalstammblattLabel(peekLine)) {
+      // Not split-column for this label; let existing logic handle it.
+      i++
+      continue
+    }
+
+    // Collect consecutive known-label lines (skipping section headers).
+    const labelBlock: string[] = []
+    let j = i
+    while (j < lines.length) {
+      const line = normalizeWhitespace(lines[j])
+      if (!line) { j++; continue }
+      if (isFormSectionHeader(line)) { j++; break }
+      if (isPersonalstammblattLabel(line)) {
+        labelBlock.push(line)
+        j++
+      } else {
+        break
+      }
+    }
+
+    if (labelBlock.length < 2) {
+      i = j
+      continue
+    }
+
+    // Skip any section headers immediately after the label block.
+    while (j < lines.length && isFormSectionHeader(normalizeWhitespace(lines[j]))) {
+      j++
+    }
+
+    // Collect values – everything that is NOT a label and NOT a section header.
+    // Empty lines are preserved as empty-string values to maintain positional alignment.
+    const valueBlock: string[] = []
+    let k = j
+    while (k < lines.length && valueBlock.length < labelBlock.length) {
+      const line = normalizeWhitespace(lines[k])
+      if (isFormSectionHeader(line)) break
+      if (isPersonalstammblattLabel(line)) break
+      valueBlock.push(line)
+      k++
+    }
+
+    // Pair labels with values positionally.
+    for (let m = 0; m < Math.min(labelBlock.length, valueBlock.length); m++) {
+      const key = normalizeKey(labelBlock[m])
+      const value = valueBlock[m]
+      if (key && value && !result[key]) {
+        result[key] = value
+      }
+    }
+
+    i = Math.max(j, i + 1)
+  }
+
+  return result
+}
+// -----------------------------------------------
 
 function extractIban(text: string) {
   const compact = text.replace(/\s+/g, '')
@@ -483,19 +615,22 @@ export function parseDriverSheetText(text: string, hints: ParsedFieldHints = {})
 
   const warnings: string[] = []
   const rowMapped = extractFromHeaderValueRows(lines)
+  const columnMap = buildSplitColumnMap(lines)
 
   const firstNameRaw =
-    findHintValue(hints, ['vorname', 'first name', 'vornarne', 'vor narne']) ||
+    findHintValue(hints, ['vorname', 'first name', 'vornarne', 'vor narne', 'vorname / first name']) ||
     rowMapped['vorname'] ||
     rowMapped['first name'] ||
-    findValueForLabels(lines, ['vorname', 'first name', 'vornarne', 'vor narne']) ||
-    extractWithRegex(text, ['Vorname', 'First Name', 'Vornarne']) ||
+    columnMap['vorname'] ||
+    findValueForLabels(lines, ['vorname', 'first name', 'vornarne', 'vor narne', 'vorname / first name']) ||
+    extractWithRegex(text, ['Vorname', 'First Name', 'Vornarne', 'Vorname / First name']) ||
     null
   const lastNameRaw =
     findHintValue(hints, ['nachname', 'surname', 'last name']) ||
     rowMapped['name'] ||
     rowMapped['nachname'] ||
-    findValueForLabels(lines, ['nachname', 'surname', 'last name']) ||
+    columnMap['name'] ||
+    findValueForLabels(lines, ['nachname', 'name', 'surname', 'last name']) ||
     extractWithRegex(text, ['Nachname', 'Surname', 'Last Name']) ||
     null
   const combinedName =
@@ -513,8 +648,7 @@ export function parseDriverSheetText(text: string, hints: ParsedFieldHints = {})
   if (!isLikelyNamePart(lastName)) lastName = null
 
   if (equalsNormalized(firstName, lastName)) {
-    // If both columns contain the same token, keep one and mark the other as unresolved.
-    firstName = null
+    // firstName = null
   }
 
   const mergedName = [firstName, lastName].filter(Boolean).join(' ').trim()
@@ -597,16 +731,20 @@ export function parseDriverSheetText(text: string, hints: ParsedFieldHints = {})
   const taxClass = normalizeTaxClass(taxClassRaw)
   const taxId = toNull(
     sanitizeExtractedValue(
-      findHintValue(hints, ['steuer identifikationsnummer', 'steuer-id', 'steuer id', 'steueridentifikationsnummer']) ||
-        findValueForLabels(lines, ['steuer identifikationsnummer', 'steuer-id', 'steuer id', 'steueridentifikationsnummer']) ||
-        extractWithRegex(text, ['Steuer Identifikationsnummer', 'Steuer-ID', 'Steuer ID'])
+      findHintValue(hints, ['identifikationsnummer', 'steuer identifikationsnummer', 'steuer-id', 'steuer id', 'steueridentifikationsnummer', 'steuernummer', 'steuer-nr', 'steuernr']) ||
+        columnMap['identifikationsnummer'] ||
+        columnMap['steuer identifikationsnummer'] ||
+        findValueForLabels(lines, ['identifikationsnummer', 'steuer identifikationsnummer', 'steuer-id', 'steuer id', 'steueridentifikationsnummer', 'steuernummer', 'steuer-nr', 'steuernr']) ||
+        extractWithRegex(text, ['Identifikationsnummer', 'Steuer Identifikationsnummer', 'Steuer-ID', 'Steuer ID', 'Steuernummer', 'Steuer-Nr', 'Steuernr'])
     )
   )
   const socialSecurityNumber = toNull(
     sanitizeExtractedValue(
-      findHintValue(hints, ['sozialversicherungsnummer', 'sv-nummer', 'sv nummer']) ||
-        findValueForLabels(lines, ['sozialversicherungsnummer', 'sv-nummer', 'sv nummer']) ||
-        extractWithRegex(text, ['Sozialversicherungsnummer', 'SV-Nummer'])
+      findHintValue(hints, ['sozialversicherungsnr', 'sozialversicherungsnummer', 'sv-nummer', 'sv nummer']) ||
+        columnMap['sozialversicherungsnr'] ||
+        columnMap['sozialversicherungsnummer'] ||
+        findValueForLabels(lines, ['sozialversicherungsnr', 'sozialversicherungsnummer', 'sv-nummer', 'sv nummer']) ||
+        extractWithRegex(text, ['Sozialversicherungsnr', 'Sozialversicherungsnummer', 'SV-Nummer'])
     )
   )
   const healthInsurance = sanitizeExtractedValue(
@@ -640,7 +778,7 @@ export function parseDriverSheetText(text: string, hints: ParsedFieldHints = {})
   ])
   const pscheinValidUntil = pscheinRaw ? parseDateToken(pscheinRaw) : null
   if (!pscheinValidUntil) {
-    warnings.push('P-Schein-Datum wurde nicht erkannt. Bitte pruefen.')
+    warnings.push('P-Schein-Datum wurde nicht erkannt. Bitte prüfen.')
   }
 
   const shiftRaw = findValueForLabels(lines, ['schicht', 'dienst'])
@@ -704,6 +842,8 @@ export function parseDriverSheetText(text: string, hints: ParsedFieldHints = {})
     name,
     firstName,
     lastName,
+    streetAndNumber: [normalizedStreet, streetNumber].filter(Boolean).join(' '),
+    postalCodeAndCity: [postalCode, city].filter(Boolean).join(' '),
     street: normalizedStreet,
     streetNumber,
     postalCode,

@@ -1,47 +1,61 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { Loader2, Car } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
+import { useDelayedLoading } from '@/lib/use-delayed-loading'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { AvatarUploadCrop } from '@/components/ui/avatar-upload-crop'
 
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
 type VehicleInsert = Database['public']['Tables']['vehicles']['Insert']
 type VehicleUpdate = Database['public']['Tables']['vehicles']['Update']
+type SettingsRow = Database['public']['Tables']['settings']['Row']
 
 interface VehiclesCrudProps {
   initialVehicles: VehicleRow[]
+  settings: SettingsRow[]
 }
 
-const statuses: VehicleRow['status'][] = ['active', 'maintenance', 'offline']
-
-function statusVariant(status: VehicleRow['status']): 'success' | 'warning' | 'danger' {
+function statusVariant(status: string): 'success' | 'warning' | 'danger' | 'secondary' {
   if (status === 'active') return 'success'
   if (status === 'maintenance') return 'warning'
-  return 'danger'
+  if (status === 'offline') return 'danger'
+  return 'secondary'
 }
 
-export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
+export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
   const supabase = useMemo(() => createClient(), [])
+
+  const statuses = useMemo(() => {
+    const s = settings.find(s => s.key === 'vehicle_statuses')
+    if (s && Array.isArray(s.value)) return s.value as string[]
+    return ['active', 'maintenance', 'offline']
+  }, [settings])
 
   const [vehicles, setVehicles] = useState<VehicleRow[]>(initialVehicles)
   const [isBusy, setIsBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | VehicleRow['status']>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const [licensePlate, setLicensePlate] = useState('')
   const [model, setModel] = useState('')
-  const [status, setStatus] = useState<VehicleRow['status']>('active')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [status, setStatus] = useState<string>(statuses[0] || 'active')
 
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [editLicensePlate, setEditLicensePlate] = useState('')
   const [editModel, setEditModel] = useState('')
-  const [editStatus, setEditStatus] = useState<VehicleRow['status']>('active')
+  const [editAvatarUrl, setEditAvatarUrl] = useState<string | null>(null)
+  const [editStatus, setEditStatus] = useState<string>(statuses[0] || 'active')
+  const showBusySpinner = useDelayedLoading(isBusy)
 
   async function refreshVehicles() {
     const { data, error: fetchError } = await supabase
@@ -79,6 +93,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
       license_plate: licensePlate,
       model,
       status,
+      avatar_url: avatarUrl || null,
     }
 
     const { error: insertError } = await supabase.from('vehicles').insert(payload)
@@ -89,9 +104,12 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
       return
     }
 
+    await refreshVehicles()
+
     setLicensePlate('')
     setModel('')
-    setStatus('active')
+    setAvatarUrl(null)
+    setStatus(statuses[0] || 'active')
     setIsBusy(false)
   }
 
@@ -99,6 +117,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
     setEditingId(vehicle.id)
     setEditLicensePlate(vehicle.license_plate)
     setEditModel(vehicle.model)
+    setEditAvatarUrl(vehicle.avatar_url)
     setEditStatus(vehicle.status)
   }
 
@@ -114,6 +133,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
       license_plate: editLicensePlate,
       model: editModel,
       status: editStatus,
+      avatar_url: editAvatarUrl || null,
     }
 
     const { error: updateError } = await supabase.from('vehicles').update(payload).eq('id', id)
@@ -123,6 +143,8 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
       setIsBusy(false)
       return
     }
+
+    await refreshVehicles()
 
     setEditingId(null)
     setIsBusy(false)
@@ -140,6 +162,9 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
       return
     }
 
+    await refreshVehicles()
+
+    setConfirmDeleteId(null)
     setIsBusy(false)
   }
 
@@ -175,12 +200,16 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
               <Input id="vehicle-model" value={model} onChange={(event) => setModel(event.target.value)} required />
             </div>
             <div className="space-y-2">
+              <Label>Fahrzeugbild (optional)</Label>
+              <AvatarUploadCrop value={avatarUrl} onChange={setAvatarUrl} placeholder={<Car className="h-6 w-6" />} />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="vehicle-status">Status</Label>
               <select
                 id="vehicle-status"
                 className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                 value={status}
-                onChange={(event) => setStatus(event.target.value as VehicleRow['status'])}
+                onChange={(event) => setStatus(event.target.value)}
               >
                 {statuses.map((item) => (
                   <option key={item} value={item}>
@@ -191,6 +220,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
             </div>
 
             <Button type="submit" className="w-full" disabled={isBusy}>
+              {showBusySpinner ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Fahrzeug speichern
             </Button>
           </form>
@@ -200,7 +230,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
       <Card className="surface-card">
         <CardHeader>
           <CardTitle>Fahrzeugliste</CardTitle>
-          <CardDescription>Eintraege</CardDescription>
+          <CardDescription>Einträge</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 grid gap-3 rounded-lg border border-slate-200/80 bg-white/70 p-3 md:grid-cols-2">
@@ -212,7 +242,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
             <select
               className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
               value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value as 'all' | VehicleRow['status'])}
+              onChange={(event) => setStatusFilter(event.target.value)}
             >
               <option value="all">Alle Status</option>
               {statuses.map((item) => (
@@ -241,13 +271,17 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
                       <div className="grid gap-3 md:grid-cols-2">
                         <Input
                           value={editLicensePlate}
-                          onChange={(event) => setEditLicensePlate(event.target.value.toUpperCase())}
+                          onChange={(event) => setEditLicensePlate(event.target.value.toUpperCase().replace(/[^A-Z0-9\-\s]/g, ''))}
                         />
                         <Input value={editModel} onChange={(event) => setEditModel(event.target.value)} />
+                        <div className="flex items-center gap-3">
+                          <AvatarUploadCrop value={editAvatarUrl} onChange={setEditAvatarUrl} placeholder={<Car className="h-5 w-5" />} />
+                          <span className="text-xs text-slate-500">Fahrzeugbild</span>
+                        </div>
                         <select
-                          className="md:col-span-2 flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+                          className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                           value={editStatus}
-                          onChange={(event) => setEditStatus(event.target.value as VehicleRow['status'])}
+                          onChange={(event) => setEditStatus(event.target.value)}
                         >
                           {statuses.map((item) => (
                             <option key={item} value={item}>
@@ -258,6 +292,7 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
 
                         <div className="md:col-span-2 flex gap-2">
                           <Button onClick={() => void handleSave(vehicle.id)} disabled={isBusy}>
+                            {showBusySpinner ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                             Speichern
                           </Button>
                           <Button variant="secondary" onClick={cancelEdit} disabled={isBusy}>
@@ -267,11 +302,21 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
                       </div>
                     ) : (
                       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
-                        <div>
-                          <p className="font-semibold text-slate-900">{vehicle.license_plate}</p>
-                          <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
-                            <span>Modell: {vehicle.model}</span>
-                            <Badge variant={statusVariant(vehicle.status)}>{vehicle.status}</Badge>
+                        <div className="flex items-center gap-4">
+                          {vehicle.avatar_url ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img src={vehicle.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover bg-slate-100 ring-1 ring-slate-200" />
+                          ) : (
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 ring-1 ring-slate-200">
+                              <Car className="h-5 w-5" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-semibold text-slate-900">{vehicle.license_plate}</p>
+                            <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
+                              <span>Modell: {vehicle.model}</span>
+                              <Badge variant={statusVariant(vehicle.status)}>{vehicle.status}</Badge>
+                            </div>
                           </div>
                         </div>
 
@@ -279,14 +324,21 @@ export function VehiclesCrud({ initialVehicles }: VehiclesCrudProps) {
                           <Button variant="outline" size="sm" onClick={() => startEdit(vehicle)} disabled={isBusy}>
                             Bearbeiten
                           </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => void handleDelete(vehicle.id)}
-                            disabled={isBusy}
-                          >
-                            Loeschen
-                          </Button>
+                          {confirmDeleteId === vehicle.id ? (
+                            <>
+                              <Button variant="destructive" size="sm" onClick={() => void handleDelete(vehicle.id)} disabled={isBusy}>
+                                {showBusySpinner ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                                Löschen bestätigen
+                              </Button>
+                              <Button variant="secondary" size="sm" onClick={() => setConfirmDeleteId(null)} disabled={isBusy}>
+                                Abbrechen
+                              </Button>
+                            </>
+                          ) : (
+                            <Button variant="destructive" size="sm" onClick={() => setConfirmDeleteId(vehicle.id)} disabled={isBusy}>
+                              Löschen
+                            </Button>
+                          )}
                         </div>
                       </div>
                     )}

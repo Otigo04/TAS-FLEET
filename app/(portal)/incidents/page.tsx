@@ -5,15 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 export default async function IncidentsPage() {
   const { supabase } = await requireUser()
 
-  const [incidentsResult, driversResult, vehiclesResult] = await Promise.all([
+  const [incidentsResult, driversResult, vehiclesResult, settingsResult] = await Promise.all([
     supabase.from('incidents').select('*').order('occurred_on', { ascending: false }),
     supabase.from('drivers').select('*').order('name'),
     supabase.from('vehicles').select('*').order('license_plate'),
+    supabase.from('settings').select('*'),
   ])
 
   const incidents = incidentsResult.data ?? []
   const drivers = driversResult.data ?? []
   const vehicles = vehiclesResult.data ?? []
+  const settings = settingsResult.data ?? []
 
   const openIncidents = incidents.filter((entry) => entry.status !== 'resolved').length
   const highPriority = incidents.filter((entry) => entry.severity === 'high').length
@@ -56,7 +58,7 @@ export default async function IncidentsPage() {
         </Card>
       </section>
 
-      <IncidentLog initialIncidents={incidents} drivers={drivers} vehicles={vehicles} />
+      <IncidentLog initialIncidents={incidents} drivers={drivers} vehicles={vehicles} settings={settings} />
     </main>
   )
 }

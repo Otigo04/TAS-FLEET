@@ -90,9 +90,12 @@ export async function POST(request: Request) {
 
     const notes = [...parsed.notes]
     notes.push(`Importquelle: ${file.name}`)
+    if (parsed.firstName) {
+      notes.push(`Vorname erkannt: ${parsed.firstName}`)
+    }
 
     if (!parsed.pscheinValidUntil) {
-      notes.push('P-Schein gueltig bis: nicht erkannt, bitte manuell aktualisieren')
+      notes.push('P-Schein gültig bis: nicht erkannt, bitte manuell aktualisieren')
     }
 
     if (!parsed.district) {

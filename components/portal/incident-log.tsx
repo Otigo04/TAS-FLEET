@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import type { Database } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/client'
+import { useDelayedLoading } from '@/lib/use-delayed-loading'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -13,35 +15,53 @@ type DriverRow = Database['public']['Tables']['drivers']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
 type IncidentRow = Database['public']['Tables']['incidents']['Row']
 type IncidentInsert = Database['public']['Tables']['incidents']['Insert']
+type SettingsRow = Database['public']['Tables']['settings']['Row']
 
 interface IncidentLogProps {
   initialIncidents: IncidentRow[]
   drivers: DriverRow[]
   vehicles: VehicleRow[]
+  settings: SettingsRow[]
 }
 
-const incidentTypes: Array<IncidentRow['incident_type']> = ['schaeden', 'bussgelder', 'sperrungen']
-const severities: Array<IncidentRow['severity']> = ['low', 'medium', 'high']
-const statuses: Array<IncidentRow['status']> = ['open', 'in_progress', 'resolved']
-
-export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLogProps) {
+export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: IncidentLogProps) {
   const supabase = useMemo(() => createClient(), [])
+
+  const incidentTypes = useMemo(() => {
+    const s = settings.find(s => s.key === 'incident_types')
+    if (s && Array.isArray(s.value)) return s.value as string[]
+    return ['schaeden', 'bussgelder', 'sperrungen']
+  }, [settings])
+
+  const severities = useMemo(() => {
+    const s = settings.find(s => s.key === 'incident_severities')
+    if (s && Array.isArray(s.value)) return s.value as string[]
+    return ['low', 'medium', 'high']
+  }, [settings])
+
+  const statuses = useMemo(() => {
+    const s = settings.find(s => s.key === 'incident_statuses')
+    if (s && Array.isArray(s.value)) return s.value as string[]
+    return ['open', 'in_progress', 'resolved']
+  }, [settings])
 
   const [incidents, setIncidents] = useState<IncidentRow[]>(initialIncidents)
   const [isBusy, setIsBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const showBusySpinner = useDelayedLoading(isBusy)
 
-  const [incidentType, setIncidentType] = useState<IncidentRow['incident_type']>('schaeden')
-  const [severity, setSeverity] = useState<IncidentRow['severity']>('medium')
-  const [status, setStatus] = useState<IncidentRow['status']>('open')
+  const [incidentType, setIncidentType] = useState<string>(incidentTypes[0] || 'schaeden')
+  const [severity, setSeverity] = useState<string>(severities[0] || 'medium')
+  const [status, setStatus] = useState<string>(statuses[0] || 'open')
   const [occurredOn, setOccurredOn] = useState(new Date().toISOString().slice(0, 10))
   const [driverId, setDriverId] = useState<string>('')
   const [vehicleId, setVehicleId] = useState<string>('')
   const [description, setDescription] = useState('')
   const [costEur, setCostEur] = useState('0')
 
-  const [typeFilter, setTypeFilter] = useState<'all' | IncidentRow['incident_type']>('all')
-  const [statusFilter, setStatusFilter] = useState<'all' | IncidentRow['status']>('all')
+  const [typeFilter, setTypeFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   async function refreshIncidents() {
     const { data, error: fetchError } = await supabase
@@ -99,7 +119,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
     setIsBusy(false)
   }
 
-  async function handleStatusUpdate(id: string, nextStatus: IncidentRow['status']) {
+  async function handleStatusUpdate(id: string, nextStatus: string) {
     setError(null)
     const { error: updateError } = await supabase.from('incidents').update({ status: nextStatus }).eq('id', id)
 
@@ -120,6 +140,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
       return
     }
 
+    setConfirmDeleteId(null)
     setIsBusy(false)
   }
 
@@ -140,6 +161,37 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
     return typeMatch && statusMatch
   })
 
+  function exportToCsv() {
+    if (filteredIncidents.length === 0) return
+
+    const headers = ['Datum', 'Typ', 'Priorität', 'Status', 'Fahrer', 'Fahrzeug', 'Kosten EUR', 'Beschreibung']
+    const rows = filteredIncidents.map(inc => [
+      inc.occurred_on,
+      inc.incident_type,
+      inc.severity,
+      inc.status,
+      driverName(inc.driver_id),
+      vehicleLabel(inc.vehicle_id),
+      inc.cost_eur,
+      inc.description
+    ])
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `Incidents_Export_${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <section className="grid gap-6 xl:grid-cols-[380px_1fr]">
       <Card className="surface-card animate-fade-up-delay">
@@ -155,7 +207,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
                 id="incident-type"
                 className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
                 value={incidentType}
-                onChange={(e) => setIncidentType(e.target.value as IncidentRow['incident_type'])}
+                onChange={(e) => setIncidentType(e.target.value)}
               >
                 {incidentTypes.map((type) => (
                   <option key={type} value={type}>
@@ -176,7 +228,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
                 id="incident-severity"
                 className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
                 value={severity}
-                onChange={(e) => setSeverity(e.target.value as IncidentRow['severity'])}
+                onChange={(e) => setSeverity(e.target.value)}
               >
                 {severities.map((entry) => (
                   <option key={entry} value={entry}>
@@ -192,7 +244,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
                 id="incident-status"
                 className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
                 value={status}
-                onChange={(e) => setStatus(e.target.value as IncidentRow['status'])}
+                onChange={(e) => setStatus(e.target.value)}
               >
                 {statuses.map((entry) => (
                   <option key={entry} value={entry}>
@@ -253,6 +305,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
             </div>
 
             <Button type="submit" className="w-full" disabled={isBusy}>
+              {showBusySpinner ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Incident speichern
             </Button>
           </form>
@@ -262,14 +315,14 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
       <Card className="surface-card animate-fade-up-delay-2">
         <CardHeader>
           <CardTitle>Incident-Log</CardTitle>
-          <CardDescription>Alle Eintraege</CardDescription>
+          <CardDescription>Alle Einträge</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 grid gap-3 md:grid-cols-2">
             <select
               className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value as 'all' | IncidentRow['incident_type'])}
+              onChange={(e) => setTypeFilter(e.target.value)}
             >
               <option value="all">Alle Typen</option>
               {incidentTypes.map((type) => (
@@ -282,7 +335,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
             <select
               className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'all' | IncidentRow['status'])}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="all">Alle Stati</option>
               {statuses.map((entry) => (
@@ -320,7 +373,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
                       <select
                         className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm"
                         value={incident.status}
-                        onChange={(e) => void handleStatusUpdate(incident.id, e.target.value as IncidentRow['status'])}
+                        onChange={(e) => void handleStatusUpdate(incident.id, e.target.value)}
                       >
                         {statuses.map((entry) => (
                           <option key={entry} value={entry}>
@@ -329,9 +382,21 @@ export function IncidentLog({ initialIncidents, drivers, vehicles }: IncidentLog
                         ))}
                       </select>
 
-                      <Button variant="destructive" size="sm" onClick={() => void handleDelete(incident.id)} disabled={isBusy}>
-                        Loeschen
-                      </Button>
+                      {confirmDeleteId === incident.id ? (
+                        <>
+                          <Button variant="destructive" size="sm" onClick={() => void handleDelete(incident.id)} disabled={isBusy}>
+                            {showBusySpinner ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                            Löschen bestätigen
+                          </Button>
+                          <Button variant="secondary" size="sm" onClick={() => setConfirmDeleteId(null)} disabled={isBusy}>
+                            Abbrechen
+                          </Button>
+                        </>
+                      ) : (
+                        <Button variant="destructive" size="sm" onClick={() => setConfirmDeleteId(incident.id)} disabled={isBusy}>
+                          Löschen
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </li>

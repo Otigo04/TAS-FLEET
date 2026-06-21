@@ -13,6 +13,7 @@ const buttonVariants = cva(
         outline:
           'border border-slate-300 bg-white text-slate-900 hover:bg-slate-50 focus-visible:ring-slate-400',
         destructive: 'bg-red-600 text-white hover:bg-red-500 focus-visible:ring-red-300',
+        ghost: 'bg-transparent text-slate-900 hover:bg-slate-100 focus-visible:ring-slate-400',
       },
       size: {
         default: 'h-10 px-4 py-2',

@@ -30,10 +30,11 @@ export interface Database {
           employed_as: string | null
           bank_name: string | null
           iban: string | null
-          pschein_valid_until: string
-          district: string
+          pschein_valid_until: string | null
+          district: string | null
           current_shift: string
           notes: string[]
+          avatar_url: string | null
           created_at: string
           updated_at: string
         }
@@ -57,10 +58,11 @@ export interface Database {
           employed_as?: string | null
           bank_name?: string | null
           iban?: string | null
-          pschein_valid_until: string
-          district: string
+          pschein_valid_until?: string | null
+          district?: string | null
           current_shift: string
           notes?: string[]
+          avatar_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -84,10 +86,11 @@ export interface Database {
           employed_as?: string | null
           bank_name?: string | null
           iban?: string | null
-          pschein_valid_until?: string
-          district?: string
+          pschein_valid_until?: string | null
+          district?: string | null
           current_shift?: string
           notes?: string[]
+          avatar_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -135,9 +138,9 @@ export interface Database {
           scope_type: 'driver' | 'vehicle'
           driver_id: string | null
           vehicle_id: string | null
-          doc_type: 'pschein' | 'hu' | 'versicherung' | 'uber_freigabe'
+          doc_type: string
           due_date: string
-          status: 'valid' | 'expiring' | 'expired' | 'pending'
+          status: string
           notes: string | null
           created_at: string
           updated_at: string
@@ -147,9 +150,9 @@ export interface Database {
           scope_type: 'driver' | 'vehicle'
           driver_id?: string | null
           vehicle_id?: string | null
-          doc_type: 'pschein' | 'hu' | 'versicherung' | 'uber_freigabe'
+          doc_type: string
           due_date: string
-          status: 'valid' | 'expiring' | 'expired' | 'pending'
+          status: string
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -159,9 +162,9 @@ export interface Database {
           scope_type?: 'driver' | 'vehicle'
           driver_id?: string | null
           vehicle_id?: string | null
-          doc_type?: 'pschein' | 'hu' | 'versicherung' | 'uber_freigabe'
+          doc_type?: string
           due_date?: string
-          status?: 'valid' | 'expiring' | 'expired' | 'pending'
+          status?: string
           notes?: string | null
           created_at?: string
           updated_at?: string
@@ -171,12 +174,12 @@ export interface Database {
       incidents: {
         Row: {
           id: string
-          incident_type: 'schaeden' | 'bussgelder' | 'sperrungen'
+          incident_type: string
           driver_id: string | null
           vehicle_id: string | null
           occurred_on: string
-          severity: 'low' | 'medium' | 'high'
-          status: 'open' | 'in_progress' | 'resolved'
+          severity: string
+          status: string
           description: string
           cost_eur: number
           created_at: string
@@ -184,12 +187,12 @@ export interface Database {
         }
         Insert: {
           id?: string
-          incident_type: 'schaeden' | 'bussgelder' | 'sperrungen'
+          incident_type: string
           driver_id?: string | null
           vehicle_id?: string | null
           occurred_on: string
-          severity: 'low' | 'medium' | 'high'
-          status: 'open' | 'in_progress' | 'resolved'
+          severity: string
+          status: string
           description: string
           cost_eur?: number
           created_at?: string
@@ -197,12 +200,12 @@ export interface Database {
         }
         Update: {
           id?: string
-          incident_type?: 'schaeden' | 'bussgelder' | 'sperrungen'
+          incident_type?: string
           driver_id?: string | null
           vehicle_id?: string | null
           occurred_on?: string
-          severity?: 'low' | 'medium' | 'high'
-          status?: 'open' | 'in_progress' | 'resolved'
+          severity?: string
+          status?: string
           description?: string
           cost_eur?: number
           created_at?: string
@@ -215,7 +218,8 @@ export interface Database {
           id: string
           license_plate: string
           model: string
-          status: 'active' | 'maintenance' | 'offline'
+          status: string
+          avatar_url: string | null
           created_at: string
           updated_at: string
         }
@@ -223,7 +227,8 @@ export interface Database {
           id?: string
           license_plate: string
           model: string
-          status: 'active' | 'maintenance' | 'offline'
+          status: string
+          avatar_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -231,7 +236,8 @@ export interface Database {
           id?: string
           license_plate?: string
           model?: string
-          status?: 'active' | 'maintenance' | 'offline'
+          status?: string
+          avatar_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -243,6 +249,7 @@ export interface Database {
           role: 'admin'
           first_name: string | null
           last_name: string | null
+          avatar_url: string | null
           created_at: string
         }
         Insert: {
@@ -250,6 +257,7 @@ export interface Database {
           role?: 'admin'
           first_name?: string | null
           last_name?: string | null
+          avatar_url?: string | null
           created_at?: string
         }
         Update: {
@@ -257,7 +265,26 @@ export interface Database {
           role?: 'admin'
           first_name?: string | null
           last_name?: string | null
+          avatar_url?: string | null
           created_at?: string
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          key: string
+          value: Json
+          updated_at: string
+        }
+        Insert: {
+          key: string
+          value?: Json
+          updated_at?: string
+        }
+        Update: {
+          key?: string
+          value?: Json
+          updated_at?: string
         }
         Relationships: []
       }

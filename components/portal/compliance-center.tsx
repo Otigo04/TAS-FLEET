@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import type { Database } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/client'
+import { useDelayedLoading } from '@/lib/use-delayed-loading'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -13,15 +15,14 @@ type DriverRow = Database['public']['Tables']['drivers']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
 type DocRow = Database['public']['Tables']['compliance_documents']['Row']
 type DocInsert = Database['public']['Tables']['compliance_documents']['Insert']
+type SettingsRow = Database['public']['Tables']['settings']['Row']
 
 interface ComplianceCenterProps {
   initialDocuments: DocRow[]
   drivers: DriverRow[]
   vehicles: VehicleRow[]
+  settings: SettingsRow[]
 }
-
-const docTypes: Array<DocRow['doc_type']> = ['pschein', 'hu', 'versicherung', 'uber_freigabe']
-const statuses: Array<DocRow['status']> = ['valid', 'expiring', 'expired', 'pending']
 
 function daysUntil(dateString: string) {
   const now = new Date()
@@ -31,23 +32,37 @@ function daysUntil(dateString: string) {
   return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
 }
 
-export function ComplianceCenter({ initialDocuments, drivers, vehicles }: ComplianceCenterProps) {
+export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings }: ComplianceCenterProps) {
   const supabase = useMemo(() => createClient(), [])
+
+  const docTypes = useMemo(() => {
+    const s = settings.find(s => s.key === 'document_types')
+    if (s && Array.isArray(s.value)) return s.value as string[]
+    return ['pschein', 'hu', 'versicherung']
+  }, [settings])
+
+  const statuses = useMemo(() => {
+    const s = settings.find(s => s.key === 'document_statuses')
+    if (s && Array.isArray(s.value)) return s.value as string[]
+    return ['valid', 'expiring', 'expired', 'pending']
+  }, [settings])
 
   const [documents, setDocuments] = useState<DocRow[]>(initialDocuments)
   const [error, setError] = useState<string | null>(null)
   const [isBusy, setIsBusy] = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const showBusySpinner = useDelayedLoading(isBusy)
 
   const [scopeType, setScopeType] = useState<DocRow['scope_type']>('driver')
   const [driverId, setDriverId] = useState(drivers[0]?.id ?? '')
   const [vehicleId, setVehicleId] = useState(vehicles[0]?.id ?? '')
-  const [docType, setDocType] = useState<DocRow['doc_type']>('pschein')
+  const [docType, setDocType] = useState<string>(docTypes[0] || 'pschein')
   const [dueDate, setDueDate] = useState(new Date().toISOString().slice(0, 10))
-  const [status, setStatus] = useState<DocRow['status']>('pending')
+  const [status, setStatus] = useState<string>(statuses[0] || 'pending')
   const [notes, setNotes] = useState('')
 
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | DocRow['status']>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   async function refreshDocuments() {
     const { data, error: fetchError } = await supabase
@@ -103,7 +118,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
     setIsBusy(false)
   }
 
-  async function handleStatusUpdate(id: string, nextStatus: DocRow['status']) {
+  async function handleStatusUpdate(id: string, nextStatus: string) {
     setError(null)
     const { error: updateError } = await supabase
       .from('compliance_documents')
@@ -127,6 +142,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
       return
     }
 
+    setConfirmDeleteId(null)
     setIsBusy(false)
   }
 
@@ -209,7 +225,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
                 id="doc-type"
                 className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
                 value={docType}
-                onChange={(e) => setDocType(e.target.value as DocRow['doc_type'])}
+                onChange={(e) => setDocType(e.target.value)}
               >
                 {docTypes.map((type) => (
                   <option key={type} value={type}>
@@ -220,7 +236,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="doc-due">Faellig am</Label>
+              <Label htmlFor="doc-due">Fällig am</Label>
               <Input id="doc-due" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required />
             </div>
 
@@ -230,7 +246,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
                 id="doc-status"
                 className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
                 value={status}
-                onChange={(e) => setStatus(e.target.value as DocRow['status'])}
+                onChange={(e) => setStatus(e.target.value)}
               >
                 {statuses.map((entry) => (
                   <option key={entry} value={entry}>
@@ -246,6 +262,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
             </div>
 
             <Button type="submit" className="w-full" disabled={isBusy}>
+              {showBusySpinner ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Dokument speichern
             </Button>
           </form>
@@ -255,7 +272,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
       <Card className="surface-card animate-fade-up-delay-2">
         <CardHeader>
           <CardTitle>Compliance-Center</CardTitle>
-          <CardDescription>Alle Eintraege</CardDescription>
+          <CardDescription>Alle Einträge</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 grid gap-3 md:grid-cols-2">
@@ -263,7 +280,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
             <select
               className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'all' | DocRow['status'])}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
               <option value="all">Alle Stati</option>
               {statuses.map((entry) => (
@@ -282,17 +299,17 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
             <ul className="space-y-3">
               {filteredDocuments.map((doc) => {
                 const days = daysUntil(doc.due_date)
-                const variant = days < 0 ? 'danger' : days <= 30 ? 'warning' : 'success'
+                const variant = days < 0 ? 'danger' : days < 60 ? 'warning' : 'success'
 
                 return (
                   <li key={doc.id} className="rounded-lg border border-slate-200/80 bg-white/70 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold text-slate-900">{subjectLabel(doc)}</p>
-                        <p className="text-xs text-slate-500">{doc.doc_type} · Faellig: {doc.due_date}</p>
+                        <p className="text-xs text-slate-500">{doc.doc_type} · Fällig: {doc.due_date}</p>
                         {doc.notes ? <p className="mt-1 text-xs text-slate-600">{doc.notes}</p> : null}
                         <div className="mt-2 flex items-center gap-2">
-                          <Badge variant={variant}>{days < 0 ? `${Math.abs(days)} Tage ueberfaellig` : `${days} Tage`}</Badge>
+                          <Badge variant={variant}>{days < 0 ? `${Math.abs(days)} Tage überfällig` : `${days} Tage`}</Badge>
                           <Badge variant="secondary">{doc.status}</Badge>
                         </div>
                       </div>
@@ -301,7 +318,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
                         <select
                           className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm"
                           value={doc.status}
-                          onChange={(e) => void handleStatusUpdate(doc.id, e.target.value as DocRow['status'])}
+                          onChange={(e) => void handleStatusUpdate(doc.id, e.target.value)}
                         >
                           {statuses.map((entry) => (
                             <option key={entry} value={entry}>
@@ -309,9 +326,21 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles }: Compli
                             </option>
                           ))}
                         </select>
-                        <Button variant="destructive" size="sm" onClick={() => void handleDelete(doc.id)}>
-                          Loeschen
-                        </Button>
+                        {confirmDeleteId === doc.id ? (
+                          <>
+                            <Button variant="destructive" size="sm" onClick={() => void handleDelete(doc.id)} disabled={isBusy}>
+                              {showBusySpinner ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                              Löschen bestätigen
+                            </Button>
+                            <Button variant="secondary" size="sm" onClick={() => setConfirmDeleteId(null)} disabled={isBusy}>
+                              Abbrechen
+                            </Button>
+                          </>
+                        ) : (
+                          <Button variant="destructive" size="sm" onClick={() => setConfirmDeleteId(doc.id)} disabled={isBusy}>
+                            Löschen
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </li>

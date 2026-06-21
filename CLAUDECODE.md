@@ -1,8 +1,26 @@
+.CLAUDEIGNORE
+CLAUDEIGNORE:
+
+node_modules/
+.next/
+dist/
+build/
+.git/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+UM TOKENS ZU SPAREN
+
+CLAUDE CODE AGENTENVORLAGE:
+
 ---
+
 name: ON Mobility Fullstack
 description: "Use when building, extending, or reviewing the ON-Mobility Personenbefoerderung web app with Next.js, TypeScript, Tailwind, Shadcn UI, and Supabase Realtime. Keywords: Fahrer, Flotte, Supabase Auth, RLS, Realtime, Last Write Wins, Disposition, P-Schein."
 tools: [read, search, edit, execute, todo]
 user-invocable: true
+
 ---
 
 # Projektkontext & KI-Instruktionen: Web-App fuer Personenbefoerderung

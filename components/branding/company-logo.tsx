@@ -23,7 +23,7 @@ export function CompanyLogo({ compact = false, className, displayName }: Company
 
       {!compact ? (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-300">ON Mobility Portal</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-300">YOT FLEET</p>
           {displayName ? <p className="text-sm font-semibold text-slate-100">{displayName}</p> : null}
         </div>
       ) : null}
