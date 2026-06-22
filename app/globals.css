@@ -126,28 +126,30 @@ body {
   body {
     background: #fff !important;
   }
-  /* Nur den Berichtsbereich (.report-document) drucken, App-Chrome ausblenden. */
-  body * {
-    visibility: hidden;
-  }
-  .report-document,
-  .report-document * {
-    visibility: visible;
-  }
-  .report-document {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
+  /* App-Chrome (Sidebar, Header, Footer, Präsenz, Steuerleisten) ausblenden –
+     via display:none, damit der Bericht im normalen Fluss bleibt und über
+     mehrere Seiten korrekt umbricht (position:absolute würde ab Seite 2
+     abschneiden). */
   .no-print {
     display: none !important;
+  }
+  /* Der Bericht selbst druckt randlos und ohne Schatten/Rahmen. */
+  .report-document {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   .report-document .surface-card {
     box-shadow: none !important;
     border-color: #e2e8f0 !important;
+  }
+  /* Abschnitte/Tabellenzeilen möglichst nicht über Seitenumbrüche zerreißen. */
+  .report-document section,
+  .report-document tr,
+  .report-document li {
+    break-inside: avoid;
   }
   @page {
     margin: 16mm;

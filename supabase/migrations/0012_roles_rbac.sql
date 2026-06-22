@@ -56,8 +56,8 @@ create policy "tenant_insert_incidents" on public.incidents
 drop policy if exists "admins_manage_company_users" on public.company_users;
 create policy "owners_manage_company_users" on public.company_users
   for all to authenticated
-  using (company_id = any (public.get_user_owner_company_ids()))
-  with check (company_id = any (public.get_user_owner_company_ids()));
+  using (company_id = any (public.get_user_owner_company_ids()) or public.is_superadmin())
+  with check (company_id = any (public.get_user_owner_company_ids()) or public.is_superadmin());
 
 -- ---------------------------------------------------------------------
 -- Company umbenennen ebenfalls dem Geschäftsführer vorbehalten.
@@ -65,8 +65,8 @@ create policy "owners_manage_company_users" on public.company_users
 drop policy if exists "admins_update_companies" on public.companies;
 create policy "owners_update_companies" on public.companies
   for update to authenticated
-  using (id = any (public.get_user_owner_company_ids()))
-  with check (id = any (public.get_user_owner_company_ids()));
+  using (id = any (public.get_user_owner_company_ids()) or public.is_superadmin())
+  with check (id = any (public.get_user_owner_company_ids()) or public.is_superadmin());
 
 revoke all on function public.get_user_owner_company_ids() from public;
 grant execute on function public.get_user_owner_company_ids() to authenticated;

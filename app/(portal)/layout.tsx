@@ -31,17 +31,17 @@ export default async function PortalLayout({ children }: { children: React.React
     <TenantProvider activeCompany={activeCompany} companies={companies} isSuperadmin={isSuperadmin}>
       <PresenceIndicator userId={user.id} displayName={displayName} avatarUrl={avatarUrl} />
       <div className="min-h-screen flex flex-col">
-        <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-slate-100 py-1.5 px-4 text-xs font-semibold tracking-[0.2em] text-center uppercase">
+        <div className="no-print bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-slate-100 py-1.5 px-4 text-xs font-semibold tracking-[0.2em] text-center uppercase">
           <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">YOT FLEET V0.6</span>
           <span className="text-slate-400"> · YOT SOLUTIONS · Work in Progress</span>
         </div>
         <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col lg:flex-row">
-          <div className="hidden lg:block">
+          <div className="no-print hidden lg:block">
             <Sidebar displayName={displayName} avatarUrl={avatarUrl} isSuperadmin={isSuperadmin} />
           </div>
 
           <div className="flex flex-1 flex-col">
-            <header className="surface-card animate-fade-up mx-4 mt-4 flex items-center justify-between rounded-xl px-6 py-4 gap-4">
+            <header className="no-print surface-card animate-fade-up mx-4 mt-4 flex items-center justify-between rounded-xl px-6 py-4 gap-4">
               <div className="flex items-center gap-3 shrink-0">
                 <MobileSidebar displayName={displayName} avatarUrl={avatarUrl} isSuperadmin={isSuperadmin} />
 
@@ -62,7 +62,7 @@ export default async function PortalLayout({ children }: { children: React.React
 
             <div className="animate-fade-up-delay flex-1 p-6">{children}</div>
 
-            <footer className="mx-6 mb-6 mt-auto flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
+            <footer className="no-print mx-6 mb-6 mt-auto flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
               <div className="flex items-center gap-2">
                 <UserAvatar avatarUrl={avatarUrl} name={displayName} size="sm" />
                 <span className="font-semibold uppercase tracking-[0.22em] text-emerald-600">YOT FLEET</span>

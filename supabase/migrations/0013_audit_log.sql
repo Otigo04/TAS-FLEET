@@ -67,18 +67,28 @@ begin
     end if;
   end if;
 
-  select coalesce(
-           nullif(trim(concat(p.first_name, ' ', p.last_name)), ''),
-           u.email,
-           'System'
-         )
-    into v_actor
-    from auth.users u
-    left join public.profiles p on p.id = u.id
-   where u.id = auth.uid();
+  -- WICHTIG: Das Audit-Log ist ein passiver Beobachter und darf den
+  -- eigentlichen Schreibvorgang NIEMALS blockieren. Schlägt der Akteur-
+  -- Lookup oder der Insert fehl (z. B. fehlender auth.users-Zugriff), wird
+  -- der Fehler geschluckt, der Geschäftsvorgang läuft regulär weiter.
+  begin
+    select coalesce(
+             nullif(trim(concat(p.first_name, ' ', p.last_name)), ''),
+             u.email,
+             'System'
+           )
+      into v_actor
+      from auth.users u
+      left join public.profiles p on p.id = u.id
+     where u.id = auth.uid();
 
-  insert into public.audit_log (company_id, actor_id, actor_name, table_name, record_id, action, old_data, new_data)
-  values (v_company_id, auth.uid(), coalesce(v_actor, 'System'), tg_table_name, v_record_id, lower(tg_op), v_old, v_new);
+    insert into public.audit_log (company_id, actor_id, actor_name, table_name, record_id, action, old_data, new_data)
+    values (v_company_id, auth.uid(), coalesce(v_actor, 'System'), tg_table_name, v_record_id, lower(tg_op), v_old, v_new);
+  exception
+    when others then
+      -- bewusst still: Audit-Fehler dürfen CRUD nicht beeinträchtigen.
+      null;
+  end;
 
   return coalesce(new, old);
 end;
