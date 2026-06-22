@@ -122,14 +122,14 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
   }
 
   return (
-    <section className="grid gap-6 xl:grid-cols-[380px_1fr]">
+    <section className="grid gap-4 sm:gap-6 xl:grid-cols-[380px_1fr]">
       <Card className="surface-card animate-fade-up-delay">
         <CardHeader>
           <CardTitle>Abwesenheit erfassen</CardTitle>
           <CardDescription>Urlaub, Krankheit oder Sonstiges</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleCreate} className="space-y-4">
+          <form onSubmit={handleCreate} className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
               <Label htmlFor="absence-driver">Fahrer</Label>
               <select

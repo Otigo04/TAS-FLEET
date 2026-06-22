@@ -14,7 +14,7 @@ export default async function AbwesenheitenPage() {
   return (
     <main className="space-y-6">
       <div className="animate-fade-up">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Abwesenheiten</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Abwesenheiten</h1>
         <p className="mt-1 text-slate-600">Urlaub und Krankheit der Fahrer – abwesende Fahrer werden in der Disposition blockiert.</p>
       </div>
 

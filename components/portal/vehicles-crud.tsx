@@ -184,7 +184,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
   })
 
   return (
-    <section className={`animate-fade-up-delay grid gap-6 ${canManage ? 'xl:grid-cols-[360px_1fr]' : ''}`}>
+    <section className={`animate-fade-up-delay grid gap-4 sm:gap-6 ${canManage ? 'xl:grid-cols-[360px_1fr]' : ''}`}>
       {canManage && (
       <Card className="surface-card">
         <CardHeader>

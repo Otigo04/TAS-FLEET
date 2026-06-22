@@ -106,7 +106,7 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
         <CardDescription>Wer hat wann was geändert (neueste zuerst, max. 300 Einträge)</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 grid gap-3 md:grid-cols-2">
+        <div className="mb-4 grid gap-3 sm:grid-cols-2">
           <select
             className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
             value={tableFilter}

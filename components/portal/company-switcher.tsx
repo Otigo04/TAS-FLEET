@@ -74,7 +74,7 @@ export function CompanySwitcher() {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-700">
         <CompanyAvatar company={activeCompany} className="h-6 w-6 bg-slate-100 text-slate-400 ring-1 ring-slate-200" />
-        <span className="max-w-[160px] truncate">{activeCompany.name}</span>
+        <span className="hidden xs:inline max-w-[120px] truncate sm:max-w-[160px]">{activeCompany.name}</span>
       </div>
     )
   }
@@ -105,7 +105,7 @@ export function CompanySwitcher() {
         )}
       >
         <CompanyAvatar company={activeCompany} className="h-6 w-6 bg-slate-100 text-slate-400 ring-1 ring-slate-200" />
-        <span className="max-w-[160px] truncate">{activeCompany.name}</span>
+        <span className="hidden xs:inline max-w-[120px] truncate sm:max-w-[160px]">{activeCompany.name}</span>
         <ChevronsUpDown className={cn('h-4 w-4 shrink-0 text-slate-400 transition-transform', open && 'text-emerald-500')} />
       </button>
 

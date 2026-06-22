@@ -26,11 +26,11 @@ export default async function IncidentsPage() {
   return (
     <main className="space-y-6">
       <div className="animate-fade-up">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Incident-Log</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Incident-Log</h1>
         <p className="mt-1 text-slate-600">Vorfalle dokumentieren.</p>
       </div>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3">
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Offene Faelle</CardTitle>

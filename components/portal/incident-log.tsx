@@ -198,7 +198,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
   }
 
   return (
-    <section className="grid gap-6 xl:grid-cols-[380px_1fr]">
+    <section className="grid gap-4 sm:gap-6 xl:grid-cols-[380px_1fr]">
       <Card className="surface-card animate-fade-up-delay">
         <CardHeader>
           <CardTitle>Incident erfassen</CardTitle>
@@ -323,7 +323,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
           <CardDescription>Alle Einträge</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 grid gap-3 md:grid-cols-2">
+          <div className="mb-4 grid gap-3 sm:grid-cols-2">
             <select
               className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
               value={typeFilter}

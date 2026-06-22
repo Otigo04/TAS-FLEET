@@ -179,7 +179,7 @@ function SettingsCrudInner({
 
       {/* ── Account Tab ── */}
       {activeTab === 'account' && (
-        <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[340px_1fr]">
 
           {/* Profile card */}
           <Card className="surface-card">
@@ -272,7 +272,7 @@ function SettingsCrudInner({
           {error && (
             <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">{error}</div>
           )}
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
             {SETTINGS_CATEGORIES.map((cat) => {
               const values = getValues(cat.key)
               return (

@@ -18,7 +18,7 @@ export default async function BerichtePage() {
   return (
     <main className="space-y-6">
       <div className="animate-fade-up no-print">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Berichte</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Berichte</h1>
         <p className="mt-1 text-slate-600">Monatsbericht erstellen und als PDF exportieren.</p>
       </div>
 

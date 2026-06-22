@@ -121,6 +121,35 @@ body {
   outline-offset: 2px;
 }
 
+
+/* ---------- Mobile ---------- */
+
+/* Eliminates 300ms tap delay on all interactive elements */
+:where(button, a, input, select, textarea, [role="button"]) {
+  touch-action: manipulation;
+}
+
+/* Safe-area padding for devices with home indicator */
+.mobile-safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes slideInUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-in-left  { animation: slideInLeft  0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-slide-in-up    { animation: slideInUp    0.3s  cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-in-left, .animate-slide-in-up { animation: none; }
+}
+
 /* ---------- Print / PDF-Export ---------- */
 @media print {
   body {

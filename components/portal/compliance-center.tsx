@@ -173,7 +173,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
   })
 
   return (
-    <section className={`grid gap-6 ${canManage ? 'xl:grid-cols-[380px_1fr]' : ''}`}>
+    <section className={`grid gap-4 sm:gap-6 ${canManage ? 'xl:grid-cols-[380px_1fr]' : ''}`}>
       {canManage && (
       <Card className="surface-card animate-fade-up-delay">
         <CardHeader>

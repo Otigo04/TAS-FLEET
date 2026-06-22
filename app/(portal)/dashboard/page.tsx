@@ -73,11 +73,11 @@ export default async function DashboardPage() {
   return (
     <main className="space-y-6">
       <div className="animate-fade-up">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
         <p className="mt-1 text-slate-600">Willkommen, {displayName}.</p>
       </div>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3">
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
             <CardTitle>Fahrer gesamt</CardTitle>
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
         </Card>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
+      <section className="grid gap-3 sm:gap-4 lg:grid-cols-2">
         <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
             <CardTitle>Flottenstatus</CardTitle>
@@ -158,7 +158,7 @@ export default async function DashboardPage() {
         </Card>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3">
         <Link href="/schichtplanung" className="surface-card animate-fade-up-delay rounded-xl p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Disposition</p>
           <h3 className="mt-2 text-lg font-semibold text-slate-900">Schichtplanung</h3>

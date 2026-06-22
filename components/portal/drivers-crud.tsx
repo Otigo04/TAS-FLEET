@@ -439,8 +439,8 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
       
       {/* Action Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl bg-white p-4 shadow-sm border border-slate-200">
-        <div className="flex flex-1 flex-wrap items-center gap-3">
-          <div className="relative w-full max-w-[240px]">
+        <div className="flex flex-1 flex-wrap items-start gap-3 w-full sm:items-center">
+          <div className="relative w-full sm:max-w-[240px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
               className="pl-9 bg-slate-50/50 border-slate-300"
@@ -449,7 +449,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
-          <div className="relative flex-1 min-w-[140px] max-w-[180px]">
+          <div className="relative w-full sm:flex-1 sm:min-w-[140px] sm:max-w-[180px]">
             <Filter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <select
               className="flex h-10 w-full rounded-md border border-slate-300 bg-slate-50/50 pl-9 pr-8 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -464,7 +464,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
               ))}
             </select>
           </div>
-          <div className="relative flex-1 min-w-[140px] max-w-[180px]">
+          <div className="relative w-full sm:flex-1 sm:min-w-[140px] sm:max-w-[180px]">
             <Filter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <select
               className="flex h-10 w-full rounded-md border border-slate-300 bg-slate-50/50 pl-9 pr-8 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -507,7 +507,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
               Personalstammblatt importieren oder Daten manuell eintragen.
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-6 grid gap-8 xl:grid-cols-[1fr_2fr]">
+          <CardContent className="pt-6 grid gap-6 xl:grid-cols-[1fr_2fr]">
             
             <form onSubmit={handleImport} className="space-y-4 rounded-xl border border-blue-100 bg-blue-50/40 p-5 self-start">
               <div>

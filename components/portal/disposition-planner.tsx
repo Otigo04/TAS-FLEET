@@ -133,7 +133,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences 
           <CardDescription>Fahrer zu Fahrzeugen zuweisen</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-4 mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-6 p-3 sm:p-4 bg-slate-50 rounded-lg border border-slate-200">
             <div className="space-y-1.5">
               <Label htmlFor="shift-date">Datum</Label>
               <Input id="shift-date" type="date" value={date} onChange={e => setDate(e.target.value)} />
@@ -155,7 +155,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences 
 
           {error ? <p className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded border border-red-200">{error}</p> : null}
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {activeVehicles.map(vehicle => {
               const assigned = currentShifts.filter(s => s.vehicle_id === vehicle.id)
               const assignedDriverIds = assigned.map(s => s.driver_id)
