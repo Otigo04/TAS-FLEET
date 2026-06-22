@@ -15,11 +15,13 @@ import { useActiveCompanyId } from '@/components/portal/tenant-provider'
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
 type ShiftRow = Database['public']['Tables']['shift_assignments']['Row']
+type AbsenceRow = Database['public']['Tables']['absences']['Row']
 
 interface ShiftPlannerProps {
   initialShifts: ShiftRow[]
   drivers: DriverRow[]
   vehicles: VehicleRow[]
+  absences: AbsenceRow[]
 }
 
 const SHIFT_SLOTS = ['Frueh', 'Spaet', 'Nacht'] as const
@@ -31,13 +33,23 @@ function shiftLabel(slot: string) {
   return slot
 }
 
-export function DispositionPlanner({ initialShifts, drivers, vehicles }: ShiftPlannerProps) {
+export function DispositionPlanner({ initialShifts, drivers, vehicles, absences }: ShiftPlannerProps) {
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
 
   const [shifts, setShifts] = useState<ShiftRow[]>(initialShifts)
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [slot, setSlot] = useState<string>('Frueh')
+
+  // Fahrer, die am gewählten Tag abwesend sind (Urlaub/Krankheit), können
+  // nicht eingeteilt werden.
+  const absentDriverIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const a of absences) {
+      if (a.start_date <= date && date <= a.end_date) ids.add(a.driver_id)
+    }
+    return ids
+  }, [absences, date])
   const [isBusy, setIsBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -72,9 +84,13 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles }: ShiftPl
 
   async function assignDriver(vehicleId: string, driverId: string) {
     if (!driverId) return
+    if (absentDriverIds.has(driverId)) {
+      setError('Dieser Fahrer ist am gewählten Tag abwesend und kann nicht eingeteilt werden.')
+      return
+    }
     setIsBusy(true)
     setError(null)
-    
+
     if (currentShifts.some(s => s.vehicle_id === vehicleId && s.driver_id === driverId)) {
       setIsBusy(false)
       return
@@ -177,9 +193,11 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles }: ShiftPl
                               <div className="flex items-center gap-2">
                                 {driver?.avatar_url ? (
                                   /* eslint-disable-next-line @next/next/no-img-element */
-                                  <img src={driver.avatar_url} alt="" className="h-5 w-5 rounded-full object-cover" />
+                                  <img src={driver.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover ring-1 ring-slate-200" />
                                 ) : (
-                                  <User className="h-4 w-4 text-slate-400" />
+                                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 text-slate-500 ring-1 ring-slate-200">
+                                    <User className="h-3.5 w-3.5" />
+                                  </span>
                                 )}
                                 <span className="font-medium text-slate-700">{driver?.name ?? 'Unbekannt'}</span>
                               </div>
@@ -205,7 +223,9 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles }: ShiftPl
                     >
                       <option value="" disabled>+ Fahrer hinzufügen...</option>
                       {availableDrivers.map(d => (
-                        <option key={d.id} value={d.id}>{d.name}</option>
+                        <option key={d.id} value={d.id} disabled={absentDriverIds.has(d.id)}>
+                          {d.name}{absentDriverIds.has(d.id) ? ' — abwesend' : ''}
+                        </option>
                       ))}
                     </select>
                   </div>

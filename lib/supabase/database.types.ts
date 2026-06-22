@@ -56,6 +56,81 @@ export interface Database {
         }
         Relationships: []
       }
+      audit_log: {
+        Row: {
+          id: string
+          company_id: string
+          actor_id: string | null
+          actor_name: string
+          table_name: string
+          record_id: string | null
+          action: 'insert' | 'update' | 'delete'
+          old_data: Json | null
+          new_data: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          actor_id?: string | null
+          actor_name?: string
+          table_name: string
+          record_id?: string | null
+          action: 'insert' | 'update' | 'delete'
+          old_data?: Json | null
+          new_data?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          actor_id?: string | null
+          actor_name?: string
+          table_name?: string
+          record_id?: string | null
+          action?: 'insert' | 'update' | 'delete'
+          old_data?: Json | null
+          new_data?: Json | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      absences: {
+        Row: {
+          id: string
+          company_id: string
+          driver_id: string
+          type: 'urlaub' | 'krankheit' | 'sonstiges'
+          start_date: string
+          end_date: string
+          reason: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          driver_id: string
+          type: 'urlaub' | 'krankheit' | 'sonstiges'
+          start_date: string
+          end_date: string
+          reason?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          driver_id?: string
+          type?: 'urlaub' | 'krankheit' | 'sonstiges'
+          start_date?: string
+          end_date?: string
+          reason?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       drivers: {
         Row: {
           id: string

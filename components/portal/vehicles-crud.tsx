@@ -11,7 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AvatarUploadCrop } from '@/components/ui/avatar-upload-crop'
-import { useActiveCompanyId } from '@/components/portal/tenant-provider'
+import { useActiveCompanyId, useCan } from '@/components/portal/tenant-provider'
+import { labelFor } from '@/lib/labels'
 
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
 type VehicleInsert = Database['public']['Tables']['vehicles']['Insert']
@@ -33,6 +34,7 @@ function statusVariant(status: string): 'success' | 'warning' | 'danger' | 'seco
 export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
+  const canManage = useCan('manageMasterData')
 
   const statuses = useMemo(() => {
     const s = settings.find(s => s.key === 'vehicle_statuses')
@@ -182,7 +184,8 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
   })
 
   return (
-    <section className="animate-fade-up-delay grid gap-6 xl:grid-cols-[360px_1fr]">
+    <section className={`animate-fade-up-delay grid gap-6 ${canManage ? 'xl:grid-cols-[360px_1fr]' : ''}`}>
+      {canManage && (
       <Card className="surface-card">
         <CardHeader>
           <CardTitle>Neues Fahrzeug anlegen</CardTitle>
@@ -222,7 +225,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
               >
                 {statuses.map((item) => (
                   <option key={item} value={item}>
-                    {item}
+                    {labelFor(item)}
                   </option>
                 ))}
               </select>
@@ -235,6 +238,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
           </form>
         </CardContent>
       </Card>
+      )}
 
       <Card className="surface-card">
         <CardHeader>
@@ -256,7 +260,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
               <option value="all">Alle Status</option>
               {statuses.map((item) => (
                 <option key={item} value={item}>
-                  {item}
+                  {labelFor(item)}
                 </option>
               ))}
             </select>
@@ -294,7 +298,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
                         >
                           {statuses.map((item) => (
                             <option key={item} value={item}>
-                              {item}
+                              {labelFor(item)}
                             </option>
                           ))}
                         </select>
@@ -324,11 +328,12 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
                             <p className="font-semibold text-slate-900">{vehicle.license_plate}</p>
                             <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
                               <span>Modell: {vehicle.model}</span>
-                              <Badge variant={statusVariant(vehicle.status)}>{vehicle.status}</Badge>
+                              <Badge variant={statusVariant(vehicle.status)}>{labelFor(vehicle.status)}</Badge>
                             </div>
                           </div>
                         </div>
 
+                        {canManage && (
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" onClick={() => startEdit(vehicle)} disabled={isBusy}>
                             Bearbeiten
@@ -349,6 +354,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
                             </Button>
                           )}
                         </div>
+                        )}
                       </div>
                     )}
                   </div>

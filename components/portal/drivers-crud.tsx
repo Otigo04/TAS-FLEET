@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useActiveCompanyId } from '@/components/portal/tenant-provider'
+import { useActiveCompanyId, useCan } from '@/components/portal/tenant-provider'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type DriverInsert = Database['public']['Tables']['drivers']['Insert']
@@ -38,6 +38,7 @@ function shiftVariant(shift: string): 'secondary' | 'warning' | 'danger' {
 export function DriversCrud({ initialDrivers }: DriversCrudProps) {
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
+  const canManage = useCan('manageMasterData')
 
   const [drivers, setDrivers] = useState<DriverRow[]>(initialDrivers)
   const [isBusy, setIsBusy] = useState(false)
@@ -485,11 +486,13 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
             <Download className="h-4 w-4" />
             <span className="hidden sm:inline">Export</span>
           </Button>
-          <Button onClick={() => setShowAddForm(!showAddForm)} className="gap-2">
-            {showAddForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-            <span className="hidden sm:inline">{showAddForm ? 'Schließen' : 'Neuen Fahrer anlegen'}</span>
-            <span className="sm:hidden">{showAddForm ? 'Zu' : 'Neu'}</span>
-          </Button>
+          {canManage && (
+            <Button onClick={() => setShowAddForm(!showAddForm)} className="gap-2">
+              {showAddForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              <span className="hidden sm:inline">{showAddForm ? 'Schließen' : 'Neuen Fahrer anlegen'}</span>
+              <span className="sm:hidden">{showAddForm ? 'Zu' : 'Neu'}</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -978,6 +981,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                       </div>
                     </div>
 
+                    {canManage && (
                     <div className="flex items-center gap-2 md:self-center">
                       <Button variant="outline" size="sm" onClick={() => startEdit(driver)} disabled={isBusy} className="bg-white">
                         Bearbeiten
@@ -998,6 +1002,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                         </Button>
                       )}
                     </div>
+                    )}
                   </CardContent>
                 )}
               </Card>

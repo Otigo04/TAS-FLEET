@@ -9,6 +9,7 @@ import { getUserCompanies, resolveActiveCompany } from '@/lib/tenant'
 import { getCurrentSuperadmin } from '@/lib/superadmin'
 import { TenantProvider } from '@/components/portal/tenant-provider'
 import { CompanySwitcher } from '@/components/portal/company-switcher'
+import { PresenceIndicator } from '@/components/portal/presence-indicator'
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const { user, profile } = await requireCompletedUser()
@@ -27,7 +28,8 @@ export default async function PortalLayout({ children }: { children: React.React
   }
 
   return (
-    <TenantProvider activeCompany={activeCompany} companies={companies}>
+    <TenantProvider activeCompany={activeCompany} companies={companies} isSuperadmin={isSuperadmin}>
+      <PresenceIndicator userId={user.id} displayName={displayName} avatarUrl={avatarUrl} />
       <div className="min-h-screen flex flex-col">
         <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-slate-100 py-1.5 px-4 text-xs font-semibold tracking-[0.2em] text-center uppercase">
           <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">YOT FLEET V0.6</span>

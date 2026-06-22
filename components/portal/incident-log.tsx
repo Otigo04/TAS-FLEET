@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useActiveCompanyId } from '@/components/portal/tenant-provider'
+import { labelFor } from '@/lib/labels'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
@@ -171,9 +172,9 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
     const headers = ['Datum', 'Typ', 'Priorität', 'Status', 'Fahrer', 'Fahrzeug', 'Kosten EUR', 'Beschreibung']
     const rows = filteredIncidents.map(inc => [
       inc.occurred_on,
-      inc.incident_type,
-      inc.severity,
-      inc.status,
+      labelFor(inc.incident_type),
+      labelFor(inc.severity),
+      labelFor(inc.status),
       driverName(inc.driver_id),
       vehicleLabel(inc.vehicle_id),
       inc.cost_eur,
@@ -215,7 +216,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
               >
                 {incidentTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {labelFor(type)}
                   </option>
                 ))}
               </select>
@@ -227,7 +228,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="incident-severity">Prioritaet</Label>
+              <Label htmlFor="incident-severity">Priorität</Label>
               <select
                 id="incident-severity"
                 className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
@@ -236,7 +237,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
               >
                 {severities.map((entry) => (
                   <option key={entry} value={entry}>
-                    {entry}
+                    {labelFor(entry)}
                   </option>
                 ))}
               </select>
@@ -252,7 +253,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
               >
                 {statuses.map((entry) => (
                   <option key={entry} value={entry}>
-                    {entry}
+                    {labelFor(entry)}
                   </option>
                 ))}
               </select>
@@ -331,7 +332,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
               <option value="all">Alle Typen</option>
               {incidentTypes.map((type) => (
                 <option key={type} value={type}>
-                  {type}
+                  {labelFor(type)}
                 </option>
               ))}
             </select>
@@ -341,10 +342,10 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="all">Alle Stati</option>
+              <option value="all">Alle Status</option>
               {statuses.map((entry) => (
                 <option key={entry} value={entry}>
-                  {entry}
+                  {labelFor(entry)}
                 </option>
               ))}
             </select>
@@ -362,9 +363,9 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
                     <div>
                       <div className="flex items-center gap-2">
                         <Badge variant={incident.severity === 'high' ? 'danger' : incident.severity === 'medium' ? 'warning' : 'secondary'}>
-                          {incident.severity}
+                          {labelFor(incident.severity)}
                         </Badge>
-                        <Badge variant="secondary">{incident.incident_type}</Badge>
+                        <Badge variant="secondary">{labelFor(incident.incident_type)}</Badge>
                       </div>
                       <p className="mt-2 text-sm font-semibold text-slate-900">{incident.description}</p>
                       <p className="text-xs text-slate-500">
@@ -381,7 +382,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
                       >
                         {statuses.map((entry) => (
                           <option key={entry} value={entry}>
-                            {entry}
+                            {labelFor(entry)}
                           </option>
                         ))}
                       </select>

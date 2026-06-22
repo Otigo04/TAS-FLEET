@@ -2,26 +2,39 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, Car, Users, CalendarDays, ShieldCheck, AlertTriangle, Settings, ChevronRight, ShieldAlert } from 'lucide-react'
+import { LayoutDashboard, Car, Users, CalendarDays, ShieldCheck, AlertTriangle, Settings, ChevronRight, ShieldAlert, CalendarOff, FileText, History } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { UserAvatar } from '@/components/branding/user-avatar'
 import { Suspense } from 'react'
+import { useTenant } from '@/components/portal/tenant-provider'
+import { can, roleLabel, type Capability } from '@/lib/roles'
 
-const items = [
+type NavItem = {
+  href: string
+  label: string
+  icon: typeof LayoutDashboard
+  cap?: Capability
+  subItems?: { tab: string; label: string; cap?: Capability }[]
+}
+
+const items: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/disposition', label: 'Disposition', icon: CalendarDays },
+  { href: '/disposition', label: 'Disposition', icon: CalendarDays, cap: 'manageDispatch' },
   { href: '/schichtplanung', label: 'Schichtzettel', icon: CalendarDays },
+  { href: '/abwesenheiten', label: 'Abwesenheiten', icon: CalendarOff, cap: 'manageAbsences' },
   { href: '/fahrer', label: 'Fahrer', icon: Users },
   { href: '/fahrzeuge', label: 'Fahrzeuge', icon: Car },
   { href: '/compliance', label: 'Compliance', icon: ShieldCheck },
-  { href: '/incidents', label: 'Incidents', icon: AlertTriangle },
+  { href: '/incidents', label: 'Incidents', icon: AlertTriangle, cap: 'manageIncidents' },
+  { href: '/berichte', label: 'Berichte', icon: FileText, cap: 'viewReports' },
+  { href: '/verlauf', label: 'Verlauf', icon: History, cap: 'viewAudit' },
   {
     href: '/einstellungen',
     label: 'Einstellungen',
     icon: Settings,
     subItems: [
       { tab: 'account', label: 'Account' },
-      { tab: 'werte', label: 'Werte & Status' },
+      { tab: 'werte', label: 'Werte & Status', cap: 'manageSettings' },
     ],
   },
 ]
@@ -48,10 +61,22 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const activeTab = searchParams.get('tab') ?? 'account'
+  const { activeCompany } = useTenant()
+
+  const visibleItems = items.filter(
+    (item) => !item.cap || can(activeCompany.role, item.cap, isSuperadmin),
+  )
 
   return (
     <aside className="surface-card w-72 border-b border-slate-200 p-4 lg:border-b-0 lg:border-r">
       <SidebarBrand displayName={displayName} avatarUrl={avatarUrl} />
+
+      <div className="mb-3 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-slate-400">Rolle</span>
+        <span className="text-xs font-semibold text-slate-700">
+          {isSuperadmin ? 'Superadmin' : roleLabel(activeCompany.role)}
+        </span>
+      </div>
 
       {isSuperadmin && (
         <Link
@@ -64,10 +89,13 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
       )}
 
       <nav className="flex gap-1 lg:flex-col">
-        {items.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
-          const hasSubItems = Boolean(item.subItems?.length)
+          const visibleSubItems = (item.subItems ?? []).filter(
+            (sub) => !sub.cap || can(activeCompany.role, sub.cap, isSuperadmin),
+          )
+          const hasSubItems = visibleSubItems.length > 0
 
           return (
             <div key={item.href} className="w-full">
@@ -101,7 +129,7 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
                   )}
                 >
                   <div className="ml-5 mt-1 flex flex-col gap-0.5 border-l-2 border-slate-200 pl-3 pb-1">
-                    {item.subItems!.map((sub, i) => (
+                    {visibleSubItems.map((sub, i) => (
                       <Link
                         key={sub.tab}
                         href={`/einstellungen?tab=${sub.tab}`}

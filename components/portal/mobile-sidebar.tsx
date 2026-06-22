@@ -3,18 +3,27 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, LayoutDashboard, Users, Car, CalendarDays, ShieldCheck, AlertTriangle, ShieldAlert } from 'lucide-react'
+import { Menu, X, LayoutDashboard, Users, Car, CalendarDays, ShieldCheck, AlertTriangle, ShieldAlert, CalendarOff, FileText, History, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { UserAvatar } from '@/components/branding/user-avatar'
 import { cn } from '@/lib/utils'
+import { useTenant } from '@/components/portal/tenant-provider'
+import { can, roleLabel, type Capability } from '@/lib/roles'
 
-const items = [
+type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; cap?: Capability }
+
+const items: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/schichtplanung', label: 'Schichtplanung', icon: CalendarDays },
+  { href: '/disposition', label: 'Disposition', icon: CalendarDays, cap: 'manageDispatch' },
+  { href: '/schichtplanung', label: 'Schichtzettel', icon: CalendarDays },
+  { href: '/abwesenheiten', label: 'Abwesenheiten', icon: CalendarOff, cap: 'manageAbsences' },
   { href: '/fahrer', label: 'Fahrer', icon: Users },
   { href: '/fahrzeuge', label: 'Fahrzeuge', icon: Car },
   { href: '/compliance', label: 'Compliance', icon: ShieldCheck },
-  { href: '/incidents', label: 'Incidents', icon: AlertTriangle },
+  { href: '/incidents', label: 'Incidents', icon: AlertTriangle, cap: 'manageIncidents' },
+  { href: '/berichte', label: 'Berichte', icon: FileText, cap: 'viewReports' },
+  { href: '/verlauf', label: 'Verlauf', icon: History, cap: 'viewAudit' },
+  { href: '/einstellungen', label: 'Einstellungen', icon: Settings },
 ]
 
 interface MobileSidebarProps {
@@ -26,6 +35,10 @@ interface MobileSidebarProps {
 export function MobileSidebar({ displayName, avatarUrl, isSuperadmin }: MobileSidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
+  const { activeCompany } = useTenant()
+  const visibleItems = items.filter(
+    (item) => !item.cap || can(activeCompany.role, item.cap, isSuperadmin),
+  )
 
   return (
     <>
@@ -45,6 +58,7 @@ export function MobileSidebar({ displayName, avatarUrl, isSuperadmin }: MobileSi
                 <div className="min-w-0">
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600">YOT FLEET</p>
                   {displayName ? <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p> : null}
+                  <p className="text-xs text-slate-500">{isSuperadmin ? 'Superadmin' : roleLabel(activeCompany.role)}</p>
                 </div>
               </div>
               <Button variant="outline" size="sm" onClick={() => setIsOpen(false)}>
@@ -63,7 +77,7 @@ export function MobileSidebar({ displayName, avatarUrl, isSuperadmin }: MobileSi
                   Superadmin Konsole
                 </Link>
               )}
-              {items.map((item, index) => {
+              {visibleItems.map((item, index) => {
                 const Icon = item.icon
                 const isActive = pathname === item.href
 

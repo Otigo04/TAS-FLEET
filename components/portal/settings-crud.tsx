@@ -11,19 +11,21 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { AvatarUploadCrop } from '@/components/ui/avatar-upload-crop'
-import { useActiveCompanyId } from '@/components/portal/tenant-provider'
+import { useActiveCompanyId, useCan, useTenant } from '@/components/portal/tenant-provider'
+import { labelFor } from '@/lib/labels'
+import { roleLabel } from '@/lib/roles'
 import { cn } from '@/lib/utils'
 
 type SettingsRow = Database['public']['Tables']['settings']['Row']
 type Tab = 'account' | 'werte'
 
 const SETTINGS_CATEGORIES = [
-  { key: 'vehicle_statuses', label: 'Fahrzeug-Status', description: 'z. B. active, maintenance, offline' },
-  { key: 'document_types', label: 'Dokumententypen', description: 'z. B. TÜV, Führerschein, Versicherung' },
-  { key: 'document_statuses', label: 'Dokumenten-Status', description: 'z. B. valid, expiring, expired' },
-  { key: 'incident_types', label: 'Vorfalltypen', description: 'z. B. Unfall, Schaden, Bußgeld' },
-  { key: 'incident_severities', label: 'Vorfall-Prioritäten', description: 'z. B. low, medium, high' },
-  { key: 'incident_statuses', label: 'Vorfall-Status', description: 'z. B. offen, in Bearbeitung, geschlossen' },
+  { key: 'vehicle_statuses', label: 'Fahrzeug-Status', description: 'z. B. Aktiv, In Wartung, Außer Betrieb' },
+  { key: 'document_types', label: 'Dokumententypen', description: 'z. B. P-Schein, Hauptuntersuchung, Versicherung' },
+  { key: 'document_statuses', label: 'Dokumenten-Status', description: 'z. B. Gültig, Läuft bald ab, Abgelaufen' },
+  { key: 'incident_types', label: 'Vorfalltypen', description: 'z. B. Schäden, Bußgelder, Sperrungen' },
+  { key: 'incident_severities', label: 'Vorfall-Prioritäten', description: 'z. B. Niedrig, Mittel, Hoch' },
+  { key: 'incident_statuses', label: 'Vorfall-Status', description: 'z. B. Offen, In Bearbeitung, Gelöst' },
 ]
 
 interface SettingsCrudProps {
@@ -42,22 +44,27 @@ function SettingsCrudInner({
   firstName,
   lastName,
   email,
-  role,
   avatarUrl: initialAvatarUrl,
 }: SettingsCrudProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
+  const canManageSettings = useCan('manageSettings')
+  const { activeCompany, isSuperadmin } = useTenant()
+  const roleDisplay = isSuperadmin ? 'Superadmin' : roleLabel(activeCompany.role)
 
   const urlTab = searchParams.get('tab')
-  const [activeTab, setActiveTab] = useState<Tab>(urlTab === 'werte' ? 'werte' : 'account')
+  const [activeTab, setActiveTab] = useState<Tab>(
+    urlTab === 'werte' && canManageSettings ? 'werte' : 'account',
+  )
 
-  // Sync state when URL changes (sidebar navigation)
+  // Sync state when URL changes (sidebar navigation). The "Werte & Status"
+  // tab is reserved for roles with the manageSettings capability.
   useEffect(() => {
-    const tab = searchParams.get('tab') === 'werte' ? 'werte' : 'account'
-    setActiveTab(tab)
-  }, [searchParams])
+    const wantsWerte = searchParams.get('tab') === 'werte'
+    setActiveTab(wantsWerte && canManageSettings ? 'werte' : 'account')
+  }, [searchParams, canManageSettings])
 
   function handleTabChange(tab: Tab) {
     setActiveTab(tab)
@@ -152,8 +159,8 @@ function SettingsCrudInner({
       <div className="flex gap-1 rounded-xl bg-slate-100 p-1 w-fit">
         {([
           { id: 'account' as Tab, label: 'Account' },
-          { id: 'werte' as Tab, label: 'Werte & Status' },
-        ] as const).map((tab) => (
+          ...(canManageSettings ? [{ id: 'werte' as Tab, label: 'Werte & Status' }] : []),
+        ]).map((tab) => (
           <button
             key={tab.id}
             type="button"
@@ -187,7 +194,7 @@ function SettingsCrudInner({
                   <p className="text-lg font-bold text-slate-900">{fullName}</p>
                   <p className="text-sm text-slate-500">{email}</p>
                   <Badge variant="secondary" className="mt-2">
-                    {role === 'admin' ? 'Administrator' : role}
+                    {roleDisplay}
                   </Badge>
                 </div>
                 {isSavingAvatar && (
@@ -212,7 +219,7 @@ function SettingsCrudInner({
                 {[
                   { icon: User, label: 'Name', value: fullName },
                   { icon: Mail, label: 'E-Mail', value: email },
-                  { icon: ShieldCheck, label: 'Rolle', value: role === 'admin' ? 'Administrator' : role },
+                  { icon: ShieldCheck, label: 'Rolle', value: roleDisplay },
                   { icon: Building2, label: 'Abteilung', value: 'Flottenmanagement' },
                   { icon: Phone, label: 'Telefon', value: '+49 151 000 0000' },
                 ].map(({ icon: Icon, label, value }) => (
@@ -311,7 +318,7 @@ function SettingsCrudInner({
                             key={val}
                             className="flex items-center justify-between px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                           >
-                            <span className="font-medium text-slate-900">{val}</span>
+                            <span className="font-medium text-slate-900">{labelFor(val)}</span>
                             <button
                               type="button"
                               onClick={() => void handleRemove(cat.key, val)}

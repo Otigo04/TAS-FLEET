@@ -120,3 +120,36 @@ body {
   outline: 2px solid var(--portal-ring);
   outline-offset: 2px;
 }
+
+/* ---------- Print / PDF-Export ---------- */
+@media print {
+  body {
+    background: #fff !important;
+  }
+  /* Nur den Berichtsbereich (.report-document) drucken, App-Chrome ausblenden. */
+  body * {
+    visibility: hidden;
+  }
+  .report-document,
+  .report-document * {
+    visibility: visible;
+  }
+  .report-document {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .report-document .surface-card {
+    box-shadow: none !important;
+    border-color: #e2e8f0 !important;
+  }
+  @page {
+    margin: 16mm;
+  }
+}

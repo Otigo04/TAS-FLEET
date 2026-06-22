@@ -3,6 +3,7 @@ import { requireActiveCompany } from '@/lib/tenant'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { labelFor } from '@/lib/labels'
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>
@@ -95,7 +96,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                       <div className="flex items-center gap-2">
                         <p className="font-medium text-slate-900">{vehicle.license_plate}</p>
                         <Badge variant="secondary" className="text-xs">
-                          {vehicle.status}
+                          {labelFor(vehicle.status)}
                         </Badge>
                       </div>
                       <p className="text-xs text-slate-500">{vehicle.model}</p>

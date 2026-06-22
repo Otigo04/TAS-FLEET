@@ -2,6 +2,8 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { CompanyRole } from '@/lib/supabase/database.types'
+import { can, type Capability } from '@/lib/roles'
+import { getCurrentSuperadmin } from '@/lib/superadmin'
 
 export const ACTIVE_COMPANY_COOKIE = 'active_company_id'
 
@@ -91,4 +93,24 @@ export async function requireActiveCompany(): Promise<UserCompany> {
   const active = await resolveActiveCompany()
   if (!active) redirect('/no-company')
   return active
+}
+
+/**
+ * Page-level guard: returns the active company only if the user (via role or
+ * superadmin) holds the given capability, otherwise redirects to the dashboard.
+ */
+export async function requireCapability(capability: Capability): Promise<UserCompany> {
+  const active = await requireActiveCompany()
+  const { isSuperadmin } = await getCurrentSuperadmin()
+  if (!can(active.role, capability, isSuperadmin)) {
+    redirect('/dashboard')
+  }
+  return active
+}
+
+/** The active company plus the user's superadmin flag (for server-side capability checks). */
+export async function getActiveContext(): Promise<{ company: UserCompany; isSuperadmin: boolean }> {
+  const company = await requireActiveCompany()
+  const { isSuperadmin } = await getCurrentSuperadmin()
+  return { company, isSuperadmin }
 }

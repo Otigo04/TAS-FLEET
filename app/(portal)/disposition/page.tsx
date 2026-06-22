@@ -7,15 +7,17 @@ export default async function DispositionPage() {
   const { supabase } = await requireUser()
   const company = await requireActiveCompany()
 
-  const [driversResult, vehiclesResult, shiftsResult] = await Promise.all([
+  const [driversResult, vehiclesResult, shiftsResult, absencesResult] = await Promise.all([
     supabase.from('drivers').select('*').eq('company_id', company.id).order('name'),
     supabase.from('vehicles').select('*').eq('company_id', company.id).order('license_plate'),
     supabase.from('shift_assignments').select('*').eq('company_id', company.id).order('shift_date', { ascending: true }),
+    supabase.from('absences').select('*').eq('company_id', company.id),
   ])
 
   const drivers = driversResult.data ?? []
   const vehicles = vehiclesResult.data ?? []
   const shifts = shiftsResult.data ?? []
+  const absences = absencesResult.data ?? []
 
   return (
     <main className="space-y-6">
@@ -54,7 +56,7 @@ export default async function DispositionPage() {
         </Card>
       </section>
 
-      <DispositionPlanner initialShifts={shifts} drivers={drivers} vehicles={vehicles} />
+      <DispositionPlanner initialShifts={shifts} drivers={drivers} vehicles={vehicles} absences={absences} />
     </main>
   )
 }

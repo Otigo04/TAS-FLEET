@@ -10,7 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { useActiveCompanyId } from '@/components/portal/tenant-provider'
+import { useActiveCompanyId, useCan } from '@/components/portal/tenant-provider'
+import { labelFor } from '@/lib/labels'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
@@ -36,6 +37,7 @@ function daysUntil(dateString: string) {
 export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings }: ComplianceCenterProps) {
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
+  const canManage = useCan('manageMasterData')
 
   const docTypes = useMemo(() => {
     const s = settings.find(s => s.key === 'document_types')
@@ -160,13 +162,19 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
 
   const filteredDocuments = documents.filter((doc) => {
     const label = subjectLabel(doc).toLowerCase()
-    const matchSearch = search.trim().length === 0 || label.includes(search.toLowerCase()) || doc.doc_type.includes(search.toLowerCase())
+    const term = search.toLowerCase()
+    const matchSearch =
+      search.trim().length === 0 ||
+      label.includes(term) ||
+      doc.doc_type.toLowerCase().includes(term) ||
+      labelFor(doc.doc_type).toLowerCase().includes(term)
     const matchStatus = statusFilter === 'all' || doc.status === statusFilter
     return matchSearch && matchStatus
   })
 
   return (
-    <section className="grid gap-6 xl:grid-cols-[380px_1fr]">
+    <section className={`grid gap-6 ${canManage ? 'xl:grid-cols-[380px_1fr]' : ''}`}>
+      {canManage && (
       <Card className="surface-card animate-fade-up-delay">
         <CardHeader>
           <CardTitle>Frist eintragen</CardTitle>
@@ -233,7 +241,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
               >
                 {docTypes.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {labelFor(type)}
                   </option>
                 ))}
               </select>
@@ -254,7 +262,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
               >
                 {statuses.map((entry) => (
                   <option key={entry} value={entry}>
-                    {entry}
+                    {labelFor(entry)}
                   </option>
                 ))}
               </select>
@@ -272,6 +280,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
           </form>
         </CardContent>
       </Card>
+      )}
 
       <Card className="surface-card animate-fade-up-delay-2">
         <CardHeader>
@@ -286,10 +295,10 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
-              <option value="all">Alle Stati</option>
+              <option value="all">Alle Status</option>
               {statuses.map((entry) => (
                 <option key={entry} value={entry}>
-                  {entry}
+                  {labelFor(entry)}
                 </option>
               ))}
             </select>
@@ -310,14 +319,15 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold text-slate-900">{subjectLabel(doc)}</p>
-                        <p className="text-xs text-slate-500">{doc.doc_type} · Fällig: {doc.due_date}</p>
+                        <p className="text-xs text-slate-500">{labelFor(doc.doc_type)} · Fällig: {doc.due_date}</p>
                         {doc.notes ? <p className="mt-1 text-xs text-slate-600">{doc.notes}</p> : null}
                         <div className="mt-2 flex items-center gap-2">
                           <Badge variant={variant}>{days < 0 ? `${Math.abs(days)} Tage überfällig` : `${days} Tage`}</Badge>
-                          <Badge variant="secondary">{doc.status}</Badge>
+                          <Badge variant="secondary">{labelFor(doc.status)}</Badge>
                         </div>
                       </div>
 
+                      {canManage && (
                       <div className="flex flex-wrap items-center gap-2">
                         <select
                           className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm"
@@ -326,7 +336,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
                         >
                           {statuses.map((entry) => (
                             <option key={entry} value={entry}>
-                              {entry}
+                              {labelFor(entry)}
                             </option>
                           ))}
                         </select>
@@ -346,6 +356,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
                           </Button>
                         )}
                       </div>
+                      )}
                     </div>
                   </li>
                 )

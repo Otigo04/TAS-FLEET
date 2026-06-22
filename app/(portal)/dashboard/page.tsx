@@ -3,6 +3,7 @@ import { requireActiveCompany } from '@/lib/tenant'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { labelFor } from '@/lib/labels'
 
 function daysUntil(dateString: string | null) {
   if (!dateString) return -999999
@@ -61,7 +62,7 @@ export default async function DashboardPage() {
       }
       criticalDates.push({
         id: `doc-${doc.id}`,
-        title: `${doc.doc_type}: ${subject}`,
+        title: `${labelFor(doc.doc_type)}: ${subject}`,
         days,
       })
     }
@@ -116,15 +117,15 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between rounded-md border border-slate-200 bg-white/70 p-3">
-              <span>Aktiv</span>
+              <span>{labelFor('active')}</span>
               <Badge variant="success">{activeVehicles}</Badge>
             </div>
             <div className="flex items-center justify-between rounded-md border border-slate-200 bg-white/70 p-3">
-              <span>Wartung</span>
+              <span>{labelFor('maintenance')}</span>
               <Badge variant="warning">{maintenanceVehicles}</Badge>
             </div>
             <div className="flex items-center justify-between rounded-md border border-slate-200 bg-white/70 p-3">
-              <span>Offline</span>
+              <span>{labelFor('offline')}</span>
               <Badge variant="danger">{offlineVehicles}</Badge>
             </div>
           </CardContent>
@@ -137,7 +138,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {criticalDates.length === 0 ? (
-              <p className="text-sm text-slate-500">Keine bevorstehenden Ablaufdaten in den naechsten 30 Tagen.</p>
+              <p className="text-sm text-slate-500">Keine bevorstehenden Ablaufdaten in den nächsten 30 Tagen.</p>
             ) : (
               <ul className="space-y-2">
                 {criticalDates.slice(0, 6).map((item) => (
@@ -173,7 +174,7 @@ export default async function DashboardPage() {
         <Link href="/incidents" className="surface-card animate-fade-up-delay-3 rounded-xl p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Risikolog</p>
           <h3 className="mt-2 text-lg font-semibold text-slate-900">Incident-Log</h3>
-          <p className="mt-1 text-sm text-slate-600">Vorfalle erfassen</p>
+          <p className="mt-1 text-sm text-slate-600">Vorfälle erfassen</p>
         </Link>
       </section>
     </main>
