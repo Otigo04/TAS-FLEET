@@ -1,6 +1,8 @@
+import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/auth'
 import type { CompanyRole } from '@/lib/supabase/database.types'
 import { can, type Capability } from '@/lib/roles'
 import { getCurrentSuperadmin } from '@/lib/superadmin'
@@ -20,11 +22,9 @@ export type UserCompany = {
  * RLS already restricts company_users / companies to the caller, so this
  * is safe to run with the normal authenticated server client.
  */
-export async function getUserCompanies(): Promise<UserCompany[]> {
+export const getUserCompanies = cache(async (): Promise<UserCompany[]> => {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) return []
 
   // Two simple queries (instead of an embedded join) keep this fully
@@ -64,7 +64,7 @@ export async function getUserCompanies(): Promise<UserCompany[]> {
       }
     })
     .filter((c): c is UserCompany => c !== null)
-}
+})
 
 /**
  * Resolves the company the user is currently acting in:

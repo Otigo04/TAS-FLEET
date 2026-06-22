@@ -1,6 +1,8 @@
+import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient as createAdminClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/auth'
 import type { Database, CompanyRole } from '@/lib/supabase/database.types'
 
 /**
@@ -18,11 +20,9 @@ export function getAdminClient(): SupabaseClient<Database> {
 }
 
 /** Superadmin status of the current user — tolerant if the column is absent. */
-export async function getCurrentSuperadmin() {
+export const getCurrentSuperadmin = cache(async () => {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) return { user: null, isSuperadmin: false }
 
   const { data } = await supabase
@@ -32,7 +32,7 @@ export async function getCurrentSuperadmin() {
     .maybeSingle()
 
   return { user, isSuperadmin: Boolean(data?.is_superadmin) }
-}
+})
 
 /** Page/action guard: must be a superadmin, else redirect away. */
 export async function requireSuperadmin() {

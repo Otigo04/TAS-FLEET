@@ -146,9 +146,49 @@ body {
 .animate-slide-in-left  { animation: slideInLeft  0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .animate-slide-in-up    { animation: slideInUp    0.3s  cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+/* Overlays with a real exit phase (driven by data-state). The closing-state
+   duration must stay <= the 240ms unmount timer in useAnimatedDisclosure. */
+@keyframes drawerFadeIn   { from { opacity: 0 } to { opacity: 1 } }
+@keyframes drawerFadeOut  { from { opacity: 1 } to { opacity: 0 } }
+@keyframes drawerInLeft   { from { transform: translateX(-100%) } to { transform: translateX(0) } }
+@keyframes drawerOutLeft  { from { transform: translateX(0) } to { transform: translateX(-100%) } }
+@keyframes sheetInTop     { from { transform: translateY(-12px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+@keyframes sheetOutTop    { from { transform: translateY(0); opacity: 1 } to { transform: translateY(-12px); opacity: 0 } }
+
+.drawer-backdrop[data-state="open"]    { animation: drawerFadeIn  0.2s ease-out both; }
+.drawer-backdrop[data-state="closing"] { animation: drawerFadeOut 0.2s ease-in  both; }
+.drawer-panel[data-state="open"]       { animation: drawerInLeft  0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.drawer-panel[data-state="closing"]    { animation: drawerOutLeft 0.22s cubic-bezier(0.55, 0, 0.85, 0.45) both; }
+.search-sheet[data-state="open"]       { animation: sheetInTop    0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.search-sheet[data-state="closing"]    { animation: sheetOutTop   0.18s ease-in both; }
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-slide-in-left, .animate-slide-in-up { animation: none; }
+  .animate-slide-in-left, .animate-slide-in-up,
+  .drawer-backdrop, .drawer-panel, .search-sheet { animation: none; }
 }
+
+/* ---------- View-Mode-Slider (erzwungene Mobil-/Desktop-Ansicht) ---------- */
+/* Standard bleibt das responsive lg:-Verhalten. Sobald der Nutzer im Header
+   eine Ansicht wählt, setzt der ViewModeProvider data-view-mode auf <html> und
+   diese spezifischeren Regeln (Attribut + Klasse) erzwingen das Layout –
+   unabhängig von der echten Viewport-Breite. */
+
+/* Grundgerüst: Sidebar-Spalte vs. gestapelt */
+[data-view-mode='desktop'] .vm-shell { flex-direction: row; }
+[data-view-mode='mobile']  .vm-shell { flex-direction: column; }
+
+/* Unterer Innenabstand für die Bottom-Nav */
+[data-view-mode='desktop'] .vm-root-pad { padding-bottom: 0; }
+[data-view-mode='mobile']  .vm-root-pad { padding-bottom: 4rem; }
+
+/* Desktop-Sidebar */
+[data-view-mode='desktop'] .vm-sidebar { display: block !important; }
+[data-view-mode='mobile']  .vm-sidebar { display: none !important; }
+
+/* Nur-Mobil-Elemente: Hamburger (flex), Bottom-Nav & Drawer (block) */
+[data-view-mode='desktop'] .vm-only-mobile       { display: none !important; }
+[data-view-mode='mobile']  .vm-only-mobile-flex  { display: flex !important; }
+[data-view-mode='mobile']  .vm-only-mobile-block { display: block !important; }
 
 /* ---------- Print / PDF-Export ---------- */
 @media print {

@@ -50,7 +50,7 @@ function SidebarBrand({ displayName, avatarUrl }: { displayName?: string; avatar
     <div className="mb-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
       <UserAvatar avatarUrl={avatarUrl} name={displayName} size="lg" />
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600">YOT FLEET</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600">ORYON FLEET</p>
         {displayName ? <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p> : null}
       </div>
     </div>

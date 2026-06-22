@@ -35,7 +35,7 @@ export function LoadingScreen({ overlay = false, label = 'Wird geladen…', clas
       </div>
 
       <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-600">YOT FLEET</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-600">ORYON FLEET</p>
         <p className="mt-1 text-sm font-medium text-slate-500">{label}</p>
       </div>
     </div>

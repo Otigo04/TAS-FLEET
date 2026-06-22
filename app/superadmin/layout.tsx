@@ -45,7 +45,7 @@ export default async function SuperadminLayout({ children }: { children: React.R
         <main className="flex-1 p-6">{children}</main>
 
         <footer className="border-t border-white/10 px-6 py-3 text-center text-xs uppercase tracking-widest text-slate-500">
-          © YOT FLEET V0.6 · YOT SOLUTIONS · Superadmin
+          © ORYON FLEET V0.7 · ORYON SYSTEMS · Superadmin
         </footer>
       </div>
     </div>

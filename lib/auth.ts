@@ -1,5 +1,23 @@
+import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+
+/**
+ * The authenticated user, validated against Supabase Auth.
+ *
+ * `auth.getUser()` is a network round-trip on every call. Wrapping it in
+ * React `cache()` dedupes it for the duration of a single server request, so
+ * the layout, the page and every tenant/superadmin helper that needs the user
+ * share ONE round-trip instead of issuing two or three. Returns `null` when
+ * unauthenticated — callers decide whether to redirect.
+ */
+export const getAuthUser = cache(async () => {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  return user
+})
 
 type Profile = {
   id: string
@@ -16,9 +34,7 @@ export function isProfileComplete(profile: Profile | null) {
 
 export async function requireUser() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   if (!user) {
     redirect('/login')

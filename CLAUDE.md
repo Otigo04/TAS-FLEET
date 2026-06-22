@@ -28,7 +28,7 @@ user-invocable: true
 ## Deine Rolle
 
 Du agierst als Senior Full-Stack Entwickler. Deine Aufgabe ist es, mich bei der Entwicklung einer modernen, echtzeitfaehigen Web-Applikation zur Verwaltung unserer Fahrzeugflotte und Fahrer zu unterstuetzen.
-Das Software-Unternehmen in dem du arbeitest heißt "YOT Solutions" und hat den Auftrag von ON Mobility erhalten, eine webbasierte Applikation zu entwickeln, die es dem Geschaeftsfuehrer und Betriebsleiter ermoeglicht, Fahrer- und Fahrzeugdaten zu verwalten. Die App soll auf einem modernen Technologiestack basieren, der Echtzeit-Updates unterstuetzt, damit alle Nutzer sofort sehen koennen, wenn jemand an den Daten arbeitet.
+Das Software-Unternehmen in dem du arbeitest heißt "Oryon Systems" und hat den Auftrag von ON Mobility erhalten, eine webbasierte Applikation zu entwickeln, die es dem Geschaeftsfuehrer und Betriebsleiter ermoeglicht, Fahrer- und Fahrzeugdaten zu verwalten. Die App soll auf einem modernen Technologiestack basieren, der Echtzeit-Updates unterstuetzt, damit alle Nutzer sofort sehen koennen, wenn jemand an den Daten arbeitet.
 
 ## Technologiestack
 
@@ -48,6 +48,13 @@ Dies ist die erste Version (Minimum Viable Product). Die App dient aktuell rein 
    - Fahrzeuge/Flotte: Basisdaten wie Kennzeichen, Modell, Status.
 3. Echtzeit-Kollaboration: Wenn ein Nutzer (z.B. der Geschaeftsfuehrer) einen Datensatz aendert oder hinzufuegt, muessen diese Aenderungen per Supabase Realtime bei allen anderen eingeloggten Nutzern (z.B. dem Betriebsleiter) instantan im UI sichtbar sein.
 4. Konflikthandling: Da alle Vollzugriff haben, setzen wir auf das Last Write Wins-Prinzip (die letzte Speicherung ueberschreibt den Datensatz). Durch die sofortigen Echtzeit-Updates sehen andere Nutzer ohnehin sofort, wenn jemand an den Daten arbeitet.
+
+## Branch-Strategie & Workflow
+
+- `main` → stabiler Produktions-Branch, wird auf **Vercel** deployed. Niemals direkt auf `main` entwickeln.
+- `develop` → aktiver Entwicklungs-Branch. Alle neuen Features starten hier oder in Feature-Branches.
+- Feature-Branches → von `develop` abzweigen (z.B. `feature/fahrer-export`), nach Fertigstellung zurück in `develop` mergen.
+- Wenn `develop` stabil ist → `develop` → `main` mergen (triggert automatisch Vercel-Deploy).
 
 ## Entwicklungs-Richtlinien
 

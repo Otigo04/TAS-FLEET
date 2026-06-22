@@ -1,6 +1,6 @@
 # ON Mobility Portal
 
-Internes Verwaltungsportal für die Fuhrpark- und Fahrerverwaltung von ON Mobility, entwickelt von **YOT Solutions**.
+Internes Verwaltungsportal für die Fuhrpark- und Fahrerverwaltung von ON Mobility, entwickelt von **Oryon Systems**.
 
 ## Was kann die App?
 
