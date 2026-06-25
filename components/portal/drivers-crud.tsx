@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { Loader2, Plus, X, Search, Filter, User, Download } from 'lucide-react'
 import { AvatarUploadCrop } from '@/components/ui/avatar-upload-crop'
 import { createClient } from '@/lib/supabase/client'
@@ -500,8 +501,8 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
 
       {/* Add Form Container */}
       {showAddForm && (
-        <Card className="border-slate-200 shadow-lg bg-white overflow-hidden transition-all duration-300">
-          <CardHeader className="border-b border-slate-100 bg-slate-50/80">
+        <Card className="border-slate-200 shadow-sm bg-white overflow-hidden">
+          <CardHeader className="border-b border-slate-100 bg-slate-50">
             <CardTitle className="text-xl text-slate-900">Neuen Fahrer anlegen</CardTitle>
             <CardDescription className="text-slate-600">
               Personalstammblatt importieren oder Daten manuell eintragen.
@@ -541,7 +542,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
               <div className="space-y-2">
                 <Label className="text-slate-700">Profilbild (optional)</Label>
                 <div className="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50/60 p-4">
-                  <AvatarUploadCrop value={avatarUrl} onChange={setAvatarUrl} />
+                  <AvatarUploadCrop value={avatarUrl} onChange={setAvatarUrl} pathPrefix="drivers" />
                   <p className="text-xs text-slate-500">
                     Klicke auf den Kreis, um ein Bild hochzuladen und zuzuschneiden.
                   </p>
@@ -757,7 +758,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                         <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500">Persönliche Daten</p>
                         <div className="mb-4 space-y-1.5">
                           <Label className="text-slate-700">Profilbild</Label>
-                          <AvatarUploadCrop value={editAvatarUrl} onChange={setEditAvatarUrl} />
+                          <AvatarUploadCrop value={editAvatarUrl} onChange={setEditAvatarUrl} pathPrefix="drivers" />
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
                           <div className="space-y-1.5">
@@ -981,8 +982,12 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                       </div>
                     </div>
 
-                    {canManage && (
                     <div className="flex items-center gap-2 md:self-center">
+                      <Button asChild variant="outline" size="sm" className="bg-white">
+                        <Link href={`/fahrer/${driver.id}`}>Details</Link>
+                      </Button>
+                    {canManage && (
+                    <>
                       <Button variant="outline" size="sm" onClick={() => startEdit(driver)} disabled={isBusy} className="bg-white">
                         Bearbeiten
                       </Button>
@@ -1001,8 +1006,9 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                           Löschen
                         </Button>
                       )}
-                    </div>
+                    </>
                     )}
+                    </div>
                   </CardContent>
                 )}
               </Card>

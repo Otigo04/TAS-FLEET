@@ -139,7 +139,7 @@ export function MonthlyReport({
             </div>
           </div>
           <div className="text-right text-xs text-slate-500">
-            <p className="font-semibold uppercase tracking-[0.2em] text-emerald-600">ORYON FLEET</p>
+            <p className="text-sm font-bold tracking-tight text-brand-700">TAS FLEET</p>
             <p>Erstellt am {generatedAt}</p>
           </div>
         </header>
@@ -235,7 +235,7 @@ export function MonthlyReport({
         </section>
 
         <footer className="border-t border-slate-200 pt-4 text-center text-xs text-slate-400">
-          Automatisch erstellter Bericht · {companyName} · ORYON FLEET
+          Automatisch erstellter Bericht · {companyName} · TAS FLEET
         </footer>
       </div>
     </div>

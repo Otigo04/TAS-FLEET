@@ -10,6 +10,7 @@ import { TenantProvider } from '@/components/portal/tenant-provider'
 import { CompanySwitcher } from '@/components/portal/company-switcher'
 import { PresenceIndicator } from '@/components/portal/presence-indicator'
 import { MobileBottomNav } from '@/components/portal/mobile-bottom-nav'
+import { NotificationBell } from '@/components/portal/notification-bell'
 import { MobileNavProvider, MobileNavTrigger } from '@/components/portal/mobile-nav'
 import { ViewModeProvider } from '@/components/portal/view-mode-provider'
 import { ViewModeSlider } from '@/components/portal/view-mode-slider'
@@ -33,9 +34,9 @@ export default async function PortalLayout({ children }: { children: React.React
      <MobileNavProvider displayName={displayName} avatarUrl={avatarUrl} isSuperadmin={isSuperadmin}>
       <PresenceIndicator userId={user.id} displayName={displayName} avatarUrl={avatarUrl} />
       <div className="vm-root-pad min-h-screen flex flex-col pb-16 lg:pb-0">
-        <div className="no-print bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-slate-100 py-1.5 px-4 text-xs font-semibold tracking-[0.2em] text-center uppercase">
-          <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">ORYON FLEET V0.7</span>
-          <span className="text-slate-400"> · ORYON SYSTEMS · Work in Progress</span>
+        <div className="no-print bg-slate-900 text-slate-300 py-1.5 px-4 text-xs text-center">
+          <span className="font-semibold text-brand-300">TAS FLEET</span>
+          <span className="text-slate-500"> · v0.7 · TAS WEBWORKS</span>
         </div>
         <div className="vm-shell mx-auto flex w-full max-w-[1400px] flex-1 flex-col lg:flex-row">
           <div className="vm-sidebar no-print hidden lg:block">
@@ -43,12 +44,12 @@ export default async function PortalLayout({ children }: { children: React.React
           </div>
 
           <div className="flex flex-1 flex-col min-w-0">
-            <header className="no-print surface-card animate-fade-up mx-2 mt-2 sm:mx-4 sm:mt-4 flex items-center justify-between rounded-xl px-3 py-3 sm:px-6 sm:py-4 gap-2 sm:gap-4">
+            <header className="no-print surface-card mx-2 mt-2 sm:mx-4 sm:mt-4 flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4 gap-2 sm:gap-4">
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <MobileNavTrigger />
 
                 <div className="hidden sm:block">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Angemeldet als</p>
+                  <p className="text-xs text-slate-500">Angemeldet als</p>
                   <p className="text-sm font-semibold text-slate-900">{displayName}</p>
                 </div>
               </div>
@@ -56,6 +57,7 @@ export default async function PortalLayout({ children }: { children: React.React
               <GlobalSearch />
 
               <div className="flex items-center gap-2 shrink-0">
+                <NotificationBell userId={user.id} />
                 <ViewModeSlider />
                 <CompanySwitcher />
                 <UserAvatar avatarUrl={avatarUrl} name={displayName} size="md" className="hidden sm:inline-flex" />
@@ -63,12 +65,12 @@ export default async function PortalLayout({ children }: { children: React.React
               </div>
             </header>
 
-            <div className="animate-fade-up-delay flex-1 p-3 sm:p-4 lg:p-6 min-w-0">{children}</div>
+            <div className="flex-1 p-3 sm:p-4 lg:p-6 min-w-0">{children}</div>
 
-            <footer className="no-print hidden sm:flex mx-4 sm:mx-6 mb-4 sm:mb-6 mt-auto items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
+            <footer className="no-print hidden sm:flex mx-4 sm:mx-6 mb-4 sm:mb-6 mt-auto items-center justify-between rounded-md border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
               <div className="flex items-center gap-2">
                 <UserAvatar avatarUrl={avatarUrl} name={displayName} size="sm" />
-                <span className="font-semibold uppercase tracking-[0.22em] text-emerald-600">ORYON FLEET</span>
+                <span className="font-semibold text-slate-700">TAS FLEET</span>
               </div>
               <p>Angemeldet als {displayName}</p>
             </footer>

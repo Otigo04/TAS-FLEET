@@ -10,8 +10,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Download } from 'lucide-react'
 import { useActiveCompanyId, useCan } from '@/components/portal/tenant-provider'
+import { AttachmentList } from '@/components/portal/attachments'
 import { labelFor } from '@/lib/labels'
+import { downloadCsv, todayStamp } from '@/lib/export'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
@@ -283,9 +286,26 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
       )}
 
       <Card className="surface-card animate-fade-up-delay-2">
-        <CardHeader>
-          <CardTitle>Compliance-Center</CardTitle>
-          <CardDescription>Alle Einträge</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Compliance-Center</CardTitle>
+            <CardDescription>Alle Einträge</CardDescription>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={filteredDocuments.length === 0}
+            onClick={() =>
+              downloadCsv(
+                `compliance-${todayStamp()}`,
+                ['Betreff', 'Typ', 'Fällig', 'Status', 'Notiz'],
+                filteredDocuments.map((d) => [subjectLabel(d), labelFor(d.doc_type), d.due_date, labelFor(d.status), d.notes ?? '']),
+              )
+            }
+          >
+            <Download className="mr-2 h-4 w-4" /> CSV
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="mb-4 grid gap-3 md:grid-cols-2">
@@ -358,6 +378,17 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
                       </div>
                       )}
                     </div>
+
+                    {companyId && (
+                      <div className="mt-3 border-t border-slate-100 pt-3">
+                        <AttachmentList
+                          companyId={companyId}
+                          scopeType="compliance"
+                          entityId={doc.id}
+                          canEdit={canManage}
+                        />
+                      </div>
+                    )}
                   </li>
                 )
               })}

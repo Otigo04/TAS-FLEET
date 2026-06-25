@@ -115,7 +115,7 @@ function MobileNavDrawer({
           <div className="flex items-center gap-3">
             <UserAvatar avatarUrl={avatarUrl} name={displayName} size="md" />
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600">ORYON FLEET</p>
+              <p className="text-sm font-bold tracking-tight text-brand-700">TAS FLEET</p>
               {displayName ? <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p> : null}
               <p className="text-xs text-slate-500">{isSuperadmin ? 'Superadmin' : roleLabel(activeCompany.role)}</p>
             </div>
@@ -134,7 +134,7 @@ function MobileNavDrawer({
             <Link
               href="/superadmin"
               onClick={onClose}
-              className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-4 py-3 text-sm font-semibold text-slate-950 mb-2"
+              className="flex items-center gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 mb-2"
             >
               <ShieldAlert className="h-5 w-5 shrink-0" />
               Superadmin Konsole
@@ -149,9 +149,9 @@ function MobileNavDrawer({
                 href={item.href}
                 onClick={onClose}
                 className={cn(
-                  'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors',
+                  'flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-sm'
+                    ? 'bg-brand-600 text-white'
                     : 'text-slate-700 hover:bg-slate-100 active:bg-slate-200',
                 )}
               >

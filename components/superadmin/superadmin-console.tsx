@@ -73,12 +73,10 @@ export function SuperadminConsole({
 function StatCard({
   icon: Icon, label, value, tone,
 }: { icon: typeof Building2; label: string; value: number; tone: 'amber' | 'sky' }) {
-  const toneCls = tone === 'amber'
-    ? 'from-amber-400 to-orange-500 shadow-orange-500/20'
-    : 'from-sky-400 to-blue-500 shadow-blue-500/20'
+  const toneCls = tone === 'amber' ? 'bg-amber-500' : 'bg-sky-500'
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
-      <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-slate-950 shadow-lg ${toneCls}`}>
+    <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-white/5 p-5">
+      <div className={`flex h-12 w-12 items-center justify-center rounded-md text-slate-950 ${toneCls}`}>
         <Icon className="h-6 w-6" />
       </div>
       <div>
@@ -171,6 +169,7 @@ function CompaniesPanel({ companies }: { companies: AdminCompany[] }) {
                   value={c.logoUrl}
                   onChange={(url) => run(() => setCompanyLogo(c.id, url))}
                   placeholder={<Building2 className="h-7 w-7" />}
+                  pathPrefix="companies"
                 />
 
                 {editingId === c.id ? (

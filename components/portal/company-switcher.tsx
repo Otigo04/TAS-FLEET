@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
-import { useRouter } from 'next/navigation'
 import { Building2, Check, ChevronsUpDown } from 'lucide-react'
 import { setActiveCompany } from '@/actions/tenant-actions'
 import { useTenant } from '@/components/portal/tenant-provider'
@@ -31,7 +30,6 @@ function CompanyAvatar({ company, className }: { company: UserCompany; className
 
 export function CompanySwitcher() {
   const { activeCompany, companies } = useTenant()
-  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [mounted, setMounted] = useState(false)
@@ -83,8 +81,11 @@ export function CompanySwitcher() {
     setOpen(false)
     if (companyId === activeCompany.id) return
     startTransition(async () => {
-      const result = await setActiveCompany(companyId)
-      if (result.success) router.refresh()
+      // setActiveCompany ruft serverseitig revalidatePath('/', 'layout') auf –
+      // Next rendert die Route dadurch automatisch mit dem neuen Tenant neu.
+      // Ein zusätzliches router.refresh() würde nur ein zweites, redundantes
+      // Nachladen auslösen (spürbar beim Wechsel).
+      await setActiveCompany(companyId)
     })
   }
 

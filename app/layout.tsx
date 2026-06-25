@@ -1,22 +1,22 @@
 import type { Metadata, Viewport } from 'next'
-import { Space_Grotesk } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import './globals.css'
 
-const spaceGrotesk = Space_Grotesk({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-space-grotesk',
+  variable: '--font-inter',
 })
 
 export const metadata: Metadata = {
-  title: 'ON Mobility Portal',
-  description: 'Fahrer- und Flottenverwaltung mit Supabase Realtime',
+  title: 'TAS FLEET',
+  description: 'Fahrer- und Flottenverwaltung — TAS WEBWORKS',
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#059669',
+  themeColor: '#2f6a45',
 }
 
 export default function RootLayout({
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      <body className={`${spaceGrotesk.variable} font-sans`}>{children}</body>
+      <body className={`${inter.variable} font-sans`}>{children}</body>
     </html>
   )
 }

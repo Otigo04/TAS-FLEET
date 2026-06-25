@@ -10,10 +10,10 @@ interface CompanyLogoProps {
 export function CompanyLogo({ compact = false, className, displayName }: CompanyLogoProps) {
   return (
     <div className={cn('inline-flex items-center gap-3', className)}>
-      <div className="relative h-11 w-11 overflow-hidden rounded-md border border-slate-200 bg-white shadow-md ring-1 ring-white/60">
+      <div className="relative h-11 w-11 overflow-hidden rounded-md border border-slate-200 bg-white">
         <Image
           src="/ON-MOBILITY_LOGO_300x300.png"
-          alt="ON Mobility Logo"
+          alt="TAS FLEET Logo"
           fill
           sizes="44px"
           className="object-contain"
@@ -23,8 +23,8 @@ export function CompanyLogo({ compact = false, className, displayName }: Company
 
       {!compact ? (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-teal-300">ORYON FLEET</p>
-          {displayName ? <p className="text-sm font-semibold text-slate-100">{displayName}</p> : null}
+          <p className="text-sm font-bold tracking-tight text-brand-700">TAS FLEET</p>
+          {displayName ? <p className="text-sm font-semibold text-slate-900">{displayName}</p> : null}
         </div>
       ) : null}
     </div>

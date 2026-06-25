@@ -10,8 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Download } from 'lucide-react'
 import { useActiveCompanyId } from '@/components/portal/tenant-provider'
 import { labelFor } from '@/lib/labels'
+import { downloadCsv, todayStamp } from '@/lib/export'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type AbsenceRow = Database['public']['Tables']['absences']['Row']
@@ -48,11 +50,32 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
   const showBusySpinner = useDelayedLoading(isBusy)
 
   const today = new Date().toISOString().slice(0, 10)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [driverId, setDriverId] = useState<string>(drivers[0]?.id ?? '')
   const [type, setType] = useState<AbsenceType>('urlaub')
   const [startDate, setStartDate] = useState(today)
   const [endDate, setEndDate] = useState(today)
   const [reason, setReason] = useState('')
+
+  function resetForm() {
+    setEditingId(null)
+    setDriverId(drivers[0]?.id ?? '')
+    setType('urlaub')
+    setStartDate(today)
+    setEndDate(today)
+    setReason('')
+  }
+
+  function startEdit(absence: AbsenceRow) {
+    setEditingId(absence.id)
+    setDriverId(absence.driver_id)
+    setType(absence.type)
+    setStartDate(absence.start_date)
+    setEndDate(absence.end_date)
+    setReason(absence.reason ?? '')
+    setError(null)
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   async function refresh() {
     const { data, error: fetchError } = await supabase
@@ -80,7 +103,7 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase, companyId])
 
-  async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
     if (endDate < startDate) {
@@ -96,15 +119,39 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
       end_date: endDate,
       reason: reason.trim() || null,
     }
-    const { error: insertError } = await supabase.from('absences').insert(payload)
-    if (insertError) {
-      setError(insertError.message)
+    const { error: writeError } = editingId
+      ? await supabase.from('absences').update(payload).eq('id', editingId)
+      : await supabase.from('absences').insert(payload)
+    if (writeError) {
+      setError(writeError.message)
       setIsBusy(false)
       return
     }
-    setReason('')
+    resetForm()
     setIsBusy(false)
   }
+
+  // Resturlaub (laufendes Jahr): Kontingent − genommene Urlaubstage im Jahr.
+  const vacationSummary = useMemo(() => {
+    const year = new Date().getFullYear()
+    const yearStart = `${year}-01-01`
+    const yearEnd = `${year}-12-31`
+    return drivers
+      .filter((d) => d.annual_vacation_days != null)
+      .map((d) => {
+        let used = 0
+        for (const a of absences) {
+          if (a.driver_id !== d.id || a.type !== 'urlaub') continue
+          const from = a.start_date < yearStart ? yearStart : a.start_date
+          const to = a.end_date > yearEnd ? yearEnd : a.end_date
+          if (from > to) continue
+          const days = Math.floor((new Date(to).getTime() - new Date(from).getTime()) / 86400000) + 1
+          used += days
+        }
+        const quota = d.annual_vacation_days ?? 0
+        return { id: d.id, name: d.name, quota, used, remaining: quota - used }
+      })
+  }, [drivers, absences])
 
   async function handleDelete(id: string) {
     setIsBusy(true)
@@ -125,11 +172,11 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
     <section className="grid gap-4 sm:gap-6 xl:grid-cols-[380px_1fr]">
       <Card className="surface-card animate-fade-up-delay">
         <CardHeader>
-          <CardTitle>Abwesenheit erfassen</CardTitle>
+          <CardTitle>{editingId ? 'Abwesenheit bearbeiten' : 'Abwesenheit erfassen'}</CardTitle>
           <CardDescription>Urlaub, Krankheit oder Sonstiges</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleCreate} className="space-y-3 sm:space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
               <Label htmlFor="absence-driver">Fahrer</Label>
               <select
@@ -181,18 +228,63 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
 
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-            <Button type="submit" className="w-full" disabled={isBusy || drivers.length === 0}>
-              {showBusySpinner ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Abwesenheit speichern
-            </Button>
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1" disabled={isBusy || drivers.length === 0}>
+                {showBusySpinner ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {editingId ? 'Aktualisieren' : 'Abwesenheit speichern'}
+              </Button>
+              {editingId && (
+                <Button type="button" variant="secondary" onClick={resetForm} disabled={isBusy}>
+                  Abbrechen
+                </Button>
+              )}
+            </div>
           </form>
+
+          {vacationSummary.length > 0 && (
+            <div className="mt-6 border-t border-slate-100 pt-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Resturlaub {new Date().getFullYear()}
+              </p>
+              <ul className="space-y-1.5">
+                {vacationSummary.map((v) => (
+                  <li key={v.id} className="flex items-center justify-between text-sm">
+                    <span className="text-slate-700">{v.name}</span>
+                    <span className="tabular-nums">
+                      <span className={v.remaining < 0 ? 'font-semibold text-rose-600' : 'font-semibold text-slate-900'}>
+                        {v.remaining}
+                      </span>
+                      <span className="text-slate-400"> / {v.quota} Tage</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       <Card className="surface-card animate-fade-up-delay-2">
-        <CardHeader>
-          <CardTitle>Abwesenheiten</CardTitle>
-          <CardDescription>Alle Einträge (neueste zuerst)</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Abwesenheiten</CardTitle>
+            <CardDescription>Alle Einträge (neueste zuerst)</CardDescription>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={absences.length === 0}
+            onClick={() =>
+              downloadCsv(
+                `abwesenheiten-${todayStamp()}`,
+                ['Fahrer', 'Art', 'Von', 'Bis', 'Grund'],
+                absences.map((a) => [driverName(a.driver_id), labelFor(a.type), a.start_date, a.end_date, a.reason ?? '']),
+              )
+            }
+          >
+            <Download className="mr-2 h-4 w-4" /> CSV
+          </Button>
         </CardHeader>
         <CardContent>
           {absences.length === 0 ? (
@@ -233,9 +325,14 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
                           </Button>
                         </div>
                       ) : (
-                        <Button variant="destructive" size="sm" onClick={() => setConfirmDeleteId(absence.id)} disabled={isBusy}>
-                          Löschen
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button variant="outline" size="sm" onClick={() => startEdit(absence)} disabled={isBusy}>
+                            Bearbeiten
+                          </Button>
+                          <Button variant="destructive" size="sm" onClick={() => setConfirmDeleteId(absence.id)} disabled={isBusy}>
+                            Löschen
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </li>
@@ -245,6 +342,105 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
           )}
         </CardContent>
       </Card>
+
+      <div className="xl:col-span-2">
+        <AbsenceCalendar absences={absences} driverName={driverName} />
+      </div>
     </section>
+  )
+}
+
+/** Monats-Team-Kalender: Zeile je Fahrer mit Abwesenheiten, Tage farbcodiert. */
+function AbsenceCalendar({
+  absences,
+  driverName,
+}: {
+  absences: AbsenceRow[]
+  driverName: (id: string) => string
+}) {
+  const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7)) // YYYY-MM
+
+  const [year, mon] = month.split('-').map(Number)
+  const daysInMonth = new Date(year, mon, 0).getDate()
+  const monthStart = `${month}-01`
+  const monthEnd = `${month}-${String(daysInMonth).padStart(2, '0')}`
+
+  // Fahrer mit mindestens einer Abwesenheit im Monat.
+  const rows = useMemo(() => {
+    const relevant = absences.filter((a) => a.start_date <= monthEnd && a.end_date >= monthStart)
+    const byDriver = new Map<string, AbsenceRow[]>()
+    for (const a of relevant) {
+      const list = byDriver.get(a.driver_id) ?? []
+      list.push(a)
+      byDriver.set(a.driver_id, list)
+    }
+    return Array.from(byDriver.entries())
+  }, [absences, monthStart, monthEnd])
+
+  function colorFor(driverAbsences: AbsenceRow[], day: number): string {
+    const dateStr = `${month}-${String(day).padStart(2, '0')}`
+    const hit = driverAbsences.find((a) => a.start_date <= dateStr && dateStr <= a.end_date)
+    if (!hit) return ''
+    if (hit.type === 'urlaub') return 'bg-sky-400'
+    if (hit.type === 'krankheit') return 'bg-rose-400'
+    return 'bg-amber-400'
+  }
+
+  function shiftMonth(delta: number) {
+    const d = new Date(year, mon - 1 + delta, 1)
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+  }
+
+  return (
+    <Card className="surface-card">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Team-Kalender</CardTitle>
+          <CardDescription>Abwesenheiten im Monat</CardDescription>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => shiftMonth(-1)}>‹</Button>
+          <span className="text-sm font-medium tabular-nums text-slate-700">
+            {new Date(year, mon - 1, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
+          </span>
+          <Button type="button" variant="outline" size="sm" onClick={() => shiftMonth(1)}>›</Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {rows.length === 0 ? (
+          <p className="text-sm text-slate-400">Keine Abwesenheiten in diesem Monat.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-xs">
+              <thead>
+                <tr>
+                  <th className="sticky left-0 bg-white px-2 py-1 text-left font-medium text-slate-500">Fahrer</th>
+                  {Array.from({ length: daysInMonth }, (_, i) => (
+                    <th key={i} className="w-5 px-0 py-1 text-center font-normal text-slate-400">{i + 1}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map(([driverId, list]) => (
+                  <tr key={driverId} className="border-t border-slate-100">
+                    <td className="sticky left-0 bg-white px-2 py-1 font-medium text-slate-700 whitespace-nowrap">{driverName(driverId)}</td>
+                    {Array.from({ length: daysInMonth }, (_, i) => (
+                      <td key={i} className="px-0 py-1">
+                        <div className={`mx-auto h-4 w-4 rounded-sm ${colorFor(list, i + 1) || 'bg-slate-50'}`} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="mt-3 flex gap-4 text-xs text-slate-500">
+              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-sky-400" /> Urlaub</span>
+              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-rose-400" /> Krankheit</span>
+              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-amber-400" /> Sonstiges</span>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

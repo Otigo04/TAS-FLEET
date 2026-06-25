@@ -47,11 +47,11 @@ interface SidebarProps {
 
 function SidebarBrand({ displayName, avatarUrl }: { displayName?: string; avatarUrl?: string | null }) {
   return (
-    <div className="mb-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
+    <div className="mb-6 flex items-center gap-3 rounded-md border border-slate-200 bg-white p-4">
       <UserAvatar avatarUrl={avatarUrl} name={displayName} size="lg" />
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600">ORYON FLEET</p>
-        {displayName ? <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p> : null}
+        <p className="text-sm font-bold tracking-tight text-brand-700">TAS FLEET</p>
+        {displayName ? <p className="truncate text-sm text-slate-600">{displayName}</p> : null}
       </div>
     </div>
   )
@@ -71,8 +71,8 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
     <aside className="surface-card w-72 border-b border-slate-200 p-4 lg:border-b-0 lg:border-r">
       <SidebarBrand displayName={displayName} avatarUrl={avatarUrl} />
 
-      <div className="mb-3 flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-400">Rolle</span>
+      <div className="mb-3 flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+        <span className="text-xs font-medium text-slate-400">Rolle</span>
         <span className="text-xs font-semibold text-slate-700">
           {isSuperadmin ? 'Superadmin' : roleLabel(activeCompany.role)}
         </span>
@@ -81,7 +81,7 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
       {isSuperadmin && (
         <Link
           href="/superadmin"
-          className="mb-3 flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-2 text-sm font-semibold text-slate-950 shadow-sm transition-transform hover:scale-[1.02]"
+          className="mb-3 flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 transition-colors hover:bg-amber-100"
         >
           <ShieldAlert className="h-4 w-4 shrink-0" />
           Superadmin Konsole
@@ -102,9 +102,9 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
               <Link
                 href={item.href}
                 className={cn(
-                  'inline-flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
+                  'inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white shadow-sm shadow-emerald-600/20'
+                    ? 'bg-brand-600 text-white'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
                 )}
               >

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -10,6 +11,8 @@ export function GlobalSearch() {
   const [query, setQuery] = useState('')
   const { state, isVisible, open, close } = useAnimatedDisclosure()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -29,30 +32,44 @@ export function GlobalSearch() {
 
   return (
     <>
-      {/* Desktop: inline search bar */}
-      <form onSubmit={onSubmit} className="relative hidden md:flex w-full max-w-sm items-center">
-        <Search className="absolute left-3 h-4 w-4 text-slate-400 pointer-events-none" />
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Schnellsuche (Fahrer, Fahrzeuge)..."
-          className="pl-9 bg-slate-50 border-slate-200 focus-visible:ring-slate-300 w-full"
-        />
-      </form>
+      {/* Header-Mittelspalte: füllt den freien Raum und richtet die Suche aus –
+          Desktop-Leiste zentriert, mobiles Icon rechts neben den Aktionen. */}
+      <div className="flex min-w-0 flex-1 items-center justify-end">
+        {/* Desktop: inline Schnellsuche (an echtem lg-Breakpoint UND erzwungenem
+            Desktop-Modus; im Mobil-Modus ausgeblendet). */}
+        <form
+          onSubmit={onSubmit}
+          className="vm-only-desktop vm-only-desktop-flex relative hidden lg:flex w-full max-w-sm items-center lg:mx-auto"
+        >
+          <Search className="absolute left-3 h-4 w-4 text-slate-400 pointer-events-none" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Schnellsuche (Fahrer, Fahrzeuge)..."
+            className="pl-9 bg-slate-50 border-slate-200 focus-visible:ring-slate-300 w-full"
+          />
+        </form>
 
-      {/* Mobile: compact icon button that opens an overlay */}
-      <button
-        type="button"
-        aria-label="Suche öffnen"
-        onClick={open}
-        className="md:hidden flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 active:bg-slate-100"
-      >
-        <Search className="h-4 w-4" />
-      </button>
+        {/* Mobil: kompaktes Icon, das ein Overlay öffnet (spiegelt den Hamburger:
+            lg:hidden + vm-only-mobile, damit es im Mobil-Modus immer erscheint). */}
+        <button
+          type="button"
+          aria-label="Suche öffnen"
+          onClick={open}
+          className="vm-only-mobile vm-only-mobile-flex lg:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 active:bg-slate-100"
+        >
+          <Search className="h-4 w-4" />
+        </button>
+      </div>
 
-      {/* Mobile: animated search sheet */}
-      {isVisible && (
-        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
+      {/* Mobile: animated search sheet. Per Portal an <body>, damit das fixe
+          Overlay nicht im Header (transform = containing block) gefangen wird –
+          sonst deckt der Backdrop nur die Header-Zeile ab und der Seiteninhalt
+          liegt darüber. Kein Breakpoint-Guard nötig: öffnet nur über den
+          mobilen Trigger. */}
+      {mounted && isVisible &&
+        createPortal(
+          <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true">
           <button
             className="drawer-backdrop absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             data-state={state}
@@ -60,10 +77,10 @@ export function GlobalSearch() {
             onClick={close}
           />
 
-          <div className="absolute inset-x-0 top-0 px-3 pt-3">
+          <div className="absolute inset-x-0 top-0 px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
             <form
               onSubmit={onSubmit}
-              className="search-sheet w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+              className="search-sheet w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl"
               data-state={state}
             >
               <div className="flex items-center gap-3 p-3">
@@ -94,8 +111,9 @@ export function GlobalSearch() {
               )}
             </form>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </>
   )
 }

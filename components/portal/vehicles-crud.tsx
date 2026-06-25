@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { Loader2, Car } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
@@ -209,7 +210,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
             <div className="space-y-2">
               <Label>Fahrzeugbild (optional)</Label>
               <div className="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50/60 p-4">
-                <AvatarUploadCrop value={avatarUrl} onChange={setAvatarUrl} placeholder={<Car className="h-6 w-6" />} />
+                <AvatarUploadCrop value={avatarUrl} onChange={setAvatarUrl} placeholder={<Car className="h-6 w-6" />} pathPrefix="vehicles" />
                 <p className="text-xs text-slate-500">
                   Klicke auf den Kreis, um ein Bild hochzuladen und zuzuschneiden.
                 </p>
@@ -288,7 +289,7 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
                         />
                         <Input value={editModel} onChange={(event) => setEditModel(event.target.value)} />
                         <div className="flex items-center gap-6">
-                          <AvatarUploadCrop value={editAvatarUrl} onChange={setEditAvatarUrl} placeholder={<Car className="h-5 w-5" />} />
+                          <AvatarUploadCrop value={editAvatarUrl} onChange={setEditAvatarUrl} placeholder={<Car className="h-5 w-5" />} pathPrefix="vehicles" />
                           <span className="text-xs text-slate-500">Fahrzeugbild</span>
                         </div>
                         <select
@@ -333,8 +334,12 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
                           </div>
                         </div>
 
-                        {canManage && (
                         <div className="flex gap-2">
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={`/fahrzeuge/${vehicle.id}`}>Details</Link>
+                          </Button>
+                          {canManage && (
+                          <>
                           <Button variant="outline" size="sm" onClick={() => startEdit(vehicle)} disabled={isBusy}>
                             Bearbeiten
                           </Button>
@@ -353,8 +358,9 @@ export function VehiclesCrud({ initialVehicles, settings }: VehiclesCrudProps) {
                               Löschen
                             </Button>
                           )}
+                          </>
+                          )}
                         </div>
-                        )}
                       </div>
                     )}
                   </div>

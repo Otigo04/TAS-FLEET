@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { AvatarUploadCrop } from '@/components/ui/avatar-upload-crop'
 import { useActiveCompanyId, useCan, useTenant } from '@/components/portal/tenant-provider'
 import { labelFor } from '@/lib/labels'
-import { roleLabel } from '@/lib/roles'
+import { roleLabel, can, CAPABILITIES, CAPABILITY_LABELS, COMPANY_ROLES } from '@/lib/roles'
 import { cn } from '@/lib/utils'
 
 type SettingsRow = Database['public']['Tables']['settings']['Row']
@@ -26,6 +26,7 @@ const SETTINGS_CATEGORIES = [
   { key: 'incident_types', label: 'Vorfalltypen', description: 'z. B. Schäden, Bußgelder, Sperrungen' },
   { key: 'incident_severities', label: 'Vorfall-Prioritäten', description: 'z. B. Niedrig, Mittel, Hoch' },
   { key: 'incident_statuses', label: 'Vorfall-Status', description: 'z. B. Offen, In Bearbeitung, Gelöst' },
+  { key: 'uber_zones', label: 'Uber-Zonen', description: 'Auswählbare Zonen in der Disposition, z. B. Innenstadt, Flughafen' },
 ]
 
 interface SettingsCrudProps {
@@ -95,6 +96,33 @@ function SettingsCrudInner({
       setTimeout(() => setAvatarSaved(false), 3000)
     }
     setIsSavingAvatar(false)
+  }
+
+  // --- Passwort & Sitzung ---
+  const [newPassword, setNewPassword] = useState('')
+  const [pwBusy, setPwBusy] = useState(false)
+  const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null)
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault()
+    setPwMsg(null)
+    if (newPassword.length < 8) {
+      setPwMsg({ ok: false, text: 'Das Passwort muss mindestens 8 Zeichen haben.' })
+      return
+    }
+    setPwBusy(true)
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    setPwBusy(false)
+    if (error) setPwMsg({ ok: false, text: error.message })
+    else {
+      setNewPassword('')
+      setPwMsg({ ok: true, text: 'Passwort aktualisiert.' })
+    }
+  }
+
+  async function handleSignOutEverywhere() {
+    await supabase.auth.signOut({ scope: 'global' })
+    window.location.href = '/login'
   }
 
   // --- Settings state ---
@@ -189,7 +217,7 @@ function SettingsCrudInner({
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="flex flex-col items-center gap-4 rounded-xl border border-slate-200 bg-slate-50/60 p-6 text-center">
-                <AvatarUploadCrop value={profileAvatar} onChange={handleAvatarChange} />
+                <AvatarUploadCrop value={profileAvatar} onChange={handleAvatarChange} pathPrefix="profiles" />
                 <div>
                   <p className="text-lg font-bold text-slate-900">{fullName}</p>
                   <p className="text-sm text-slate-500">{email}</p>
@@ -238,28 +266,81 @@ function SettingsCrudInner({
 
             <Card className="surface-card">
               <CardHeader>
-                <CardTitle>Zugangsdaten</CardTitle>
-                <CardDescription>Sicherheit und Sitzungsinformationen</CardDescription>
+                <CardTitle>Sicherheit</CardTitle>
+                <CardDescription>Passwort ändern und Sitzungen verwalten</CardDescription>
               </CardHeader>
-              <CardContent className="divide-y divide-slate-100">
-                <div className="flex items-center gap-4 py-3.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-                    <ShieldCheck className="h-4 w-4" />
+              <CardContent className="space-y-5">
+                <form onSubmit={handleChangePassword} className="space-y-2">
+                  <label htmlFor="new-password" className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                    Neues Passwort
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="new-password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="mind. 8 Zeichen"
+                      autoComplete="new-password"
+                    />
+                    <Button type="submit" disabled={pwBusy || newPassword.length < 8}>
+                      {pwBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Ändern'}
+                    </Button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Passwort</p>
-                    <p className="text-sm font-medium text-slate-900">••••••••••••</p>
+                  {pwMsg && (
+                    <p className={cn('text-sm', pwMsg.ok ? 'text-brand-700' : 'text-rose-600')}>{pwMsg.text}</p>
+                  )}
+                </form>
+
+                <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                      <Clock className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">Aktive Sitzungen</p>
+                      <p className="text-xs text-slate-500">Auf allen Geräten abmelden</p>
+                    </div>
                   </div>
+                  <Button type="button" variant="outline" size="sm" onClick={() => void handleSignOutEverywhere()}>
+                    Überall abmelden
+                  </Button>
                 </div>
-                <div className="flex items-center gap-4 py-3.5">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-                    <Clock className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Letzte Anmeldung</p>
-                    <p className="text-sm font-medium text-slate-900">Heute, 08:32 Uhr</p>
-                  </div>
-                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="surface-card">
+              <CardHeader>
+                <CardTitle>Rechte-Übersicht</CardTitle>
+                <CardDescription>Welche Rolle was darf</CardDescription>
+              </CardHeader>
+              <CardContent className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200">
+                      <th className="py-2 pr-3 text-left font-medium text-slate-500">Berechtigung</th>
+                      {COMPANY_ROLES.map((r) => (
+                        <th key={r} className="px-2 py-2 text-center font-medium text-slate-500">{roleLabel(r)}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {CAPABILITIES.map((cap) => (
+                      <tr key={cap} className="border-b border-slate-100">
+                        <td className="py-2 pr-3 text-slate-700">{CAPABILITY_LABELS[cap]}</td>
+                        {COMPANY_ROLES.map((r) => (
+                          <td key={r} className="px-2 py-2 text-center">
+                            {can(r, cap) ? (
+                              <span className="text-brand-700">✓</span>
+                            ) : (
+                              <span className="text-slate-300">—</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </CardContent>
             </Card>
           </div>

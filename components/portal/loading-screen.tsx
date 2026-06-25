@@ -25,18 +25,16 @@ export function LoadingScreen({ overlay = false, label = 'Wird geladen…', clas
       role="status"
       aria-live="polite"
     >
-      <div className="relative h-14 w-14">
+      <div className="relative h-12 w-12">
         {/* Track */}
         <div className="absolute inset-0 rounded-full border-[3px] border-slate-200" />
         {/* Spinning accent arc */}
-        <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-emerald-500 border-r-teal-500" />
-        {/* Soft pulsing core */}
-        <div className="absolute inset-[5px] animate-pulse rounded-full bg-gradient-to-br from-emerald-500/15 to-teal-500/15" />
+        <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-brand-600" />
       </div>
 
       <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-600">ORYON FLEET</p>
-        <p className="mt-1 text-sm font-medium text-slate-500">{label}</p>
+        <p className="text-sm font-bold tracking-tight text-brand-700">TAS FLEET</p>
+        <p className="mt-1 text-sm text-slate-500">{label}</p>
       </div>
     </div>
   )

@@ -69,6 +69,12 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
   const [entries, setEntries] = useState<AuditRow[]>(initialEntries)
   const [tableFilter, setTableFilter] = useState<string>('all')
   const [actionFilter, setActionFilter] = useState<string>('all')
+  const [actorFilter, setActorFilter] = useState<string>('all')
+
+  const actors = useMemo(
+    () => Array.from(new Set(entries.map((e) => e.actor_name).filter(Boolean))).sort(),
+    [entries],
+  )
 
   async function refresh() {
     const { data } = await supabase
@@ -96,7 +102,8 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
   const filtered = entries.filter((e) => {
     const tableMatch = tableFilter === 'all' || e.table_name === tableFilter
     const actionMatch = actionFilter === 'all' || e.action === actionFilter
-    return tableMatch && actionMatch
+    const actorMatch = actorFilter === 'all' || e.actor_name === actorFilter
+    return tableMatch && actionMatch && actorMatch
   })
 
   return (
@@ -106,7 +113,7 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
         <CardDescription>Wer hat wann was geändert (neueste zuerst, max. 300 Einträge)</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 grid gap-3 sm:grid-cols-2">
+        <div className="mb-4 grid gap-3 sm:grid-cols-3">
           <select
             className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
             value={tableFilter}
@@ -117,6 +124,16 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
               <option key={t} value={t}>
                 {tableLabel(t)}
               </option>
+            ))}
+          </select>
+          <select
+            className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+            value={actorFilter}
+            onChange={(e) => setActorFilter(e.target.value)}
+          >
+            <option value="all">Alle Nutzer</option>
+            {actors.map((a) => (
+              <option key={a} value={a}>{a}</option>
             ))}
           </select>
           <select

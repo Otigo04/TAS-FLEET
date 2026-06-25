@@ -31,8 +31,8 @@ export function UserAvatar({ avatarUrl, name, size = 'md', className }: UserAvat
     <span
       className={cn(
         'relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full',
-        'font-semibold text-white shadow-sm ring-1 ring-black/5',
-        'bg-gradient-to-br from-emerald-500 to-teal-600',
+        'font-semibold text-white ring-1 ring-black/5',
+        'bg-brand-600',
         SIZE[size],
         className,
       )}

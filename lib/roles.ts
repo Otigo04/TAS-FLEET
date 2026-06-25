@@ -44,6 +44,30 @@ export type Capability =
   | 'manageMembers' // Mitglieder & Rollen verwalten
   | 'viewAudit' // Audit-Log / Änderungshistorie einsehen
 
+/** Deutsche Bezeichnungen der Berechtigungen (für die Rechte-Übersicht). */
+export const CAPABILITY_LABELS: Record<Capability, string> = {
+  manageMasterData: 'Stammdaten verwalten',
+  manageDispatch: 'Disposition',
+  manageIncidents: 'Vorfälle',
+  manageAbsences: 'Abwesenheiten',
+  manageSettings: 'Einstellungen',
+  viewReports: 'Berichte',
+  manageMembers: 'Mitglieder & Rollen',
+  viewAudit: 'Änderungsverlauf',
+}
+
+/** Alle Berechtigungen in Anzeige-Reihenfolge. */
+export const CAPABILITIES: Capability[] = [
+  'manageMasterData',
+  'manageDispatch',
+  'manageIncidents',
+  'manageAbsences',
+  'manageSettings',
+  'viewReports',
+  'manageMembers',
+  'viewAudit',
+]
+
 const MATRIX: Record<CompanyRole, Capability[]> = {
   owner: [
     'manageMasterData',

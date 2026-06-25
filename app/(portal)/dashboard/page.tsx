@@ -1,8 +1,9 @@
 import { requireCompletedUser } from '@/lib/auth'
 import { requireActiveCompany } from '@/lib/tenant'
 import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { DashboardCharts } from '@/components/portal/dashboard-charts'
 import { labelFor } from '@/lib/labels'
 
 function daysUntil(dateString: string | null) {
@@ -20,15 +21,24 @@ export default async function DashboardPage() {
   const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
   const displayName = fullName || user.email || 'dein Team'
 
-  const [driversResult, vehiclesResult, docsResult] = await Promise.all([
+  const [driversResult, vehiclesResult, docsResult, incidentsResult] = await Promise.all([
     supabase.from('drivers').select('*').eq('company_id', company.id).order('pschein_valid_until', { ascending: true }),
     supabase.from('vehicles').select('*').eq('company_id', company.id).order('created_at', { ascending: false }),
-    supabase.from('compliance_documents').select('*').eq('company_id', company.id)
+    supabase.from('compliance_documents').select('*').eq('company_id', company.id),
+    supabase.from('incidents').select('incident_type').eq('company_id', company.id)
   ])
 
   const drivers = driversResult.data ?? []
   const vehicles = vehiclesResult.data ?? []
   const docs = docsResult.data ?? []
+  const incidents = incidentsResult.data ?? []
+
+  const incidentsByType = Object.entries(
+    incidents.reduce<Record<string, number>>((acc, inc) => {
+      acc[inc.incident_type] = (acc[inc.incident_type] ?? 0) + 1
+      return acc
+    }, {}),
+  ).map(([type, count]) => ({ label: labelFor(type), count }))
 
   const driversCount = drivers.length
   const vehiclesCount = vehicles.length
@@ -71,113 +81,116 @@ export default async function DashboardPage() {
   criticalDates.sort((a, b) => a.days - b.days)
 
   return (
-    <main className="space-y-6">
-      <div className="animate-fade-up">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
-        <p className="mt-1 text-slate-600">Willkommen, {displayName}.</p>
+    <main className="animate-fade-up space-y-5">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-500">Willkommen zurück, {displayName}.</p>
+        </div>
       </div>
 
-      <section className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3">
-        <Card className="surface-card animate-fade-up-delay">
-          <CardHeader>
-            <CardTitle>Fahrer gesamt</CardTitle>
-            <CardDescription>Aktive Einträge</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-slate-900">{driversCount}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="surface-card animate-fade-up-delay-2">
-          <CardHeader>
-            <CardTitle>Fahrzeuge gesamt</CardTitle>
-            <CardDescription>Aktive Einträge</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-slate-900">{vehiclesCount}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="surface-card animate-fade-up-delay-3">
-          <CardHeader>
-            <CardTitle>Kritische Termine</CardTitle>
-            <CardDescription>Fällig in 30 Tagen</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-4xl font-bold text-slate-900">{criticalDates.length}</p>
-          </CardContent>
-        </Card>
+      {/* Kennzahlen-Zeile – kompakt, eine Leiste statt großer Kacheln */}
+      <section className="surface-card grid grid-cols-3 divide-x divide-slate-200">
+        <Stat label="Fahrer" value={driversCount} hint="aktive Einträge" />
+        <Stat label="Fahrzeuge" value={vehiclesCount} hint={`${activeVehicles} aktiv`} />
+        <Stat label="Kritische Termine" value={criticalDates.length} hint="nächste 60 Tage" />
       </section>
 
-      <section className="grid gap-3 sm:gap-4 lg:grid-cols-2">
-        <Card className="surface-card animate-fade-up-delay-2">
-          <CardHeader>
-            <CardTitle>Flottenstatus</CardTitle>
-            <CardDescription>Aktueller Status</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between rounded-md border border-slate-200 bg-white/70 p-3">
-              <span>{labelFor('active')}</span>
-              <Badge variant="success">{activeVehicles}</Badge>
-            </div>
-            <div className="flex items-center justify-between rounded-md border border-slate-200 bg-white/70 p-3">
-              <span>{labelFor('maintenance')}</span>
-              <Badge variant="warning">{maintenanceVehicles}</Badge>
-            </div>
-            <div className="flex items-center justify-between rounded-md border border-slate-200 bg-white/70 p-3">
-              <span>{labelFor('offline')}</span>
-              <Badge variant="danger">{offlineVehicles}</Badge>
-            </div>
-          </CardContent>
-        </Card>
+      <section className="grid gap-4 lg:grid-cols-2">
+        {/* Flottenstatus */}
+        <div className="surface-card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2.5">
+            <h2 className="text-sm font-semibold text-slate-800">Flottenstatus</h2>
+            <Link href="/fahrzeuge" className="text-xs font-medium text-brand-700 hover:underline">
+              Alle Fahrzeuge
+            </Link>
+          </div>
+          <ul className="divide-y divide-slate-100 text-sm">
+            <StatusRow label={labelFor('active')} count={activeVehicles} variant="success" />
+            <StatusRow label={labelFor('maintenance')} count={maintenanceVehicles} variant="warning" />
+            <StatusRow label={labelFor('offline')} count={offlineVehicles} variant="danger" />
+          </ul>
+        </div>
 
-        <Card className="surface-card animate-fade-up-delay-3">
-          <CardHeader>
-            <CardTitle>Kritische Termine</CardTitle>
-            <CardDescription>Ablaufdaten (Fahrer & Fahrzeuge)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {criticalDates.length === 0 ? (
-              <p className="text-sm text-slate-500">Keine bevorstehenden Ablaufdaten in den nächsten 30 Tagen.</p>
-            ) : (
-              <ul className="space-y-2">
-                {criticalDates.slice(0, 6).map((item) => (
-                  <li
-                    key={item.id}
-                    className="flex items-center justify-between rounded-md border border-slate-200 bg-white/70 p-3 text-sm"
-                  >
-                    <span className="font-medium text-slate-800">{item.title}</span>
-                    <Badge variant={item.days <= 7 ? 'danger' : 'warning'}>
-                      {item.days} Tage
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+        {/* Kritische Termine */}
+        <div className="surface-card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2.5">
+            <h2 className="text-sm font-semibold text-slate-800">Kritische Termine</h2>
+            <Link href="/compliance" className="text-xs font-medium text-brand-700 hover:underline">
+              Compliance
+            </Link>
+          </div>
+          {criticalDates.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-slate-500">
+              Keine Ablaufdaten in den nächsten 60 Tagen.
+            </p>
+          ) : (
+            <ul className="divide-y divide-slate-100 text-sm">
+              {criticalDates.slice(0, 6).map((item) => (
+                <li key={item.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                  <span className="truncate font-medium text-slate-700">{item.title}</span>
+                  <Badge variant={item.days <= 7 ? 'danger' : 'warning'}>{item.days} Tage</Badge>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
 
-      <section className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3">
-        <Link href="/schichtplanung" className="surface-card animate-fade-up-delay rounded-xl p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Disposition</p>
-          <h3 className="mt-2 text-lg font-semibold text-slate-900">Schichtplanung</h3>
-          <p className="mt-1 text-sm text-slate-600">Schichten planen</p>
-        </Link>
+      <DashboardCharts
+        fleet={{ active: activeVehicles, maintenance: maintenanceVehicles, offline: offlineVehicles }}
+        incidentsByType={incidentsByType}
+      />
 
-        <Link href="/compliance" className="surface-card animate-fade-up-delay-2 rounded-xl p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Fristen</p>
-          <h3 className="mt-2 text-lg font-semibold text-slate-900">Compliance-Center</h3>
-          <p className="mt-1 text-sm text-slate-600">Dokumente und Fristen</p>
-        </Link>
-
-        <Link href="/incidents" className="surface-card animate-fade-up-delay-3 rounded-xl p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Risikolog</p>
-          <h3 className="mt-2 text-lg font-semibold text-slate-900">Incident-Log</h3>
-          <p className="mt-1 text-sm text-slate-600">Vorfälle erfassen</p>
-        </Link>
+      {/* Schnellzugriff – schlanke Zeilen statt großer Kacheln */}
+      <section className="grid gap-3 sm:grid-cols-3">
+        <QuickLink href="/schichtplanung" label="Schichtplanung" hint="Schichten planen" />
+        <QuickLink href="/compliance" label="Compliance-Center" hint="Dokumente & Fristen" />
+        <QuickLink href="/incidents" label="Incident-Log" hint="Vorfälle erfassen" />
       </section>
     </main>
+  )
+}
+
+function Stat({ label, value, hint }: { label: string; value: number; hint?: string }) {
+  return (
+    <div className="px-4 py-3">
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="mt-0.5 text-2xl font-semibold tabular-nums text-slate-900">{value}</p>
+      {hint ? <p className="text-xs text-slate-400">{hint}</p> : null}
+    </div>
+  )
+}
+
+function StatusRow({
+  label,
+  count,
+  variant,
+}: {
+  label: string
+  count: number
+  variant: 'success' | 'warning' | 'danger'
+}) {
+  return (
+    <li className="flex items-center justify-between px-4 py-2.5">
+      <span className="text-slate-700">{label}</span>
+      <Badge variant={variant}>{count}</Badge>
+    </li>
+  )
+}
+
+function QuickLink({ href, label, hint }: { href: string; label: string; hint: string }) {
+  return (
+    <Link
+      href={href}
+      className="surface-card group flex items-center justify-between px-4 py-3 transition-colors hover:bg-slate-50"
+    >
+      <div>
+        <p className="text-sm font-semibold text-slate-800">{label}</p>
+        <p className="text-xs text-slate-500">{hint}</p>
+      </div>
+      <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5" />
+    </Link>
   )
 }
 

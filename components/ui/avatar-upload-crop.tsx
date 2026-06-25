@@ -1,16 +1,20 @@
 'use client'
 
 import { useId, useRef, useState } from 'react'
-import { Upload, User, X, Check, ZoomIn, Pencil } from 'lucide-react'
+import { Upload, User, X, Check, ZoomIn, Pencil, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/client'
+import { uploadAvatar } from '@/lib/storage'
 
 interface AvatarUploadCropProps {
   value: string | null
   onChange: (url: string | null) => void
   placeholder?: React.ReactNode
+  /** Storage-Ordner im `avatars`-Bucket (z. B. 'drivers', 'vehicles', 'profiles'). */
+  pathPrefix?: string
 }
 
-export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadCropProps) {
+export function AvatarUploadCrop({ value, onChange, placeholder, pathPrefix = 'misc' }: AvatarUploadCropProps) {
   const maskId = useId()
   const [isOpen, setIsOpen] = useState(false)
   const [imageSrc, setImageSrc] = useState<string | null>(null)
@@ -22,10 +26,13 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [offsetSnap, setOffsetSnap] = useState({ x: 0, y: 0 })
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   const fileRef = useRef<HTMLInputElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const cropRef = useRef<HTMLDivElement>(null)
+  const supabase = createClient()
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -111,15 +118,38 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
         displaySize / scale,
         0, 0, OUT, OUT,
       )
-      onChange(canvas.toDataURL('image/jpeg', 0.88))
-      handleClose()
+      // Zugeschnittenes Bild als Blob in den Storage laden, statt es als
+      // Data-URL in der DB-Spalte abzulegen (hält die Datenbank schlank).
+      canvas.toBlob(
+        async (blob) => {
+          if (!blob) {
+            setUploadError('Bild konnte nicht verarbeitet werden.')
+            return
+          }
+          setIsUploading(true)
+          setUploadError(null)
+          try {
+            const url = await uploadAvatar(supabase, pathPrefix, blob)
+            onChange(url)
+            handleClose()
+          } catch (e) {
+            setUploadError(e instanceof Error ? e.message : 'Upload fehlgeschlagen.')
+          } finally {
+            setIsUploading(false)
+          }
+        },
+        'image/jpeg',
+        0.88,
+      )
     }
     img.src = imageSrc
   }
 
   function handleClose() {
+    if (isUploading) return
     setIsOpen(false)
     setImageSrc(null)
+    setUploadError(null)
   }
 
   const imgX = displaySize / 2 - (naturalSize.w * scale) / 2 + offset.x
@@ -265,18 +295,24 @@ export function AvatarUploadCrop({ value, onChange, placeholder }: AvatarUploadC
               />
             </div>
 
+            {uploadError && <p className="text-sm text-rose-600">{uploadError}</p>}
+
             <div className="flex gap-3">
-              <Button type="button" variant="outline" className="flex-1" onClick={handleClose}>
+              <Button type="button" variant="outline" className="flex-1" onClick={handleClose} disabled={isUploading}>
                 Abbrechen
               </Button>
               <Button
                 type="button"
                 className="flex-1 bg-slate-900 text-white hover:bg-slate-800"
                 onClick={handleConfirm}
-                disabled={naturalSize.w === 0}
+                disabled={naturalSize.w === 0 || isUploading}
               >
-                <Check className="mr-2 h-4 w-4" />
-                Übernehmen
+                {isUploading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="mr-2 h-4 w-4" />
+                )}
+                {isUploading ? 'Lädt hoch…' : 'Übernehmen'}
               </Button>
             </div>
           </div>

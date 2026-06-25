@@ -10,8 +10,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { Download } from 'lucide-react'
 import { useActiveCompanyId } from '@/components/portal/tenant-provider'
+import { AttachmentList } from '@/components/portal/attachments'
 import { labelFor } from '@/lib/labels'
+import { downloadCsv, todayStamp } from '@/lib/export'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
@@ -318,9 +321,35 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
       </Card>
 
       <Card className="surface-card animate-fade-up-delay-2">
-        <CardHeader>
-          <CardTitle>Incident-Log</CardTitle>
-          <CardDescription>Alle Einträge</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Incident-Log</CardTitle>
+            <CardDescription>Alle Einträge</CardDescription>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={filteredIncidents.length === 0}
+            onClick={() =>
+              downloadCsv(
+                `incidents-${todayStamp()}`,
+                ['Datum', 'Typ', 'Priorität', 'Status', 'Fahrer', 'Fahrzeug', 'Kosten EUR', 'Beschreibung'],
+                filteredIncidents.map((i) => [
+                  i.occurred_on,
+                  labelFor(i.incident_type),
+                  labelFor(i.severity),
+                  labelFor(i.status),
+                  driverName(i.driver_id),
+                  vehicleLabel(i.vehicle_id),
+                  i.cost_eur,
+                  i.description,
+                ]),
+              )
+            }
+          >
+            <Download className="mr-2 h-4 w-4" /> CSV
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
@@ -404,6 +433,16 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
                       )}
                     </div>
                   </div>
+
+                  {companyId && (
+                    <div className="mt-3 border-t border-slate-100 pt-3">
+                      <AttachmentList
+                        companyId={companyId}
+                        scopeType="incident"
+                        entityId={incident.id}
+                      />
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

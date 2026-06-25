@@ -4,30 +4,26 @@
 
 :root {
   color-scheme: light;
-  --portal-bg: #eef1f6;
-  --portal-bg-2: #e6eaf2;
-  --portal-ink: #0b1220;
-  --portal-muted: #51607a;
-  --portal-accent: #059669;
-  --portal-accent-2: #0d9488;
+  --portal-bg: #f4f6f8;
+  --portal-bg-2: #f4f6f8;
+  --portal-ink: #0f172a;
+  --portal-muted: #64748b;
+  --portal-accent: #2f6a45;
+  --portal-accent-2: #2f6a45;
   --portal-surface: #ffffff;
-  --portal-border: #d6deea;
-  --portal-ring: rgba(5, 150, 105, 0.35);
+  --portal-border: #e2e8f0;
+  --portal-ring: rgba(47, 106, 69, 0.35);
 }
 
 body {
-  font-family: var(--font-space-grotesk), 'Segoe UI', sans-serif;
-  background:
-    radial-gradient(1200px 600px at 100% -10%, rgba(13, 148, 136, 0.08), transparent 60%),
-    radial-gradient(900px 500px at -10% 0%, rgba(5, 150, 105, 0.07), transparent 55%),
-    linear-gradient(180deg, #f6f8fc 0%, var(--portal-bg) 60%, var(--portal-bg-2) 100%);
-  background-attachment: fixed;
+  font-family: var(--font-inter), 'Segoe UI', system-ui, sans-serif;
+  background: var(--portal-bg);
   @apply text-ink antialiased;
 }
 
 /* ---------- Animations ---------- */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeIn {
@@ -46,10 +42,10 @@ body {
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.animate-fade-up        { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.animate-fade-up-delay  { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both; }
-.animate-fade-up-delay-2{ animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both; }
-.animate-fade-up-delay-3{ animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both; }
+.animate-fade-up        { animation: fadeUp 0.28s ease-out both; }
+.animate-fade-up-delay  { animation: fadeUp 0.28s ease-out 0.04s both; }
+.animate-fade-up-delay-2{ animation: fadeUp 0.28s ease-out 0.07s both; }
+.animate-fade-up-delay-3{ animation: fadeUp 0.28s ease-out 0.1s both; }
 .animate-fade-in        { animation: fadeIn 0.4s ease-out both; }
 .animate-scale-in       { animation: scaleIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .animate-dropdown-in    { animation: dropdownIn 0.18s cubic-bezier(0.22, 1, 0.36, 1) both; }
@@ -70,20 +66,15 @@ body {
 .surface-card {
   background: var(--portal-surface);
   border: 1px solid var(--portal-border);
-  border-radius: 0.85rem;
-  box-shadow:
-    0 1px 2px rgba(11, 18, 32, 0.04),
-    0 12px 32px -22px rgba(11, 18, 32, 0.45);
-  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease;
 }
 .surface-card:hover {
-  border-color: #c3cedd;
-  box-shadow:
-    0 1px 2px rgba(11, 18, 32, 0.05),
-    0 20px 44px -24px rgba(11, 18, 32, 0.5);
+  border-color: #cbd5e1;
 }
 
-/* Subtle accent top-edge for emphasised cards */
+/* Dezente Akzentkante für hervorgehobene Karten */
 .surface-card-accent {
   position: relative;
   overflow: hidden;
@@ -92,8 +83,8 @@ body {
   content: '';
   position: absolute;
   inset: 0 0 auto 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--portal-accent), var(--portal-accent-2));
+  height: 2px;
+  background: var(--portal-accent);
 }
 
 /* ---------- Bits ---------- */
@@ -189,6 +180,10 @@ body {
 [data-view-mode='desktop'] .vm-only-mobile       { display: none !important; }
 [data-view-mode='mobile']  .vm-only-mobile-flex  { display: flex !important; }
 [data-view-mode='mobile']  .vm-only-mobile-block { display: block !important; }
+
+/* Nur-Desktop-Elemente: z. B. die inline Schnellsuche im Header */
+[data-view-mode='mobile']  .vm-only-desktop       { display: none !important; }
+[data-view-mode='desktop'] .vm-only-desktop-flex  { display: flex !important; }
 
 /* ---------- Print / PDF-Export ---------- */
 @media print {

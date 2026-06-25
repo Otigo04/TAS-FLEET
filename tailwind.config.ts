@@ -18,19 +18,57 @@ const config: Config = {
     extend: {
       colors: {
         surface: '#ffffff',
-        ink: '#0b1220',
-        muted: '#51607a',
+        ink: '#0f172a',
+        muted: '#64748b',
+        // Eine einzige, ruhige Corporate-Grün-Skala. emerald & teal werden
+        // bewusst auf dieselbe Skala gelegt, damit Alt-Verläufe (from-emerald
+        // → to-teal) flach erscheinen und der frühere Mehrfarb-Look verschwindet.
         accent: {
-          DEFAULT: '#059669',
-          600: '#047857',
+          DEFAULT: '#2f6a45',
+          600: '#2f6a45',
+          700: '#285639',
+        },
+        brand: {
+          50: '#f1f6f3',
+          100: '#dceae1',
+          200: '#bcd6c6',
+          300: '#93bca4',
+          400: '#639d7d',
+          500: '#437d5e',
+          600: '#2f6a45',
+          700: '#285639',
+          800: '#234630',
+          900: '#1e3a29',
+        },
+        emerald: {
+          50: '#f1f6f3',
+          100: '#dceae1',
+          200: '#bcd6c6',
+          300: '#93bca4',
+          400: '#639d7d',
+          500: '#437d5e',
+          600: '#2f6a45',
+          700: '#285639',
+          800: '#234630',
+          900: '#1e3a29',
         },
         teal: {
-          accent: '#0d9488',
+          accent: '#2f6a45',
+          50: '#f1f6f3',
+          100: '#dceae1',
+          200: '#bcd6c6',
+          300: '#93bca4',
+          400: '#639d7d',
+          500: '#437d5e',
+          600: '#2f6a45',
+          700: '#285639',
+          800: '#234630',
+          900: '#1e3a29',
         },
       },
       boxShadow: {
-        card: '0 1px 2px rgba(11,18,32,0.04), 0 12px 32px -22px rgba(11,18,32,0.45)',
-        'card-hover': '0 1px 2px rgba(11,18,32,0.05), 0 20px 44px -24px rgba(11,18,32,0.5)',
+        card: '0 1px 2px rgba(15,23,42,0.05)',
+        'card-hover': '0 1px 3px rgba(15,23,42,0.08)',
       },
       keyframes: {
         marquee: {
@@ -38,7 +76,7 @@ const config: Config = {
           '100%': { transform: 'translateX(-50%)' },
         },
         fadeUp: {
-          from: { opacity: '0', transform: 'translateY(10px)' },
+          from: { opacity: '0', transform: 'translateY(4px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
         scaleIn: {

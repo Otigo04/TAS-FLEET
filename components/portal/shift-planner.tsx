@@ -1,10 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Loader2, Save, Check, Download } from 'lucide-react'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 import type { Database } from '@/lib/supabase/database.types'
 import { useDelayedLoading } from '@/lib/use-delayed-loading'
+import { createClient } from '@/lib/supabase/client'
+import { useActiveCompanyId } from '@/components/portal/tenant-provider'
+import { parseHourValue, formatHours } from '@/lib/timesheet'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -15,7 +18,7 @@ type ShiftRow = Database['public']['Tables']['shift_assignments']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
 type WeekdayCode = 'MO' | 'DI' | 'MI' | 'DO' | 'FR' | 'SA' | 'SO'
 
-type TimesheetDraftMap = Record<string, WeeklyTimesheetRow[]>
+type TimesheetRow = Database['public']['Tables']['timesheet_entries']['Row']
 
 interface WeeklyTimesheetRow {
   day: WeekdayCode
@@ -33,7 +36,6 @@ interface ShiftPlannerProps {
   drivers: DriverRow[]
 }
 
-const draftStorageKey = 'timesheet-weekly-drafts-v1'
 const weekdays: WeekdayCode[] = ['MO', 'DI', 'MI', 'DO', 'FR', 'SA', 'SO']
 const sharedRowFields: Array<keyof Omit<WeeklyTimesheetRow, 'day' | 'date' | 'note'>> = [
   'start',
@@ -149,40 +151,6 @@ function createRowsForWeek(isoWeekValue: string) {
   })
 }
 
-function parseHourValue(value: string) {
-  const normalized = value.trim().replace(',', '.')
-  if (!normalized) return 0
-
-  if (/^\d{1,2}:\d{2}$/.test(normalized)) {
-    const [hoursPart, minutesPart] = normalized.split(':')
-    const hours = Number(hoursPart)
-    const minutes = Number(minutesPart)
-    if (!Number.isNaN(hours) && !Number.isNaN(minutes)) {
-      return hours + minutes / 60
-    }
-  }
-
-  const numberValue = Number(normalized)
-  return Number.isNaN(numberValue) ? 0 : numberValue
-}
-
-function buildDraftKey(driverId: string, isoWeekValue: string) {
-  return `${driverId}__${isoWeekValue}`
-}
-
-function loadDraftsFromStorage(): TimesheetDraftMap {
-  if (typeof window === 'undefined') return {}
-
-  try {
-    const raw = window.localStorage.getItem(draftStorageKey)
-    if (!raw) return {}
-    const parsed = JSON.parse(raw) as TimesheetDraftMap
-    return parsed ?? {}
-  } catch {
-    return {}
-  }
-}
-
 function safePdfText(value: string) {
   return value.replace(/\s+/g, ' ').trim()
 }
@@ -234,6 +202,16 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
   const [pdfError, setPdfError] = useState<string | null>(null)
   const showPdfSpinner = useDelayedLoading(isPdfBusy)
 
+  const supabase = useMemo(() => createClient(), [])
+  const companyId = useActiveCompanyId()
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [savedAt, setSavedAt] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [monthEntries, setMonthEntries] = useState<TimesheetRow[]>([])
+  // Verhindert, dass ein Realtime-/Lade-Refresh ungespeicherte Eingaben überschreibt.
+  const isDirtyRef = useRef(false)
+
   const selectedDriver = useMemo(
     () => drivers.find((driver) => driver.id === selectedDriverId) ?? null,
     [drivers, selectedDriverId]
@@ -250,7 +228,26 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
     return Array.from(options).sort()
   }, [selectedWeek])
 
-  useEffect(() => {
+  // Monatszeitraum (für das Stundenkonto) aus der gewählten Woche ableiten.
+  const monthRange = useMemo(() => {
+    const weekStart = getStartOfIsoWeek(selectedWeek)
+    if (!weekStart) return null
+    const year = weekStart.getUTCFullYear()
+    const month = weekStart.getUTCMonth()
+    const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate()
+    const label = new Date(Date.UTC(year, month, 1)).toLocaleDateString('de-DE', {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    })
+    return {
+      first: `${year}-${pad2(month + 1)}-01`,
+      last: `${year}-${pad2(month + 1)}-${pad2(lastDay)}`,
+      label,
+    }
+  }, [selectedWeek])
+
+  const loadWeek = useCallback(async () => {
     const weekStart = getStartOfIsoWeek(selectedWeek)
     const baseRows = createRowsForWeek(selectedWeek)
 
@@ -259,43 +256,184 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
       return
     }
 
-    const draftKey = buildDraftKey(selectedDriverId, selectedWeek)
-    const drafts = loadDraftsFromStorage()
-    const draftRows = drafts[draftKey]
+    const dates = baseRows.map((row) => row.date).filter(Boolean)
+    setIsLoading(true)
+    const { data } = await supabase
+      .from('timesheet_entries')
+      .select('*')
+      .eq('driver_id', selectedDriverId)
+      .in('work_date', dates)
+    setIsLoading(false)
 
-    if (draftRows && draftRows.length === weekdays.length) {
+    if (data && data.length > 0) {
+      const byDate = new Map(data.map((entry) => [entry.work_date, entry]))
       setRows(
-        draftRows.map((row, index) => ({
-          ...row,
-          day: weekdays[index],
-          date: baseRows[index].date,
-        }))
+        baseRows.map((row) => {
+          const entry = byDate.get(row.date)
+          if (!entry) return row
+          return {
+            ...row,
+            start: entry.start_time ?? '',
+            end: entry.end_time ?? '',
+            pause: entry.pause ?? '',
+            workHours: entry.work_hours ?? '',
+            overtimeHours: entry.overtime_hours ?? '',
+            note: entry.note ?? '',
+          }
+        }),
       )
+    } else {
+      // Noch nichts gespeichert -> aus der Disposition vorbefüllen.
+      setRows(buildRowsFromShifts(baseRows, initialShifts, selectedDriverId, weekStart))
+    }
+    isDirtyRef.current = false
+  }, [supabase, selectedDriverId, selectedWeek, initialShifts])
+
+  const loadMonth = useCallback(async () => {
+    if (!selectedDriverId || !monthRange) {
+      setMonthEntries([])
       return
     }
-
-    setRows(buildRowsFromShifts(baseRows, initialShifts, selectedDriverId, weekStart))
-  }, [initialShifts, selectedDriverId, selectedWeek])
+    const { data } = await supabase
+      .from('timesheet_entries')
+      .select('*')
+      .eq('driver_id', selectedDriverId)
+      .gte('work_date', monthRange.first)
+      .lte('work_date', monthRange.last)
+    setMonthEntries(data ?? [])
+  }, [supabase, selectedDriverId, monthRange])
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    void loadWeek()
+  }, [loadWeek])
+
+  useEffect(() => {
+    void loadMonth()
+  }, [loadMonth])
+
+  // Realtime: Änderungen von Kollegen übernehmen, solange nichts Ungespeichertes offen ist.
+  useEffect(() => {
     if (!selectedDriverId) return
-
-    const draftKey = buildDraftKey(selectedDriverId, selectedWeek)
-    const currentDrafts = loadDraftsFromStorage()
-    const nextDrafts = {
-      ...currentDrafts,
-      [draftKey]: rows,
+    const channel = supabase
+      .channel(`timesheets-${selectedDriverId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'timesheet_entries', filter: `driver_id=eq.${selectedDriverId}` },
+        () => {
+          if (!isDirtyRef.current) void loadWeek()
+          void loadMonth()
+        },
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
     }
+  }, [supabase, selectedDriverId, loadWeek, loadMonth])
 
+  const monthIstHours = useMemo(
+    () => monthEntries.reduce((sum, entry) => sum + Number(entry.work_hours_num ?? 0), 0),
+    [monthEntries],
+  )
+  const monthOvertimeHours = useMemo(
+    () => monthEntries.reduce((sum, entry) => sum + Number(entry.overtime_num ?? 0), 0),
+    [monthEntries],
+  )
+  const monthTargetHours = useMemo(() => {
+    const weekly = selectedDriver?.weekly_target_hours
+    if (!weekly) return null
+    // grobe Schätzung: Wochensoll / 7 * Tage im Monat
+    const days = monthRange ? new Date(monthRange.last).getUTCDate() : 30
+    return (Number(weekly) / 7) * days
+  }, [selectedDriver, monthRange])
+
+  async function handleSave() {
+    if (!selectedDriverId || !companyId) return
+    setIsSaving(true)
+    setSaveError(null)
     try {
-      window.localStorage.setItem(draftStorageKey, JSON.stringify(nextDrafts))
-    } catch {
-      // ignore localStorage errors to keep the UI responsive
+      const toUpsert: Database['public']['Tables']['timesheet_entries']['Insert'][] = []
+      const toDeleteDates: string[] = []
+
+      for (const row of rows) {
+        if (!row.date) continue
+        const hasContent = [row.start, row.end, row.pause, row.workHours, row.overtimeHours, row.note].some(
+          (value) => value.trim() !== '',
+        )
+        if (hasContent) {
+          toUpsert.push({
+            company_id: companyId,
+            driver_id: selectedDriverId,
+            work_date: row.date,
+            start_time: row.start || null,
+            end_time: row.end || null,
+            pause: row.pause || null,
+            work_hours: row.workHours || null,
+            overtime_hours: row.overtimeHours || null,
+            work_hours_num: parseHourValue(row.workHours),
+            overtime_num: parseHourValue(row.overtimeHours),
+            note: row.note || null,
+          })
+        } else {
+          toDeleteDates.push(row.date)
+        }
+      }
+
+      if (toUpsert.length > 0) {
+        const { error } = await supabase
+          .from('timesheet_entries')
+          .upsert(toUpsert, { onConflict: 'company_id,driver_id,work_date' })
+        if (error) throw error
+      }
+      if (toDeleteDates.length > 0) {
+        const { error } = await supabase
+          .from('timesheet_entries')
+          .delete()
+          .eq('driver_id', selectedDriverId)
+          .in('work_date', toDeleteDates)
+        if (error) throw error
+      }
+
+      isDirtyRef.current = false
+      setSavedAt(Date.now())
+      await loadMonth()
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Speichern fehlgeschlagen.')
+    } finally {
+      setIsSaving(false)
     }
-  }, [rows, selectedDriverId, selectedWeek])
+  }
+
+  function handleExportCsv() {
+    const header = ['Datum', 'Start', 'Ende', 'Pause', 'Arbeitszeit', 'Überstunden', 'Bemerkung']
+    const sorted = [...monthEntries].sort((a, b) => a.work_date.localeCompare(b.work_date))
+    const lines = sorted.map((entry) => [
+      entry.work_date,
+      entry.start_time ?? '',
+      entry.end_time ?? '',
+      entry.pause ?? '',
+      entry.work_hours ?? '',
+      entry.overtime_hours ?? '',
+      entry.note ?? '',
+    ])
+    const csv = [header, ...lines]
+      .map((cols) => cols.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(';'))
+      .join('\n')
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    const safeDriver = (selectedDriver?.name || 'mitarbeiter')
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-zA-Z0-9_-]+/g, '-')
+      .toLowerCase()
+    link.href = url
+    link.download = `stundenkonto-${safeDriver}-${monthRange?.first.slice(0, 7) ?? ''}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
 
   function updateRow(day: WeekdayCode, field: keyof Omit<WeeklyTimesheetRow, 'day'>, value: string) {
+    isDirtyRef.current = true
     setRows((current) => {
       const next = current.map((row) => {
         if (row.day !== day) return row
@@ -431,21 +569,21 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
 
   return (
     <section className="space-y-6">
-      <Card className="animate-fade-up-delay border border-sky-200/70 bg-gradient-to-br from-sky-50 via-white to-cyan-50 shadow-sm">
-        <CardHeader className="rounded-t-xl border-b border-sky-200/70 bg-white/65 backdrop-blur">
+      <Card className="border border-slate-200 bg-white shadow-sm">
+        <CardHeader className="rounded-t-lg border-b border-slate-200 bg-slate-50">
           <CardTitle>Wöchentlicher Stundenzettel</CardTitle>
           <CardDescription>Mitarbeiter und Woche auswählen, Zeiten erfassen, PDF exportieren</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="rounded-xl border border-sky-200/70 bg-sky-100/60 p-3">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
             <div className="grid gap-3 md:grid-cols-[1.3fr_1fr_auto_auto_auto] md:items-end">
             <div className="space-y-1.5">
-              <Label htmlFor="timesheet-driver" className="text-xs uppercase tracking-wide text-sky-700">
+              <Label htmlFor="timesheet-driver" className="text-xs uppercase tracking-wide text-slate-500">
                 Mitarbeiter
               </Label>
               <select
                 id="timesheet-driver"
-                className="flex h-10 w-full rounded-md border border-sky-300 bg-white px-3 py-2 text-sm shadow-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
                 value={selectedDriverId}
                 onChange={(event) => setSelectedDriverId(event.target.value)}
                 required
@@ -459,7 +597,7 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="timesheet-week" className="text-xs uppercase tracking-wide text-sky-700">
+              <Label htmlFor="timesheet-week" className="text-xs uppercase tracking-wide text-slate-500">
                 Woche (direkt)
               </Label>
               <Input
@@ -467,17 +605,17 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
                 type="week"
                 value={selectedWeek}
                 onChange={(event) => setSelectedWeek(event.target.value)}
-                className="border-sky-300 bg-white shadow-sm"
+                className="border-slate-300 bg-white shadow-sm"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="timesheet-week-select" className="text-xs uppercase tracking-wide text-sky-700">
+              <Label htmlFor="timesheet-week-select" className="text-xs uppercase tracking-wide text-slate-500">
                 Woche (Auswahl)
               </Label>
               <select
                 id="timesheet-week-select"
-                className="flex h-10 w-full min-w-[160px] rounded-md border border-sky-300 bg-white px-3 py-2 text-sm shadow-sm"
+                className="flex h-10 w-full min-w-[160px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
                 value={selectedWeek}
                 onChange={(event) => setSelectedWeek(event.target.value)}
               >
@@ -504,14 +642,14 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
             </div>
           </div>
 
-          <div className="rounded-lg border border-cyan-200 bg-cyan-50/80 p-3">
-            <p className="text-xs text-cyan-900">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs text-slate-700">
               Tipp: Wenn du in der Zeile MO Start, Ende, Pause, Arbeitszeit oder Überstunden eingibst, wird der Wert automatisch auf alle Tage übernommen.
             </p>
           </div>
 
           <div className="space-y-2">
-            <div className="hidden grid-cols-[46px_96px_1fr_1fr_1fr_1fr_1fr_2fr] gap-2 text-[11px] font-semibold uppercase tracking-wide text-sky-700 md:grid">
+            <div className="hidden grid-cols-[46px_96px_1fr_1fr_1fr_1fr_1fr_2fr] gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 md:grid">
               <span>Tag</span>
               <span>Datum</span>
               <span>Start</span>
@@ -527,27 +665,27 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
                 key={row.day}
                 className={`rounded-lg border p-2.5 ${
                   index % 2 === 0
-                    ? 'border-sky-200/70 bg-white/80'
-                    : 'border-cyan-200/70 bg-cyan-50/65'
+                    ? 'border-slate-200 bg-white'
+                    : 'border-slate-200 bg-slate-50'
                 }`}
               >
                 <div className="grid gap-2 md:grid-cols-[46px_96px_1fr_1fr_1fr_1fr_1fr_2fr]">
                   <div className="space-y-1">
-                    <Label htmlFor={`row-day-${row.day}`} className="text-[11px] text-sky-700 md:hidden">
+                    <Label htmlFor={`row-day-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
                       Tag
                     </Label>
-                    <Input id={`row-day-${row.day}`} value={row.day} readOnly className="border-sky-200 bg-sky-100/90" />
+                    <Input id={`row-day-${row.day}`} value={row.day} readOnly className="border-slate-200 bg-slate-100" />
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-date-${row.day}`} className="text-[11px] text-sky-700 md:hidden">
+                    <Label htmlFor={`row-date-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
                       Datum
                     </Label>
-                    <Input id={`row-date-${row.day}`} value={row.date} readOnly className="border-sky-200 bg-sky-100/90" />
+                    <Input id={`row-date-${row.day}`} value={row.date} readOnly className="border-slate-200 bg-slate-100" />
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-start-${row.day}`} className="text-[11px] text-sky-700 md:hidden">
+                    <Label htmlFor={`row-start-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
                       Start
                     </Label>
                     <Input
@@ -559,7 +697,7 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-end-${row.day}`} className="text-[11px] text-sky-700 md:hidden">
+                    <Label htmlFor={`row-end-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
                       Ende
                     </Label>
                     <Input
@@ -571,7 +709,7 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-break-${row.day}`} className="text-[11px] text-sky-700 md:hidden">
+                    <Label htmlFor={`row-break-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
                       Pause
                     </Label>
                     <Input
@@ -583,7 +721,7 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-work-${row.day}`} className="text-[11px] text-sky-700 md:hidden">
+                    <Label htmlFor={`row-work-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
                       Arbeitszeit
                     </Label>
                     <Input
@@ -595,7 +733,7 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-over-${row.day}`} className="text-[11px] text-sky-700 md:hidden">
+                    <Label htmlFor={`row-over-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
                       Überstunden
                     </Label>
                     <Input
@@ -607,7 +745,7 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-note-${row.day}`} className="text-[11px] text-sky-700 md:hidden">
+                    <Label htmlFor={`row-note-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
                       Bemerkung
                     </Label>
                     <Input
@@ -622,17 +760,90 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3">
-            <p className="text-sm text-sky-900">
-              Stunden gesamt: <span className="font-semibold">{totalWorkHours}</span>
-            </p>
-            <Button type="button" onClick={() => void handleDownloadPdf()} disabled={isPdfBusy || !selectedDriverId}>
-              {showPdfSpinner ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {isPdfBusy ? 'PDF wird erstellt...' : 'Stundenzettel als PDF erstellen'}
-            </Button>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-slate-700">
+                Stunden gesamt: <span className="font-semibold">{totalWorkHours}</span>
+              </p>
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" /> : null}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                onClick={() => void handleSave()}
+                disabled={isSaving || !selectedDriverId || !companyId}
+              >
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {isSaving ? 'Speichert…' : 'Speichern'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void handleDownloadPdf()}
+                disabled={isPdfBusy || !selectedDriverId}
+              >
+                {showPdfSpinner ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {isPdfBusy ? 'PDF…' : 'PDF'}
+              </Button>
+            </div>
           </div>
 
+          {saveError ? <p className="text-sm text-red-600">{saveError}</p> : null}
+          {savedAt && !isSaving ? (
+            <p className="flex items-center gap-1.5 text-sm text-brand-700">
+              <Check className="h-4 w-4" /> Gespeichert.
+            </p>
+          ) : null}
           {pdfError ? <p className="text-sm text-red-600">{pdfError}</p> : null}
+        </CardContent>
+      </Card>
+
+      {/* Monats-Stundenkonto für den gewählten Fahrer */}
+      <Card className="border border-slate-200 bg-white shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between rounded-t-lg border-b border-slate-200 bg-slate-50">
+          <div>
+            <CardTitle>Stundenkonto</CardTitle>
+            <CardDescription>
+              {selectedDriver?.name ?? 'Fahrer'} · {monthRange?.label ?? ''}
+            </CardDescription>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleExportCsv}
+            disabled={monthEntries.length === 0}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            CSV
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="rounded-md border border-slate-200 p-3">
+              <p className="text-xs text-slate-500">Ist-Stunden</p>
+              <p className="text-xl font-semibold tabular-nums text-slate-900">{formatHours(monthIstHours)}</p>
+            </div>
+            <div className="rounded-md border border-slate-200 p-3">
+              <p className="text-xs text-slate-500">Überstunden</p>
+              <p className="text-xl font-semibold tabular-nums text-slate-900">{formatHours(monthOvertimeHours)}</p>
+            </div>
+            <div className="rounded-md border border-slate-200 p-3">
+              <p className="text-xs text-slate-500">Soll-Stunden</p>
+              <p className="text-xl font-semibold tabular-nums text-slate-900">
+                {monthTargetHours !== null ? formatHours(monthTargetHours) : '—'}
+              </p>
+            </div>
+            <div className="rounded-md border border-slate-200 p-3">
+              <p className="text-xs text-slate-500">Erfasste Tage</p>
+              <p className="text-xl font-semibold tabular-nums text-slate-900">{monthEntries.length}</p>
+            </div>
+          </div>
+          {monthTargetHours === null ? (
+            <p className="mt-3 text-xs text-slate-400">
+              Hinterlege „Wochensoll (Std.)" beim Fahrer, um Soll/Ist zu vergleichen. (optional)
+            </p>
+          ) : null}
         </CardContent>
       </Card>
     </section>

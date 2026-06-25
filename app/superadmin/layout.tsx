@@ -17,11 +17,11 @@ export default async function SuperadminLayout({ children }: { children: React.R
       <div className="mx-auto flex min-h-screen w-full max-w-[1400px] flex-col">
         <header className="flex items-center justify-between gap-4 border-b border-white/10 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 shadow-lg shadow-orange-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-amber-500 text-slate-950">
               <ShieldAlert className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-400">
+              <p className="text-xs font-semibold uppercase tracking-wide text-amber-400">
                 Plattform-Administration
               </p>
               <h1 className="text-lg font-bold tracking-tight">Superadmin Konsole</h1>
@@ -44,8 +44,8 @@ export default async function SuperadminLayout({ children }: { children: React.R
 
         <main className="flex-1 p-6">{children}</main>
 
-        <footer className="border-t border-white/10 px-6 py-3 text-center text-xs uppercase tracking-widest text-slate-500">
-          © ORYON FLEET V0.7 · ORYON SYSTEMS · Superadmin
+        <footer className="border-t border-white/10 px-6 py-3 text-center text-xs text-slate-500">
+          © TAS FLEET v0.7 · TAS WEBWORKS · Superadmin
         </footer>
       </div>
     </div>

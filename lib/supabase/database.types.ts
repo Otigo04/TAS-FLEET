@@ -157,6 +157,8 @@ export interface Database {
           district: string | null
           current_shift: string
           notes: string[]
+          weekly_target_hours: number | null
+          annual_vacation_days: number | null
           avatar_url: string | null
           created_at: string
           updated_at: string
@@ -186,6 +188,8 @@ export interface Database {
           district?: string | null
           current_shift: string
           notes?: string[]
+          weekly_target_hours?: number | null
+          annual_vacation_days?: number | null
           avatar_url?: string | null
           created_at?: string
           updated_at?: string
@@ -215,6 +219,8 @@ export interface Database {
           district?: string | null
           current_shift?: string
           notes?: string[]
+          weekly_target_hours?: number | null
+          annual_vacation_days?: number | null
           avatar_url?: string | null
           created_at?: string
           updated_at?: string
@@ -354,6 +360,16 @@ export interface Database {
           license_plate: string
           model: string
           status: string
+          build_year: number | null
+          vin: string | null
+          color: string | null
+          fuel_type: string | null
+          hu_due: string | null
+          insurance_company: string | null
+          insurance_number: string | null
+          insurance_due: string | null
+          purchase_date: string | null
+          mileage_km: number | null
           avatar_url: string | null
           created_at: string
           updated_at: string
@@ -364,6 +380,16 @@ export interface Database {
           license_plate: string
           model: string
           status: string
+          build_year?: number | null
+          vin?: string | null
+          color?: string | null
+          fuel_type?: string | null
+          hu_due?: string | null
+          insurance_company?: string | null
+          insurance_number?: string | null
+          insurance_due?: string | null
+          purchase_date?: string | null
+          mileage_km?: number | null
           avatar_url?: string | null
           created_at?: string
           updated_at?: string
@@ -374,6 +400,16 @@ export interface Database {
           license_plate?: string
           model?: string
           status?: string
+          build_year?: number | null
+          vin?: string | null
+          color?: string | null
+          fuel_type?: string | null
+          hu_due?: string | null
+          insurance_company?: string | null
+          insurance_number?: string | null
+          insurance_due?: string | null
+          purchase_date?: string | null
+          mileage_km?: number | null
           avatar_url?: string | null
           created_at?: string
           updated_at?: string
@@ -428,6 +464,231 @@ export interface Database {
           key?: string
           value?: Json
           updated_at?: string
+        }
+        Relationships: []
+      }
+      attachments: {
+        Row: {
+          id: string
+          company_id: string
+          scope_type: 'driver' | 'vehicle' | 'incident' | 'compliance' | 'company'
+          entity_id: string
+          label: string | null
+          storage_path: string
+          mime_type: string | null
+          size_bytes: number | null
+          uploaded_by: string | null
+          uploaded_by_name: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          scope_type: 'driver' | 'vehicle' | 'incident' | 'compliance' | 'company'
+          entity_id: string
+          label?: string | null
+          storage_path: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          uploaded_by?: string | null
+          uploaded_by_name?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          scope_type?: 'driver' | 'vehicle' | 'incident' | 'compliance' | 'company'
+          entity_id?: string
+          label?: string | null
+          storage_path?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          uploaded_by?: string | null
+          uploaded_by_name?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      timesheet_entries: {
+        Row: {
+          id: string
+          company_id: string
+          driver_id: string
+          work_date: string
+          start_time: string | null
+          end_time: string | null
+          pause: string | null
+          work_hours: string | null
+          overtime_hours: string | null
+          work_hours_num: number
+          overtime_num: number
+          note: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          driver_id: string
+          work_date: string
+          start_time?: string | null
+          end_time?: string | null
+          pause?: string | null
+          work_hours?: string | null
+          overtime_hours?: string | null
+          work_hours_num?: number
+          overtime_num?: number
+          note?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          driver_id?: string
+          work_date?: string
+          start_time?: string | null
+          end_time?: string | null
+          pause?: string | null
+          work_hours?: string | null
+          overtime_hours?: string | null
+          work_hours_num?: number
+          overtime_num?: number
+          note?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_reads: {
+        Row: {
+          user_id: string
+          company_id: string
+          item_key: string
+          read_at: string
+        }
+        Insert: {
+          user_id: string
+          company_id: string
+          item_key: string
+          read_at?: string
+        }
+        Update: {
+          user_id?: string
+          company_id?: string
+          item_key?: string
+          read_at?: string
+        }
+        Relationships: []
+      }
+      driver_notes: {
+        Row: {
+          id: string
+          company_id: string
+          driver_id: string
+          author_id: string | null
+          author_name: string
+          body: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          driver_id: string
+          author_id?: string | null
+          author_name?: string
+          body: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          driver_id?: string
+          author_id?: string | null
+          author_name?: string
+          body?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      vehicle_maintenance: {
+        Row: {
+          id: string
+          company_id: string
+          vehicle_id: string
+          service_date: string
+          service_type: string
+          mileage_km: number | null
+          cost_eur: number
+          note: string | null
+          next_due_date: string | null
+          next_due_km: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          vehicle_id: string
+          service_date: string
+          service_type: string
+          mileage_km?: number | null
+          cost_eur?: number
+          note?: string | null
+          next_due_date?: string | null
+          next_due_km?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          vehicle_id?: string
+          service_date?: string
+          service_type?: string
+          mileage_km?: number | null
+          cost_eur?: number
+          note?: string | null
+          next_due_date?: string | null
+          next_due_km?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vehicle_costs: {
+        Row: {
+          id: string
+          company_id: string
+          vehicle_id: string
+          cost_date: string
+          category: string
+          amount_eur: number
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          vehicle_id: string
+          cost_date: string
+          category: string
+          amount_eur?: number
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          vehicle_id?: string
+          cost_date?: string
+          category?: string
+          amount_eur?: number
+          note?: string | null
+          created_at?: string
         }
         Relationships: []
       }
