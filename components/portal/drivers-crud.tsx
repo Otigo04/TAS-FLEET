@@ -48,6 +48,15 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
   const [importStatus, setImportStatus] = useState<string | null>(null)
   const [importWarnings, setImportWarnings] = useState<string[]>([])
   const [importFile, setImportFile] = useState<File | null>(null)
+  const [csvFile, setCsvFile] = useState<File | null>(null)
+  const [isCsvImporting, setIsCsvImporting] = useState(false)
+  const [csvResult, setCsvResult] = useState<{
+    created: number
+    totalRows: number
+    skipped: { row: number; reason: string }[]
+    warnings: string[]
+    detectedColumns: string[]
+  } | null>(null)
   const [search, setSearch] = useState('')
   const [filterShift, setFilterShift] = useState('alle')
   const [filterDistrict, setFilterDistrict] = useState('alle')
@@ -106,6 +115,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
   const [editNoteInput, setEditNoteInput] = useState('')
   const showBusySpinner = useDelayedLoading(isBusy)
   const showImportSpinner = useDelayedLoading(isImporting)
+  const showCsvSpinner = useDelayedLoading(isCsvImporting)
 
   async function refreshDrivers() {
     const { data, error: fetchError } = await supabase
@@ -388,6 +398,65 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
     }
   }
 
+  async function handleCsvImport(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError(null)
+    setCsvResult(null)
+
+    if (!csvFile) {
+      setError('Bitte zuerst eine CSV-Datei auswählen.')
+      return
+    }
+
+    setIsCsvImporting(true)
+
+    const body = new FormData()
+    body.append('file', csvFile)
+
+    try {
+      const response = await fetch('/api/import-drivers-csv', {
+        method: 'POST',
+        body,
+      })
+
+      const result = (await response.json()) as {
+        error?: string
+        created?: number
+        totalRows?: number
+        skipped?: { row: number; reason: string }[]
+        warnings?: string[]
+        detectedColumns?: string[]
+      }
+
+      if (!response.ok) {
+        setError(result.error ?? 'CSV-Import fehlgeschlagen.')
+        setCsvResult({
+          created: 0,
+          totalRows: result.totalRows ?? 0,
+          skipped: result.skipped ?? [],
+          warnings: result.warnings ?? [],
+          detectedColumns: result.detectedColumns ?? [],
+        })
+        setIsCsvImporting(false)
+        return
+      }
+
+      setCsvFile(null)
+      setCsvResult({
+        created: result.created ?? 0,
+        totalRows: result.totalRows ?? 0,
+        skipped: result.skipped ?? [],
+        warnings: result.warnings ?? [],
+        detectedColumns: result.detectedColumns ?? [],
+      })
+      await refreshDrivers()
+    } catch (csvError) {
+      setError(csvError instanceof Error ? csvError.message : 'CSV-Import fehlgeschlagen.')
+    } finally {
+      setIsCsvImporting(false)
+    }
+  }
+
   const districtOptions = Array.from(
     new Set(drivers.map((driver) => driver.district).filter((d): d is string => !!d))
   ).sort()
@@ -510,7 +579,8 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
           </CardHeader>
           <CardContent className="pt-6 grid gap-6 xl:grid-cols-[1fr_2fr]">
             
-            <form onSubmit={handleImport} className="space-y-4 rounded-xl border border-blue-100 bg-blue-50/40 p-5 self-start">
+            <div className="space-y-4 self-start">
+            <form onSubmit={handleImport} className="space-y-4 rounded-xl border border-blue-100 bg-blue-50/40 p-5">
               <div>
                 <Label htmlFor="driver-sheet" className="text-blue-900 font-semibold mb-1 block">Smart Import</Label>
                 <p className="text-xs text-blue-700 mb-3">PDF oder Bild hochladen. Daten werden automatisch ausgelesen.</p>
@@ -537,6 +607,63 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                 </ul>
               ) : null}
             </form>
+
+            <form onSubmit={handleCsvImport} className="space-y-4 rounded-xl border border-emerald-100 bg-emerald-50/40 p-5">
+              <div>
+                <Label htmlFor="driver-csv" className="text-emerald-900 font-semibold mb-1 block">CSV-Massenimport</Label>
+                <p className="text-xs text-emerald-700 mb-3">
+                  CSV mit mehreren Fahrern hochladen (z. B. Fahrer-Export). Alle Zeilen werden einzeln als Fahrer angelegt. Spalten wie „Name des Fahrers“, Bezirk, Schicht, P-Schein werden automatisch erkannt.
+                </p>
+                <Input
+                  id="driver-csv"
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="bg-white border-emerald-200"
+                  onChange={(event) => setCsvFile(event.target.files?.[0] ?? null)}
+                />
+              </div>
+
+              <Button type="submit" variant="secondary" className="w-full bg-white hover:bg-emerald-50 text-emerald-900 border-emerald-200" disabled={isCsvImporting}>
+                {showCsvSpinner ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                {isCsvImporting ? 'Wird importiert...' : 'CSV importieren'}
+              </Button>
+
+              {csvResult ? (
+                <div className="space-y-2 text-xs mt-2">
+                  <p className="font-medium text-emerald-800">
+                    {csvResult.created} von {csvResult.totalRows} Fahrer(n) angelegt.
+                  </p>
+                  {csvResult.detectedColumns.length > 0 ? (
+                    <details className="rounded border border-emerald-200 bg-white p-2 text-emerald-700">
+                      <summary className="cursor-pointer font-medium">Erkannte Spalten ({csvResult.detectedColumns.length})</summary>
+                      <ul className="mt-1 space-y-0.5">
+                        {csvResult.detectedColumns.map((col, index) => (
+                          <li key={`${col}-${index}`}>{col}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : null}
+                  {csvResult.skipped.length > 0 ? (
+                    <details className="rounded border border-amber-200 bg-amber-50 p-2 text-amber-700">
+                      <summary className="cursor-pointer font-medium">Übersprungen ({csvResult.skipped.length})</summary>
+                      <ul className="mt-1 space-y-0.5">
+                        {csvResult.skipped.map((entry, index) => (
+                          <li key={`skip-${index}`}>{entry.row > 0 ? `Zeile ${entry.row}: ` : ''}{entry.reason}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : null}
+                  {csvResult.warnings.length > 0 ? (
+                    <ul className="space-y-1 text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                      {csvResult.warnings.map((warning, index) => (
+                        <li key={`csvwarn-${index}`}>- {warning}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
+            </form>
+            </div>
 
             <form onSubmit={handleCreate} className="space-y-6">
               <div className="space-y-2">

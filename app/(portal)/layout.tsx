@@ -36,7 +36,7 @@ export default async function PortalLayout({ children }: { children: React.React
       <div className="vm-root-pad min-h-screen flex flex-col pb-16 lg:pb-0">
         <div className="no-print bg-slate-900 text-slate-300 py-1.5 px-4 text-xs text-center">
           <span className="font-semibold text-brand-300">TAS FLEET</span>
-          <span className="text-slate-500"> · v0.7 · TAS WEBWORKS</span>
+          <span className="text-slate-500"> · v0.8.34 · TAS WEBWORKS</span>
         </div>
         <div className="vm-shell mx-auto flex w-full max-w-[1400px] flex-1 flex-col lg:flex-row">
           <div className="vm-sidebar no-print hidden lg:block">
