@@ -1090,44 +1090,22 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                   </CardContent>
                 ) : (
                   <CardContent className="p-4 sm:p-5 flex flex-col justify-between gap-4 md:flex-row md:items-start">
-                    <div className="space-y-3 flex items-start gap-4">
+                    <div className="flex items-center gap-4">
                       {driver.avatar_url ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={driver.avatar_url} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700 mt-1" />
+                        <img src={driver.avatar_url} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700" />
                       ) : (
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 ring-1 ring-slate-200/50 dark:ring-slate-700 mt-1">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 ring-1 ring-slate-200/50 dark:ring-slate-700">
                           <User className="h-6 w-6" />
                         </div>
                       )}
                       <div>
-                        <div className="flex items-center gap-3 mb-1">
+                        <div className="flex items-center gap-3">
                           <h4 className="font-bold text-lg text-slate-900 dark:text-slate-100">
                             {[driver.first_name, driver.last_name].filter(Boolean).join(' ') || driver.name}
                           </h4>
                           <Badge variant={shiftVariant(driver.current_shift)} className="px-2 py-0.5">{shiftLabel(driver.current_shift)}</Badge>
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600 dark:text-slate-300 font-medium">
-                          <span className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                            Bezirk: {driver.district || 'Nicht angegeben'}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                            P-Schein: <span className={driver.pschein_valid_until && new Date(driver.pschein_valid_until).getTime() < Date.now() + 60 * 24 * 60 * 60 * 1000 ? 'text-amber-600 font-bold' : ''}>
-                              {driver.pschein_valid_until ? new Date(driver.pschein_valid_until).toLocaleDateString('de-DE') : 'Nicht angegeben'}
-                            </span>
-                          </span>
-                        </div>
-
-                        {driver.notes && driver.notes.length > 0 ? (
-                          <div className="flex gap-2 flex-wrap pt-2">
-                            {driver.notes.map((note, index) => (
-                              <span key={`${driver.id}-note-${index}`} className="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-300">
-                                {note}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
                       </div>
                     </div>
 
