@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ArrowDownCircle, ArrowUpCircle, Landmark, Loader2, Plus, Trash2, TrendingUp,
+  ArrowDownCircle, ArrowUpCircle, FileDown, Landmark, Loader2, Plus, Trash2, TrendingUp,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useActiveCompanyId, useCan } from '@/components/portal/tenant-provider'
+import { useActiveCompanyId, useCan, useTenant } from '@/components/portal/tenant-provider'
 import {
   DEFAULT_HEBESATZ, LEGAL_FORM_LABELS, estimateTaxes, formatEur, type LegalForm,
 } from '@/lib/taxes'
@@ -55,6 +55,7 @@ interface FinanceManagerProps {
 export function FinanceManager({ initialEntries, initialSettings }: FinanceManagerProps) {
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
+  const { activeCompany } = useTenant()
   const canManageSettings = useCan('manageSettings')
 
   const [entries, setEntries] = useState<FinanceRow[]>(initialEntries)
@@ -183,6 +184,131 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
     ? new Date(`${month}-01T00:00:00`).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })
     : `Jahr ${year}`
 
+  // ── PDF / Druck ───────────────────────────────────────────────────
+  function handleExportPdf() {
+    const esc = (s: string) =>
+      s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] ?? c))
+
+    const taxRows: { label: string; value: number }[] = [
+      { label: `Gewerbesteuer (${config.hebesatz} % Hebesatz)`, value: anteilig(taxes.gewerbesteuer) },
+      ...(config.legal_form === 'kapitalgesellschaft'
+        ? [
+            { label: 'Körperschaftsteuer (15 %)', value: anteilig(taxes.koerperschaftsteuer) },
+            { label: 'Solidaritätszuschlag (5,5 % der KSt)', value: anteilig(taxes.soli) },
+          ]
+        : []),
+    ]
+
+    const bookingRows = periodEntries
+      .map((e) => {
+        const sign = e.kind === 'einnahme' ? '+' : '−'
+        const cls = e.kind === 'einnahme' ? 'pos' : 'neg'
+        const date = new Date(`${e.entry_date}T00:00:00`).toLocaleDateString('de-DE')
+        return `<tr>
+          <td>${esc(date)}</td>
+          <td>${esc(e.category)}${e.description ? ` <span class="muted">· ${esc(e.description)}</span>` : ''}</td>
+          <td class="num ${cls}">${sign}${esc(formatEur(Number(e.amount_eur)))}</td>
+        </tr>`
+      })
+      .join('')
+
+    const logoBlock = activeCompany.logoUrl
+      ? `<img class="logo" src="${esc(activeCompany.logoUrl)}" alt="${esc(activeCompany.name)}" />`
+      : `<div class="company-name">${esc(activeCompany.name)}</div>`
+
+    const generatedAt = new Date().toLocaleDateString('de-DE', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+    })
+
+    const html = `<!doctype html>
+<html lang="de"><head><meta charset="utf-8" />
+<title>Finanzbericht ${esc(periodLabel)}</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #0f172a; font-size: 12px; line-height: 1.45;
+    padding: 32px 40px 72px;
+  }
+  header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px;
+    border-bottom: 2px solid #059669; padding-bottom: 16px; margin-bottom: 24px; }
+  .logo { max-height: 56px; max-width: 220px; object-fit: contain; }
+  .company-name { font-size: 20px; font-weight: 700; }
+  .doc-title { text-align: right; }
+  .doc-title h1 { margin: 0; font-size: 18px; font-weight: 700; }
+  .doc-title p { margin: 2px 0 0; color: #64748b; font-size: 12px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: #475569;
+    margin: 24px 0 10px; }
+  .cards { display: flex; gap: 12px; }
+  .card { flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; }
+  .card .label { color: #64748b; font-size: 11px; margin-bottom: 4px; }
+  .card .value { font-size: 17px; font-weight: 700; }
+  .pos { color: #047857; } .neg { color: #be123c; }
+  .accent { border-color: #059669; background: #ecfdf5; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid #eef2f6; vertical-align: top; }
+  th { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: #94a3b8; }
+  td.num, th.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .muted { color: #94a3b8; }
+  .tax-total { font-weight: 700; }
+  .tax-total td { border-top: 1px solid #cbd5e1; }
+  .disclaimer { margin-top: 8px; color: #94a3b8; font-size: 10px; }
+  footer { position: fixed; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between;
+    padding: 8px 40px; font-size: 9px; color: #94a3b8;
+    border-top: 1px solid #eef2f6; }
+  @media print { body { padding-bottom: 72px; } @page { margin: 12mm; } }
+</style></head>
+<body>
+  <header>
+    <div>${logoBlock}</div>
+    <div class="doc-title">
+      <h1>Finanzbericht</h1>
+      <p>${esc(periodLabel)}</p>
+    </div>
+  </header>
+
+  <h2>Übersicht (EÜR)</h2>
+  <div class="cards">
+    <div class="card"><div class="label">Einnahmen</div><div class="value pos">${esc(formatEur(einnahmen))}</div></div>
+    <div class="card"><div class="label">Ausgaben</div><div class="value neg">${esc(formatEur(ausgaben))}</div></div>
+    <div class="card accent"><div class="label">Gewinn / Verlust</div><div class="value ${gewinn >= 0 ? 'pos' : 'neg'}">${esc(formatEur(gewinn))}</div></div>
+    <div class="card"><div class="label">Steuern (geschätzt)</div><div class="value">${esc(formatEur(anteilig(taxes.steuernGesamt)))}</div></div>
+  </div>
+
+  <h2>Steuerschätzung</h2>
+  <table>
+    <tbody>
+      ${taxRows.map((r) => `<tr><td>${esc(r.label)}</td><td class="num">${esc(formatEur(r.value))}</td></tr>`).join('')}
+      <tr class="tax-total"><td>Steuern gesamt</td><td class="num">${esc(formatEur(anteilig(taxes.steuernGesamt)))}</td></tr>
+      <tr class="tax-total"><td>Gewinn nach Steuern</td><td class="num ${anteilig(taxes.gewinnNachSteuern) >= 0 ? 'pos' : 'neg'}">${esc(formatEur(anteilig(taxes.gewinnNachSteuern)))}</td></tr>
+    </tbody>
+  </table>
+  <p class="disclaimer">Vereinfachte Schätzung ohne Gewähr — ersetzt keine Steuerberatung.</p>
+
+  <h2>Buchungen (${periodEntries.length})</h2>
+  <table>
+    <thead><tr><th>Datum</th><th>Kategorie</th><th class="num">Betrag</th></tr></thead>
+    <tbody>${bookingRows || '<tr><td colspan="3" class="muted">Keine Buchungen im gewählten Zeitraum.</td></tr>'}</tbody>
+  </table>
+
+  <footer>
+    <span>${esc(activeCompany.name)} · erstellt am ${esc(generatedAt)}</span>
+    <span>erstellt mit TAS FLEET</span>
+  </footer>
+  <script>window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 150); });<\/script>
+</body></html>`
+
+    const w = window.open('', '_blank')
+    if (!w) {
+      setError('PDF-Fenster wurde vom Browser blockiert. Bitte Pop-ups für diese Seite erlauben.')
+      return
+    }
+    w.document.write(html)
+    w.document.close()
+  }
+
   return (
     <div className="space-y-6">
       {/* ── Zeitraum-Wahl ── */}
@@ -218,6 +344,11 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
             />
           </div>
         )}
+
+        <Button type="button" variant="outline" size="sm" onClick={handleExportPdf} className="ml-auto gap-2">
+          <FileDown className="h-4 w-4" />
+          PDF erstellen
+        </Button>
       </div>
 
       {error && (

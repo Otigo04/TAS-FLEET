@@ -10,8 +10,8 @@ interface CompanyLogoProps {
 }
 
 const SIZES = {
-  md: { box: 'h-12 w-[150px]', px: '150px' },
-  lg: { box: 'h-16 w-[210px]', px: '210px' },
+  md: { box: 'h-14 w-[188px]', px: '188px' },
+  lg: { box: 'h-20 w-[264px]', px: '264px' },
 } as const
 
 export function CompanyLogo({ compact = false, className, displayName, size = 'md' }: CompanyLogoProps) {

@@ -15,3 +15,6 @@ dist
 coverage
 *.tsbuildinfo
 .vercel
+
+# Local verify/scratch scripts
+.verify-*.mjs

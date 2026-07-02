@@ -1,7 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
+import { AuthApiError } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export function updateSession(request: NextRequest) {
+export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -27,7 +28,15 @@ export function updateSession(request: NextRequest) {
     }
   )
 
-  void supabase.auth.getUser()
+  try {
+    await supabase.auth.getUser()
+  } catch (error) {
+    if (error instanceof AuthApiError && error.code === 'refresh_token_not_found') {
+      await supabase.auth.signOut()
+    } else {
+      throw error
+    }
+  }
 
   return response
 }

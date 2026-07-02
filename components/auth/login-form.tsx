@@ -103,7 +103,7 @@ export function LoginForm() {
         </Button>
 
         <p className="flex items-center justify-center gap-1.5 pt-1 text-xs text-slate-400">
-          <Lock className="h-3 w-3" /> Verschlüsselte Verbindung · Zugang nur für Mitarbeitende
+          <Lock className="h-3 w-3" /> Verschlüsselte Verbindung · Zugang nur mit Unternehmenskonto
         </p>
       </form>
     </div>

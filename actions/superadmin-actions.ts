@@ -81,14 +81,18 @@ export async function renameCompany(id: string, name: string): Promise<ActionRes
   return { success: true }
 }
 
-// Accept a cropped data URL (image/*) or null to clear the logo. Capped at
-// ~1.5MB encoded to keep the companies row reasonable.
+// AvatarUploadCrop lädt das zugeschnittene Bild in den `avatars`-Storage-Bucket
+// und liefert eine öffentliche https-URL. Ältere Logos wurden noch als
+// data:image-URL abgelegt — beide Formen bleiben gültig; null löscht das Logo.
 const companyLogoSchema = z.object({
   companyId: z.uuid('Ungültige Unternehmens-ID.'),
   logoUrl: z
     .string()
     .max(1_500_000, 'Bild ist zu groß.')
-    .regex(/^data:image\/(png|jpeg|webp);base64,/, 'Ungültiges Bildformat.')
+    .refine(
+      (v) => /^https:\/\//.test(v) || /^data:image\/(png|jpeg|webp);base64,/.test(v),
+      'Ungültiges Bildformat.',
+    )
     .nullable(),
 })
 

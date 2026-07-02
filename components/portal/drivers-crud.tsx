@@ -23,6 +23,7 @@ interface DriversCrudProps {
 }
 
 const shifts = ['Frueh', 'Spaet', 'Nacht']
+const PAGE_SIZE = 12
 
 function shiftLabel(shift: string) {
   if (shift === 'Frueh') return 'Früh'
@@ -61,6 +62,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
   const [filterShift, setFilterShift] = useState('alle')
   const [filterDistrict, setFilterDistrict] = useState('alle')
   const [showAddForm, setShowAddForm] = useState(false)
+  const [page, setPage] = useState(1)
 
   const [name, setName] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -472,6 +474,15 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
     return matchSearch && matchShift && matchDistrict
   })
 
+  // Filter ändern → zurück auf Seite 1, damit Ergebnisse sichtbar bleiben.
+  useEffect(() => {
+    setPage(1)
+  }, [search, filterShift, filterDistrict])
+
+  const totalPages = Math.max(1, Math.ceil(filteredDrivers.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const pagedDrivers = filteredDrivers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
   function exportToCsv() {
     if (filteredDrivers.length === 0) return
 
@@ -856,12 +867,23 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
 
       {/* Driver List */}
       <div className="space-y-3">
+        {filteredDrivers.length > 0 && (
+          <div className="flex items-center justify-between px-1 text-sm text-slate-500 dark:text-slate-400">
+            <span>
+              {filteredDrivers.length} Fahrer
+              {filteredDrivers.length !== drivers.length ? ` (von ${drivers.length})` : ''}
+            </span>
+            {totalPages > 1 && (
+              <span>Seite {currentPage} / {totalPages}</span>
+            )}
+          </div>
+        )}
         {filteredDrivers.length === 0 ? (
           <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700/60 border-dashed">
             <p className="text-slate-500 dark:text-slate-400">Keine Fahrer gefunden.</p>
           </div>
         ) : (
-          filteredDrivers.map((driver) => {
+          pagedDrivers.map((driver) => {
             const isEditing = editingId === driver.id
 
             return (
@@ -1141,6 +1163,51 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
               </Card>
             )
           })
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-1 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="bg-white dark:bg-slate-900"
+            >
+              Zurück
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+              .reduce<(number | 'gap')[]>((acc, p, idx, arr) => {
+                if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('gap')
+                acc.push(p)
+                return acc
+              }, [])
+              .map((p, idx) =>
+                p === 'gap' ? (
+                  <span key={`gap-${idx}`} className="px-2 text-slate-400">…</span>
+                ) : (
+                  <Button
+                    key={p}
+                    variant={p === currentPage ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setPage(p)}
+                    className={p === currentPage ? '' : 'bg-white dark:bg-slate-900'}
+                  >
+                    {p}
+                  </Button>
+                ),
+              )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="bg-white dark:bg-slate-900"
+            >
+              Weiter
+            </Button>
+          </div>
         )}
       </div>
     </section>
