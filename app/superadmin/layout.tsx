@@ -5,7 +5,34 @@ import { getUserCompanies } from '@/lib/tenant'
 import { LogoutButton } from '@/components/portal/logout-button'
 
 export default async function SuperadminLayout({ children }: { children: React.ReactNode }) {
-  await requireSuperadmin()
+  try {
+    await requireSuperadmin()
+  } catch (err) {
+    // `redirect()` inside requireSuperadmin() throws internally too — let
+    // that pass through untouched, Next.js handles it.
+    if (err && typeof err === 'object' && 'digest' in err && String(err.digest).startsWith('NEXT_REDIRECT')) {
+      throw err
+    }
+    // Anything else here (e.g. missing SUPABASE_SERVICE_ROLE_KEY on the
+    // deployment) would otherwise surface as a bare, undiagnosable "server
+    // error occurred" page. Show the real message instead.
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 p-6 text-slate-100">
+        <div className="max-w-md rounded-lg border border-amber-500/30 bg-amber-500/10 p-6">
+          <p className="text-sm font-semibold uppercase tracking-wide text-amber-400">
+            Superadmin-Konsole nicht erreichbar
+          </p>
+          <p className="mt-2 text-sm text-slate-200">
+            {err instanceof Error ? err.message : 'Unbekannter Fehler beim Laden der Superadmin-Konsole.'}
+          </p>
+          <p className="mt-4 text-xs text-slate-400">
+            Pruefe in Vercel unter Project Settings → Environment Variables (Production), ob
+            SUPABASE_SERVICE_ROLE_KEY gesetzt ist, und deploye danach neu.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   // Only offer "Zum Portal" when this superadmin is actually a member of at
   // least one company — otherwise /dashboard just bounces back here.
