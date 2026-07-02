@@ -20,7 +20,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Hauptnavigation"
-      className="vm-only-mobile vm-only-mobile-block animate-slide-in-up fixed bottom-0 inset-x-0 z-40 lg:hidden border-t border-slate-200 bg-white/95 backdrop-blur-md"
+      className="vm-only-mobile vm-only-mobile-block animate-slide-in-up fixed bottom-0 inset-x-0 z-40 lg:hidden border-t border-slate-200 dark:border-slate-700/60 bg-white/95 dark:bg-slate-900/90 backdrop-blur-md"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="flex h-16 items-stretch">
@@ -33,11 +33,11 @@ export function MobileBottomNav() {
               href={item.href}
               className={cn(
                 'flex flex-1 flex-col items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-[0.08em] transition-colors',
-                isActive ? 'text-emerald-600' : 'text-slate-400 active:text-slate-600',
+                isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 active:text-slate-600',
               )}
             >
               <Icon
-                className={cn('h-5 w-5 transition-transform active:scale-90', isActive && 'text-emerald-600')}
+                className={cn('h-5 w-5 transition-transform active:scale-90', isActive && 'text-emerald-600 dark:text-emerald-400')}
                 strokeWidth={isActive ? 2.5 : 1.8}
               />
               {item.label}

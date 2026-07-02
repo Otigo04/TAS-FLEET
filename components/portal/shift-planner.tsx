@@ -570,21 +570,21 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
 
   return (
     <section className="space-y-6">
-      <Card className="border border-slate-200 bg-white shadow-sm">
-        <CardHeader className="rounded-t-lg border-b border-slate-200 bg-slate-50">
+      <Card className="border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 shadow-sm">
+        <CardHeader className="rounded-t-lg border-b border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50">
           <CardTitle>Wöchentlicher Stundenzettel</CardTitle>
           <CardDescription>Mitarbeiter und Woche auswählen, Zeiten erfassen, PDF exportieren</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50 p-3">
             <div className="grid gap-3 md:grid-cols-[1.3fr_1fr_auto_auto_auto] md:items-end">
             <div className="space-y-1.5">
-              <Label htmlFor="timesheet-driver" className="text-xs uppercase tracking-wide text-slate-500">
+              <Label htmlFor="timesheet-driver" className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Mitarbeiter
               </Label>
               <select
                 id="timesheet-driver"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm shadow-sm"
                 value={selectedDriverId}
                 onChange={(event) => setSelectedDriverId(event.target.value)}
                 required
@@ -598,7 +598,7 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="timesheet-week" className="text-xs uppercase tracking-wide text-slate-500">
+              <Label htmlFor="timesheet-week" className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Woche (direkt)
               </Label>
               <Input
@@ -606,17 +606,17 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
                 type="week"
                 value={selectedWeek}
                 onChange={(event) => setSelectedWeek(event.target.value)}
-                className="border-slate-300 bg-white shadow-sm"
+                className="border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-sm"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="timesheet-week-select" className="text-xs uppercase tracking-wide text-slate-500">
+              <Label htmlFor="timesheet-week-select" className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Woche (Auswahl)
               </Label>
               <select
                 id="timesheet-week-select"
-                className="flex h-10 w-full min-w-[160px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm"
+                className="flex h-10 w-full min-w-[160px] rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm shadow-sm"
                 value={selectedWeek}
                 onChange={(event) => setSelectedWeek(event.target.value)}
               >
@@ -643,14 +643,14 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-700">
+          <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50 p-3">
+            <p className="text-xs text-slate-700 dark:text-slate-300">
               Tipp: Wenn du in der Zeile MO Start, Ende, Pause, Arbeitszeit oder Überstunden eingibst, wird der Wert automatisch auf alle Tage übernommen.
             </p>
           </div>
 
           <div className="space-y-2">
-            <div className="hidden grid-cols-[46px_96px_1fr_1fr_1fr_1fr_1fr_2fr] gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 md:grid">
+            <div className="hidden grid-cols-[46px_96px_1fr_1fr_1fr_1fr_1fr_2fr] gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 md:grid">
               <span>Tag</span>
               <span>Datum</span>
               <span>Start</span>
@@ -666,94 +666,94 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
                 key={row.day}
                 className={`rounded-lg border p-2.5 ${
                   index % 2 === 0
-                    ? 'border-slate-200 bg-white'
-                    : 'border-slate-200 bg-slate-50'
+                    ? 'border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900'
+                    : 'border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50'
                 }`}
               >
                 <div className="grid gap-2 md:grid-cols-[46px_96px_1fr_1fr_1fr_1fr_1fr_2fr]">
                   <div className="space-y-1">
-                    <Label htmlFor={`row-day-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
+                    <Label htmlFor={`row-day-${row.day}`} className="text-[11px] text-slate-500 dark:text-slate-400 md:hidden">
                       Tag
                     </Label>
-                    <Input id={`row-day-${row.day}`} value={row.day} readOnly className="border-slate-200 bg-slate-100" />
+                    <Input id={`row-day-${row.day}`} value={row.day} readOnly className="border-slate-200 dark:border-slate-700/60 bg-slate-100 dark:bg-slate-800" />
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-date-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
+                    <Label htmlFor={`row-date-${row.day}`} className="text-[11px] text-slate-500 dark:text-slate-400 md:hidden">
                       Datum
                     </Label>
-                    <Input id={`row-date-${row.day}`} value={row.date} readOnly className="border-slate-200 bg-slate-100" />
+                    <Input id={`row-date-${row.day}`} value={row.date} readOnly className="border-slate-200 dark:border-slate-700/60 bg-slate-100 dark:bg-slate-800" />
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-start-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
+                    <Label htmlFor={`row-start-${row.day}`} className="text-[11px] text-slate-500 dark:text-slate-400 md:hidden">
                       Start
                     </Label>
                     <Input
                       id={`row-start-${row.day}`}
                       value={row.start}
                       onChange={(event) => updateRow(row.day, 'start', event.target.value)}
-                      className="border-slate-300 bg-white"
+                      className="border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-end-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
+                    <Label htmlFor={`row-end-${row.day}`} className="text-[11px] text-slate-500 dark:text-slate-400 md:hidden">
                       Ende
                     </Label>
                     <Input
                       id={`row-end-${row.day}`}
                       value={row.end}
                       onChange={(event) => updateRow(row.day, 'end', event.target.value)}
-                      className="border-slate-300 bg-white"
+                      className="border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-break-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
+                    <Label htmlFor={`row-break-${row.day}`} className="text-[11px] text-slate-500 dark:text-slate-400 md:hidden">
                       Pause
                     </Label>
                     <Input
                       id={`row-break-${row.day}`}
                       value={row.pause}
                       onChange={(event) => updateRow(row.day, 'pause', event.target.value)}
-                      className="border-slate-300 bg-white"
+                      className="border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-work-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
+                    <Label htmlFor={`row-work-${row.day}`} className="text-[11px] text-slate-500 dark:text-slate-400 md:hidden">
                       Arbeitszeit
                     </Label>
                     <Input
                       id={`row-work-${row.day}`}
                       value={row.workHours}
                       onChange={(event) => updateRow(row.day, 'workHours', event.target.value)}
-                      className="border-slate-300 bg-white"
+                      className="border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-over-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
+                    <Label htmlFor={`row-over-${row.day}`} className="text-[11px] text-slate-500 dark:text-slate-400 md:hidden">
                       Überstunden
                     </Label>
                     <Input
                       id={`row-over-${row.day}`}
                       value={row.overtimeHours}
                       onChange={(event) => updateRow(row.day, 'overtimeHours', event.target.value)}
-                      className="border-slate-300 bg-white"
+                      className="border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor={`row-note-${row.day}`} className="text-[11px] text-slate-500 md:hidden">
+                    <Label htmlFor={`row-note-${row.day}`} className="text-[11px] text-slate-500 dark:text-slate-400 md:hidden">
                       Bemerkung
                     </Label>
                     <Input
                       id={`row-note-${row.day}`}
                       value={row.note}
                       onChange={(event) => updateRow(row.day, 'note', event.target.value)}
-                      className="border-slate-300 bg-white"
+                      className="border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
                     />
                   </div>
                 </div>
@@ -761,9 +761,9 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50 px-4 py-3">
             <div className="flex items-center gap-3">
-              <p className="text-sm text-slate-700">
+              <p className="text-sm text-slate-700 dark:text-slate-300">
                 Stunden gesamt: <span className="font-semibold">{totalWorkHours}</span>
               </p>
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" /> : null}
@@ -789,19 +789,19 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
             </div>
           </div>
 
-          {saveError ? <p className="text-sm text-red-600">{saveError}</p> : null}
+          {saveError ? <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p> : null}
           {savedAt && !isSaving ? (
-            <p className="flex items-center gap-1.5 text-sm text-brand-700">
+            <p className="flex items-center gap-1.5 text-sm text-brand-700 dark:text-brand-300">
               <Check className="h-4 w-4" /> Gespeichert.
             </p>
           ) : null}
-          {pdfError ? <p className="text-sm text-red-600">{pdfError}</p> : null}
+          {pdfError ? <p className="text-sm text-red-600 dark:text-red-400">{pdfError}</p> : null}
         </CardContent>
       </Card>
 
       {/* Monats-Stundenkonto für den gewählten Fahrer */}
-      <Card className="border border-slate-200 bg-white shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between rounded-t-lg border-b border-slate-200 bg-slate-50">
+      <Card className="border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between rounded-t-lg border-b border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50">
           <div>
             <CardTitle>Stundenkonto</CardTitle>
             <CardDescription>
@@ -821,23 +821,23 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-md border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">Ist-Stunden</p>
-              <p className="text-xl font-semibold tabular-nums text-slate-900">{formatHours(monthIstHours)}</p>
+            <div className="rounded-md border border-slate-200 dark:border-slate-700/60 p-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400">Ist-Stunden</p>
+              <p className="text-xl font-semibold tabular-nums text-slate-900 dark:text-slate-100">{formatHours(monthIstHours)}</p>
             </div>
-            <div className="rounded-md border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">Überstunden</p>
-              <p className="text-xl font-semibold tabular-nums text-slate-900">{formatHours(monthOvertimeHours)}</p>
+            <div className="rounded-md border border-slate-200 dark:border-slate-700/60 p-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400">Überstunden</p>
+              <p className="text-xl font-semibold tabular-nums text-slate-900 dark:text-slate-100">{formatHours(monthOvertimeHours)}</p>
             </div>
-            <div className="rounded-md border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">Soll-Stunden</p>
-              <p className="text-xl font-semibold tabular-nums text-slate-900">
+            <div className="rounded-md border border-slate-200 dark:border-slate-700/60 p-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400">Soll-Stunden</p>
+              <p className="text-xl font-semibold tabular-nums text-slate-900 dark:text-slate-100">
                 {monthTargetHours !== null ? formatHours(monthTargetHours) : '—'}
               </p>
             </div>
-            <div className="rounded-md border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">Erfasste Tage</p>
-              <p className="text-xl font-semibold tabular-nums text-slate-900">{monthEntries.length}</p>
+            <div className="rounded-md border border-slate-200 dark:border-slate-700/60 p-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400">Erfasste Tage</p>
+              <p className="text-xl font-semibold tabular-nums text-slate-900 dark:text-slate-100">{monthEntries.length}</p>
             </div>
           </div>
           {monthTargetHours === null ? (

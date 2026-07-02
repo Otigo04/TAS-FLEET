@@ -115,7 +115,7 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
       <CardContent>
         <div className="mb-4 grid gap-3 sm:grid-cols-3">
           <select
-            className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+            className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
             value={tableFilter}
             onChange={(e) => setTableFilter(e.target.value)}
           >
@@ -127,7 +127,7 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
             ))}
           </select>
           <select
-            className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+            className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
             value={actorFilter}
             onChange={(e) => setActorFilter(e.target.value)}
           >
@@ -137,7 +137,7 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
             ))}
           </select>
           <select
-            className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+            className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
           >
@@ -149,7 +149,7 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
         </div>
 
         {filtered.length === 0 ? (
-          <p className="text-sm text-slate-500">Keine Einträge vorhanden.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Keine Einträge vorhanden.</p>
         ) : (
           <ul className="space-y-3">
             {filtered.map((entry) => {
@@ -160,7 +160,7 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
               )
 
               return (
-                <li key={entry.id} className="rounded-lg border border-slate-200/80 bg-white/70 p-4">
+                <li key={entry.id} className="rounded-lg border border-slate-200/80 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/90 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <Badge variant={variant} className="gap-1">
@@ -169,26 +169,26 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
                       </Badge>
                       <Badge variant="secondary">{tableLabel(entry.table_name)}</Badge>
                     </div>
-                    <span className="text-xs text-slate-500">{formatTimestamp(entry.created_at)}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{formatTimestamp(entry.created_at)}</span>
                   </div>
 
-                  <p className="mt-2 text-sm text-slate-700">
-                    <span className="font-semibold text-slate-900">{entry.actor_name}</span>
+                  <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
+                    <span className="font-semibold text-slate-900 dark:text-slate-100">{entry.actor_name}</span>
                     {entry.action === 'insert' && ' hat einen neuen Eintrag erstellt.'}
                     {entry.action === 'delete' && ' hat den Eintrag gelöscht.'}
                     {entry.action === 'update' && ' hat den Eintrag geändert.'}
                   </p>
 
                   {entry.action === 'update' && fields.length > 0 ? (
-                    <ul className="mt-2 space-y-1 rounded-md border border-slate-200 bg-slate-50/60 p-3 text-xs">
+                    <ul className="mt-2 space-y-1 rounded-md border border-slate-200 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-800/50 p-3 text-xs">
                       {fields.map((key) => (
                         <li key={key} className="flex flex-wrap items-center gap-1.5">
-                          <span className="font-medium text-slate-600">{fieldLabel(key)}:</span>
+                          <span className="font-medium text-slate-600 dark:text-slate-300">{fieldLabel(key)}:</span>
                           <span className="text-slate-400 line-through">
                             {formatValue(key, (entry.old_data as Json)?.[key])}
                           </span>
                           <span className="text-slate-400">→</span>
-                          <span className="font-medium text-slate-900">
+                          <span className="font-medium text-slate-900 dark:text-slate-100">
                             {formatValue(key, (entry.new_data as Json)?.[key])}
                           </span>
                         </li>

@@ -18,7 +18,7 @@ export function LoadingScreen({ overlay = false, label = 'Wird geladen…', clas
       className={cn(
         'animate-delayed-appear flex flex-col items-center justify-center gap-5',
         overlay
-          ? 'fixed inset-0 z-[200] bg-white/70 backdrop-blur-md'
+          ? 'fixed inset-0 z-[200] bg-white/70 dark:bg-slate-900/90 backdrop-blur-md'
           : 'min-h-[60vh] w-full',
         className,
       )}
@@ -27,14 +27,14 @@ export function LoadingScreen({ overlay = false, label = 'Wird geladen…', clas
     >
       <div className="relative h-12 w-12">
         {/* Track */}
-        <div className="absolute inset-0 rounded-full border-[3px] border-slate-200" />
+        <div className="absolute inset-0 rounded-full border-[3px] border-slate-200 dark:border-slate-700/60" />
         {/* Spinning accent arc */}
         <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-brand-600" />
       </div>
 
       <div className="text-center">
-        <p className="text-sm font-bold tracking-tight text-brand-700">TAS FLEET</p>
-        <p className="mt-1 text-sm text-slate-500">{label}</p>
+        <p className="text-sm font-bold tracking-tight text-brand-700 dark:text-brand-300">TAS FLEET</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{label}</p>
       </div>
     </div>
   )

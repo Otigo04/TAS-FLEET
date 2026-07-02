@@ -72,7 +72,7 @@ export default async function SuperadminLayout({ children }: { children: React.R
         <main className="flex-1 p-6">{children}</main>
 
         <footer className="border-t border-white/10 px-6 py-3 text-center text-xs text-slate-500">
-          © TAS FLEET v0.7 · TAS WEBWORKS · Superadmin
+          © TAS FLEET v0.9.11 · TAS WEBWORKS · Superadmin
         </footer>
       </div>
     </div>

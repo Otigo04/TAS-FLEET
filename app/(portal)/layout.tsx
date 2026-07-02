@@ -9,6 +9,7 @@ import { getCurrentSuperadmin } from '@/lib/superadmin'
 import { TenantProvider } from '@/components/portal/tenant-provider'
 import { CompanySwitcher } from '@/components/portal/company-switcher'
 import { PresenceIndicator } from '@/components/portal/presence-indicator'
+import { ThemeToggle } from '@/components/portal/theme-toggle'
 import { MobileBottomNav } from '@/components/portal/mobile-bottom-nav'
 import { NotificationBell } from '@/components/portal/notification-bell'
 import { MobileNavProvider, MobileNavTrigger } from '@/components/portal/mobile-nav'
@@ -21,8 +22,10 @@ export default async function PortalLayout({ children }: { children: React.React
   const displayName = fullName || user.email || 'Unbekannt'
   const avatarUrl = profile?.avatar_url ?? null
 
-  const { isSuperadmin } = await getCurrentSuperadmin()
-  const companies = await getUserCompanies()
+  const [{ isSuperadmin }, companies] = await Promise.all([
+    getCurrentSuperadmin(),
+    getUserCompanies(),
+  ])
   const activeCompany = await resolveActiveCompany(companies)
   if (!activeCompany) {
     redirect(isSuperadmin ? '/superadmin' : '/no-company')
@@ -36,7 +39,7 @@ export default async function PortalLayout({ children }: { children: React.React
       <div className="vm-root-pad min-h-screen flex flex-col pb-16 lg:pb-0">
         <div className="no-print bg-slate-900 text-slate-300 py-1.5 px-4 text-xs text-center">
           <span className="font-semibold text-brand-300">TAS FLEET</span>
-          <span className="text-slate-500"> · v0.8.34 · TAS WEBWORKS</span>
+          <span className="text-slate-500 dark:text-slate-400"> · v0.9.11 · TAS WEBWORKS</span>
         </div>
         <div className="vm-shell mx-auto flex w-full max-w-[1400px] flex-1 flex-col lg:flex-row">
           <div className="vm-sidebar no-print hidden lg:block">
@@ -49,14 +52,15 @@ export default async function PortalLayout({ children }: { children: React.React
                 <MobileNavTrigger />
 
                 <div className="hidden sm:block">
-                  <p className="text-xs text-slate-500">Angemeldet als</p>
-                  <p className="text-sm font-semibold text-slate-900">{displayName}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Angemeldet als</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{displayName}</p>
                 </div>
               </div>
 
               <GlobalSearch />
 
               <div className="flex items-center gap-2 shrink-0">
+                <ThemeToggle />
                 <NotificationBell userId={user.id} />
                 <ViewModeSlider />
                 <CompanySwitcher />
@@ -67,10 +71,10 @@ export default async function PortalLayout({ children }: { children: React.React
 
             <div className="flex-1 p-3 sm:p-4 lg:p-6 min-w-0">{children}</div>
 
-            <footer className="no-print hidden sm:flex mx-4 sm:mx-6 mb-4 sm:mb-6 mt-auto items-center justify-between rounded-md border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
+            <footer className="no-print hidden sm:flex mx-4 sm:mx-6 mb-4 sm:mb-6 mt-auto items-center justify-between rounded-md border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 px-4 py-3 text-xs text-slate-500 dark:text-slate-400">
               <div className="flex items-center gap-2">
                 <UserAvatar avatarUrl={avatarUrl} name={displayName} size="sm" />
-                <span className="font-semibold text-slate-700">TAS FLEET</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">TAS FLEET</span>
               </div>
               <p>Angemeldet als {displayName}</p>
             </footer>

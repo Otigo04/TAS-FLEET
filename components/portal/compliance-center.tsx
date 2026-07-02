@@ -189,7 +189,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
               <Label htmlFor="doc-scope">Bereich</Label>
               <select
                 id="doc-scope"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={scopeType}
                 onChange={(e) => setScopeType(e.target.value as DocRow['scope_type'])}
               >
@@ -203,7 +203,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
                 <Label htmlFor="doc-driver">Fahrer</Label>
                 <select
                   id="doc-driver"
-                  className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                  className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                   value={driverId}
                   onChange={(e) => setDriverId(e.target.value)}
                   required
@@ -220,7 +220,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
                 <Label htmlFor="doc-vehicle">Fahrzeug</Label>
                 <select
                   id="doc-vehicle"
-                  className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                  className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                   value={vehicleId}
                   onChange={(e) => setVehicleId(e.target.value)}
                   required
@@ -238,7 +238,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
               <Label htmlFor="doc-type">Dokumenttyp</Label>
               <select
                 id="doc-type"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={docType}
                 onChange={(e) => setDocType(e.target.value)}
               >
@@ -259,7 +259,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
               <Label htmlFor="doc-status">Status</Label>
               <select
                 id="doc-status"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
@@ -311,7 +311,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
           <div className="mb-4 grid gap-3 md:grid-cols-2">
             <Input placeholder="Suche Fahrer/Fahrzeug oder Typ" value={search} onChange={(e) => setSearch(e.target.value)} />
             <select
-              className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -324,10 +324,10 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
             </select>
           </div>
 
-          {error ? <p className="mb-3 text-sm text-red-600">{error}</p> : null}
+          {error ? <p className="mb-3 text-sm text-red-600 dark:text-red-400">{error}</p> : null}
 
           {filteredDocuments.length === 0 ? (
-            <p className="text-sm text-slate-500">Keine Dokumente gefunden.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Keine Dokumente gefunden.</p>
           ) : (
             <ul className="space-y-3">
               {filteredDocuments.map((doc) => {
@@ -335,12 +335,12 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
                 const variant = days < 0 ? 'danger' : days < 60 ? 'warning' : 'success'
 
                 return (
-                  <li key={doc.id} className="rounded-lg border border-slate-200/80 bg-white/70 p-4">
+                  <li key={doc.id} className="rounded-lg border border-slate-200/80 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/90 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold text-slate-900">{subjectLabel(doc)}</p>
-                        <p className="text-xs text-slate-500">{labelFor(doc.doc_type)} · Fällig: {doc.due_date}</p>
-                        {doc.notes ? <p className="mt-1 text-xs text-slate-600">{doc.notes}</p> : null}
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{subjectLabel(doc)}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{labelFor(doc.doc_type)} · Fällig: {doc.due_date}</p>
+                        {doc.notes ? <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{doc.notes}</p> : null}
                         <div className="mt-2 flex items-center gap-2">
                           <Badge variant={variant}>{days < 0 ? `${Math.abs(days)} Tage überfällig` : `${days} Tage`}</Badge>
                           <Badge variant="secondary">{labelFor(doc.status)}</Badge>
@@ -350,7 +350,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
                       {canManage && (
                       <div className="flex flex-wrap items-center gap-2">
                         <select
-                          className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm"
+                          className="h-9 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 text-sm"
                           value={doc.status}
                           onChange={(e) => void handleStatusUpdate(doc.id, e.target.value)}
                         >
@@ -380,7 +380,7 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
                     </div>
 
                     {companyId && (
-                      <div className="mt-3 border-t border-slate-100 pt-3">
+                      <div className="mt-3 border-t border-slate-100 dark:border-slate-800 pt-3">
                         <AttachmentList
                           companyId={companyId}
                           scopeType="compliance"

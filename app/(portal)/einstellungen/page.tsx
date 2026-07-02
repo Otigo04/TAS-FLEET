@@ -14,8 +14,8 @@ export default async function EinstellungenPage() {
   return (
     <div className="space-y-6">
       <div className="animate-fade-up">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Einstellungen</h1>
-        <p className="mt-1 text-slate-600">Account verwalten und Systemwerte konfigurieren.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Einstellungen</h1>
+        <p className="mt-1 text-slate-600 dark:text-slate-300">Account verwalten und Systemwerte konfigurieren.</p>
       </div>
 
       <SettingsCrud

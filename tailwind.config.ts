@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -20,55 +21,31 @@ const config: Config = {
         surface: '#ffffff',
         ink: '#0f172a',
         muted: '#64748b',
-        // Eine einzige, ruhige Corporate-Grün-Skala. emerald & teal werden
-        // bewusst auf dieselbe Skala gelegt, damit Alt-Verläufe (from-emerald
-        // → to-teal) flach erscheinen und der frühere Mehrfarb-Look verschwindet.
+        // TAS-FLEET-Markenfarbe: ruhiges Cyan/Hellblau. Eine einzige Skala
+        // für alle Akzente — Status-Farben (emerald/amber/rose) bleiben
+        // semantisch und kommen aus der Tailwind-Standardpalette.
         accent: {
-          DEFAULT: '#2f6a45',
-          600: '#2f6a45',
-          700: '#285639',
+          DEFAULT: '#0891b2',
+          600: '#0891b2',
+          700: '#0e7490',
         },
         brand: {
-          50: '#f1f6f3',
-          100: '#dceae1',
-          200: '#bcd6c6',
-          300: '#93bca4',
-          400: '#639d7d',
-          500: '#437d5e',
-          600: '#2f6a45',
-          700: '#285639',
-          800: '#234630',
-          900: '#1e3a29',
-        },
-        emerald: {
-          50: '#f1f6f3',
-          100: '#dceae1',
-          200: '#bcd6c6',
-          300: '#93bca4',
-          400: '#639d7d',
-          500: '#437d5e',
-          600: '#2f6a45',
-          700: '#285639',
-          800: '#234630',
-          900: '#1e3a29',
-        },
-        teal: {
-          accent: '#2f6a45',
-          50: '#f1f6f3',
-          100: '#dceae1',
-          200: '#bcd6c6',
-          300: '#93bca4',
-          400: '#639d7d',
-          500: '#437d5e',
-          600: '#2f6a45',
-          700: '#285639',
-          800: '#234630',
-          900: '#1e3a29',
+          50: '#ecfeff',
+          100: '#cffafe',
+          200: '#a5f3fc',
+          300: '#67e8f9',
+          400: '#22d3ee',
+          500: '#06b6d4',
+          600: '#0891b2',
+          700: '#0e7490',
+          800: '#155e75',
+          900: '#164e63',
+          950: '#083344',
         },
       },
       boxShadow: {
         card: '0 1px 2px rgba(15,23,42,0.05)',
-        'card-hover': '0 1px 3px rgba(15,23,42,0.08)',
+        'card-hover': '0 4px 16px -4px rgba(8,145,178,0.12), 0 1px 3px rgba(15,23,42,0.08)',
       },
       keyframes: {
         marquee: {

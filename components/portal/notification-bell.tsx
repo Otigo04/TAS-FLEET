@@ -127,7 +127,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label="Benachrichtigungen"
-        className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50"
+        className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/70"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
@@ -140,14 +140,14 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden="true" />
-          <div className="animate-dropdown-in absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
-              <p className="text-sm font-semibold text-slate-800">Ablaufende Fristen</p>
+          <div className="animate-dropdown-in absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-2.5">
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Ablaufende Fristen</p>
               {unreadCount > 0 && (
                 <button
                   type="button"
                   onClick={() => void markRead(unread.map((i) => i.key))}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-brand-700 hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-brand-700 dark:text-brand-300 hover:underline"
                 >
                   <CheckCheck className="h-3.5 w-3.5" /> Alle gelesen
                 </button>
@@ -159,7 +159,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                 Keine Fristen in den nächsten {THRESHOLD_DAYS} Tagen.
               </p>
             ) : (
-              <ul className="max-h-80 divide-y divide-slate-100 overflow-y-auto">
+              <ul className="max-h-80 divide-y divide-slate-100 dark:divide-slate-800 overflow-y-auto">
                 {items.map((item) => {
                   const isRead = reads.has(item.key)
                   return (
@@ -168,7 +168,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                       className={cn('flex items-center justify-between gap-2 px-4 py-2.5', !isRead && 'bg-brand-50/40')}
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-slate-700">{item.title}</p>
+                        <p className="truncate text-sm font-medium text-slate-700 dark:text-slate-300">{item.title}</p>
                         <p className="text-xs text-slate-400">
                           {item.days < 0 ? `${Math.abs(item.days)} Tage überfällig` : `in ${item.days} Tagen`}
                         </p>
@@ -181,7 +181,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                           <button
                             type="button"
                             onClick={() => void markRead([item.key])}
-                            className="rounded-md p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                            className="rounded-md p-1 text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
                             title="Als gelesen markieren"
                           >
                             <Check className="h-4 w-4" />

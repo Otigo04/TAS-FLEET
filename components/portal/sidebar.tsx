@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { LayoutDashboard, Car, Users, CalendarDays, ShieldCheck, AlertTriangle, Settings, ChevronRight, ShieldAlert, CalendarOff, FileText, History } from 'lucide-react'
+import { LayoutDashboard, Car, Users, CalendarDays, ShieldCheck, AlertTriangle, Settings, ChevronRight, ShieldAlert, CalendarOff, FileText, History, Euro } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { UserAvatar } from '@/components/branding/user-avatar'
+import { CompanyLogo } from '@/components/branding/company-logo'
 import { Suspense } from 'react'
 import { useTenant } from '@/components/portal/tenant-provider'
 import { can, roleLabel, type Capability } from '@/lib/roles'
@@ -27,6 +28,7 @@ const items: NavItem[] = [
   { href: '/compliance', label: 'Compliance', icon: ShieldCheck },
   { href: '/incidents', label: 'Incidents', icon: AlertTriangle, cap: 'manageIncidents' },
   { href: '/berichte', label: 'Berichte', icon: FileText, cap: 'viewReports' },
+  { href: '/finanzen', label: 'Finanzen', icon: Euro, cap: 'viewReports' },
   { href: '/verlauf', label: 'Verlauf', icon: History, cap: 'viewAudit' },
   {
     href: '/einstellungen',
@@ -47,11 +49,11 @@ interface SidebarProps {
 
 function SidebarBrand({ displayName, avatarUrl }: { displayName?: string; avatarUrl?: string | null }) {
   return (
-    <div className="mb-6 flex items-center gap-3 rounded-md border border-slate-200 bg-white p-4">
-      <UserAvatar avatarUrl={avatarUrl} name={displayName} size="lg" />
-      <div className="min-w-0">
-        <p className="text-sm font-bold tracking-tight text-brand-700">TAS FLEET</p>
-        {displayName ? <p className="truncate text-sm text-slate-600">{displayName}</p> : null}
+    <div className="mb-6 space-y-3 rounded-md border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-4">
+      <CompanyLogo />
+      <div className="flex items-center gap-3 border-t border-slate-100 dark:border-slate-800 pt-3">
+        <UserAvatar avatarUrl={avatarUrl} name={displayName} size="md" />
+        {displayName ? <p className="min-w-0 truncate text-sm text-slate-600 dark:text-slate-300">{displayName}</p> : null}
       </div>
     </div>
   )
@@ -68,12 +70,12 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
   )
 
   return (
-    <aside className="surface-card w-72 border-b border-slate-200 p-4 lg:border-b-0 lg:border-r">
+    <aside className="surface-card w-72 border-b border-slate-200 dark:border-slate-700/60 p-4 lg:border-b-0 lg:border-r">
       <SidebarBrand displayName={displayName} avatarUrl={avatarUrl} />
 
-      <div className="mb-3 flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+      <div className="mb-3 flex items-center justify-between rounded-md border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50 px-3 py-2">
         <span className="text-xs font-medium text-slate-400">Rolle</span>
-        <span className="text-xs font-semibold text-slate-700">
+        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
           {isSuperadmin ? 'Superadmin' : roleLabel(activeCompany.role)}
         </span>
       </div>
@@ -81,7 +83,7 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
       {isSuperadmin && (
         <Link
           href="/superadmin"
-          className="mb-3 flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 transition-colors hover:bg-amber-100"
+          className="mb-3 flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-sm font-semibold text-amber-800 dark:text-amber-300 transition-colors hover:bg-amber-100"
         >
           <ShieldAlert className="h-4 w-4 shrink-0" />
           Superadmin Konsole
@@ -105,7 +107,7 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
                   'inline-flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   isActive
                     ? 'bg-brand-600 text-white'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white',
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -128,7 +130,7 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
                     isActive ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0 pointer-events-none',
                   )}
                 >
-                  <div className="ml-5 mt-1 flex flex-col gap-0.5 border-l-2 border-slate-200 pl-3 pb-1">
+                  <div className="ml-5 mt-1 flex flex-col gap-0.5 border-l-2 border-slate-200 dark:border-slate-700/60 pl-3 pb-1">
                     {visibleSubItems.map((sub, i) => (
                       <Link
                         key={sub.tab}
@@ -140,7 +142,7 @@ function SidebarNav({ displayName, avatarUrl, isSuperadmin }: SidebarProps) {
                             : '-translate-x-1 opacity-0',
                           activeTab === sub.tab
                             ? 'bg-emerald-50 text-emerald-700 font-semibold'
-                            : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900',
+                            : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white',
                         )}
                         style={{ transitionDelay: isActive ? `${i * 55 + 70}ms` : '0ms' }}
                       >
@@ -162,7 +164,7 @@ export function Sidebar({ displayName, avatarUrl, isSuperadmin }: SidebarProps) 
   return (
     <Suspense
       fallback={
-        <aside className="surface-card w-72 border-b border-slate-200 p-4 lg:border-b-0 lg:border-r">
+        <aside className="surface-card w-72 border-b border-slate-200 dark:border-slate-700/60 p-4 lg:border-b-0 lg:border-r">
           <SidebarBrand displayName={displayName} avatarUrl={avatarUrl} />
         </aside>
       }

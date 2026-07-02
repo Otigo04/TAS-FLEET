@@ -153,7 +153,7 @@ export function VehicleDetail({ vehicle, companyId, canEdit, incidents }: Vehicl
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {EXTENDED_FIELDS.map((f) => (
               <div key={f.key} className="space-y-1">
-                <Label htmlFor={`vf-${f.key}`} className="text-xs text-slate-500">{f.label}</Label>
+                <Label htmlFor={`vf-${f.key}`} className="text-xs text-slate-500 dark:text-slate-400">{f.label}</Label>
                 <Input
                   id={`vf-${f.key}`}
                   type={f.type === 'date' ? 'date' : f.type === 'number' ? 'number' : 'text'}
@@ -170,7 +170,7 @@ export function VehicleDetail({ vehicle, companyId, canEdit, incidents }: Vehicl
                 {savingMaster ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : masterSaved ? <Check className="mr-2 h-4 w-4" /> : null}
                 {masterSaved ? 'Gespeichert' : 'Speichern'}
               </Button>
-              {masterError && <p className="text-sm text-rose-600">{masterError}</p>}
+              {masterError && <p className="text-sm text-rose-600 dark:text-rose-400">{masterError}</p>}
             </div>
           )}
         </CardContent>
@@ -184,7 +184,7 @@ export function VehicleDetail({ vehicle, companyId, canEdit, incidents }: Vehicl
         </CardHeader>
         <CardContent className="space-y-3">
           {canEdit && (
-            <div className="grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2">
+            <div className="grid gap-2 rounded-md border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50 p-3 sm:grid-cols-2">
               <Input type="date" value={mDate} onChange={(e) => setMDate(e.target.value)} />
               <Input placeholder="Art (z. B. Inspektion)" value={mType} onChange={(e) => setMType(e.target.value)} />
               <Input placeholder="Kosten €" inputMode="decimal" value={mCost} onChange={(e) => setMCost(e.target.value)} />
@@ -197,15 +197,15 @@ export function VehicleDetail({ vehicle, companyId, canEdit, incidents }: Vehicl
           {maintenance.length === 0 ? (
             <p className="text-sm text-slate-400">Keine Wartungseinträge.</p>
           ) : (
-            <ul className="divide-y divide-slate-100 rounded-md border border-slate-200 text-sm">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800 rounded-md border border-slate-200 dark:border-slate-700/60 text-sm">
               {maintenance.map((m) => (
                 <li key={m.id} className="flex items-center justify-between gap-2 px-3 py-2">
                   <div className="min-w-0">
-                    <p className="truncate text-slate-700">{m.service_type}</p>
+                    <p className="truncate text-slate-700 dark:text-slate-300">{m.service_type}</p>
                     <p className="text-xs text-slate-400">{m.service_date}{m.note ? ` · ${m.note}` : ''}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <span className="text-xs text-slate-600">{eur(Number(m.cost_eur ?? 0))}</span>
+                    <span className="text-xs text-slate-600 dark:text-slate-300">{eur(Number(m.cost_eur ?? 0))}</span>
                     {canEdit && (
                       <button type="button" onClick={() => void supabase.from('vehicle_maintenance').delete().eq('id', m.id)} className="rounded p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600">
                         <Trash2 className="h-4 w-4" />
@@ -227,7 +227,7 @@ export function VehicleDetail({ vehicle, companyId, canEdit, incidents }: Vehicl
         </CardHeader>
         <CardContent className="space-y-3">
           {canEdit && (
-            <div className="grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2">
+            <div className="grid gap-2 rounded-md border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50 p-3 sm:grid-cols-2">
               <Input type="date" value={cDate} onChange={(e) => setCDate(e.target.value)} />
               <Input placeholder="Kategorie (z. B. Tanken)" value={cCategory} onChange={(e) => setCCategory(e.target.value)} />
               <Input placeholder="Betrag €" inputMode="decimal" value={cAmount} onChange={(e) => setCAmount(e.target.value)} />
@@ -240,15 +240,15 @@ export function VehicleDetail({ vehicle, companyId, canEdit, incidents }: Vehicl
           {costs.length === 0 ? (
             <p className="text-sm text-slate-400">Keine Kosten erfasst.</p>
           ) : (
-            <ul className="divide-y divide-slate-100 rounded-md border border-slate-200 text-sm">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800 rounded-md border border-slate-200 dark:border-slate-700/60 text-sm">
               {costs.map((c) => (
                 <li key={c.id} className="flex items-center justify-between gap-2 px-3 py-2">
                   <div className="min-w-0">
-                    <p className="truncate text-slate-700">{c.category}</p>
+                    <p className="truncate text-slate-700 dark:text-slate-300">{c.category}</p>
                     <p className="text-xs text-slate-400">{c.cost_date}{c.note ? ` · ${c.note}` : ''}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <span className="text-xs text-slate-600">{eur(Number(c.amount_eur ?? 0))}</span>
+                    <span className="text-xs text-slate-600 dark:text-slate-300">{eur(Number(c.amount_eur ?? 0))}</span>
                     {canEdit && (
                       <button type="button" onClick={() => void supabase.from('vehicle_costs').delete().eq('id', c.id)} className="rounded p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600">
                         <Trash2 className="h-4 w-4" />
@@ -272,18 +272,18 @@ export function VehicleDetail({ vehicle, companyId, canEdit, incidents }: Vehicl
           {incidents.length === 0 ? (
             <p className="text-sm text-slate-400">Keine Vorfälle für dieses Fahrzeug.</p>
           ) : (
-            <ul className="divide-y divide-slate-100 rounded-md border border-slate-200 text-sm">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800 rounded-md border border-slate-200 dark:border-slate-700/60 text-sm">
               {incidents.map((inc) => (
                 <li key={inc.id} className="flex items-center justify-between gap-2 px-3 py-2">
                   <div className="min-w-0">
-                    <p className="truncate text-slate-700">{inc.description}</p>
+                    <p className="truncate text-slate-700 dark:text-slate-300">{inc.description}</p>
                     <p className="text-xs text-slate-400">{inc.occurred_on} · {labelFor(inc.incident_type)}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <Badge variant={inc.severity === 'high' ? 'danger' : inc.severity === 'medium' ? 'warning' : 'secondary'}>
                       {labelFor(inc.severity)}
                     </Badge>
-                    <span className="text-xs text-slate-600">{eur(Number(inc.cost_eur ?? 0))}</span>
+                    <span className="text-xs text-slate-600 dark:text-slate-300">{eur(Number(inc.cost_eur ?? 0))}</span>
                   </div>
                 </li>
               ))}

@@ -508,12 +508,12 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
     <section className="animate-fade-up-delay space-y-6">
       
       {/* Action Bar */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl bg-white p-4 shadow-sm border border-slate-200">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl bg-white dark:bg-slate-900 p-4 shadow-sm border border-slate-200 dark:border-slate-700/60">
         <div className="flex flex-1 flex-wrap items-start gap-3 w-full sm:items-center">
           <div className="relative w-full sm:max-w-[240px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input
-              className="pl-9 bg-slate-50/50 border-slate-300"
+              className="pl-9 bg-slate-50/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-600"
               placeholder="Suchen..."
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -522,7 +522,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
           <div className="relative w-full sm:flex-1 sm:min-w-[140px] sm:max-w-[180px]">
             <Filter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <select
-              className="flex h-10 w-full rounded-md border border-slate-300 bg-slate-50/50 pl-9 pr-8 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/50 pl-9 pr-8 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               value={filterShift}
               onChange={(event) => setFilterShift(event.target.value)}
             >
@@ -537,7 +537,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
           <div className="relative w-full sm:flex-1 sm:min-w-[140px] sm:max-w-[180px]">
             <Filter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <select
-              className="flex h-10 w-full rounded-md border border-slate-300 bg-slate-50/50 pl-9 pr-8 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/50 pl-9 pr-8 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               value={filterDistrict}
               onChange={(event) => setFilterDistrict(event.target.value)}
             >
@@ -566,14 +566,14 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
         </div>
       </div>
 
-      {error ? <p className="text-sm font-medium text-red-600 bg-red-50 p-3 rounded-md border border-red-200">{error}</p> : null}
+      {error ? <p className="text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 p-3 rounded-md border border-red-200 dark:border-red-900">{error}</p> : null}
 
       {/* Add Form Container */}
       {showAddForm && (
-        <Card className="border-slate-200 shadow-sm bg-white overflow-hidden">
-          <CardHeader className="border-b border-slate-100 bg-slate-50">
-            <CardTitle className="text-xl text-slate-900">Neuen Fahrer anlegen</CardTitle>
-            <CardDescription className="text-slate-600">
+        <Card className="border-slate-200 dark:border-slate-700/60 shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
+          <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+            <CardTitle className="text-xl text-slate-900 dark:text-slate-100">Neuen Fahrer anlegen</CardTitle>
+            <CardDescription className="text-slate-600 dark:text-slate-300">
               Personalstammblatt importieren oder Daten manuell eintragen.
             </CardDescription>
           </CardHeader>
@@ -588,19 +588,19 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                   id="driver-sheet"
                   type="file"
                   accept=".pdf,image/*"
-                  className="bg-white border-blue-200"
+                  className="bg-white dark:bg-slate-900 border-blue-200"
                   onChange={(event) => setImportFile(event.target.files?.[0] ?? null)}
                 />
               </div>
 
-              <Button type="submit" variant="secondary" className="w-full bg-white hover:bg-blue-50 text-blue-900 border-blue-200" disabled={isImporting}>
+              <Button type="submit" variant="secondary" className="w-full bg-white dark:bg-slate-900 hover:bg-blue-50 text-blue-900 border-blue-200" disabled={isImporting}>
                 {showImportSpinner ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 {isImporting ? 'Wird ausgelesen...' : 'Stammblatt auslesen'}
               </Button>
 
               {importStatus ? <p className="text-sm font-medium text-emerald-700 mt-2">{importStatus}</p> : null}
               {importWarnings.length > 0 ? (
-                <ul className="space-y-1 text-xs text-amber-700 mt-2 bg-amber-50 p-2 rounded border border-amber-200">
+                <ul className="space-y-1 text-xs text-amber-700 mt-2 bg-amber-50 dark:bg-amber-950/40 p-2 rounded border border-amber-200 dark:border-amber-900">
                   {importWarnings.map((warning, index) => (
                     <li key={`${warning}-${index}`}>- {warning}</li>
                   ))}
@@ -618,23 +618,23 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                   id="driver-csv"
                   type="file"
                   accept=".csv,text/csv"
-                  className="bg-white border-emerald-200"
+                  className="bg-white dark:bg-slate-900 border-emerald-200 dark:border-emerald-900"
                   onChange={(event) => setCsvFile(event.target.files?.[0] ?? null)}
                 />
               </div>
 
-              <Button type="submit" variant="secondary" className="w-full bg-white hover:bg-emerald-50 text-emerald-900 border-emerald-200" disabled={isCsvImporting}>
+              <Button type="submit" variant="secondary" className="w-full bg-white dark:bg-slate-900 hover:bg-emerald-50 text-emerald-900 border-emerald-200 dark:border-emerald-900" disabled={isCsvImporting}>
                 {showCsvSpinner ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 {isCsvImporting ? 'Wird importiert...' : 'CSV importieren'}
               </Button>
 
               {csvResult ? (
                 <div className="space-y-2 text-xs mt-2">
-                  <p className="font-medium text-emerald-800">
+                  <p className="font-medium text-emerald-800 dark:text-emerald-300">
                     {csvResult.created} von {csvResult.totalRows} Fahrer(n) angelegt.
                   </p>
                   {csvResult.detectedColumns.length > 0 ? (
-                    <details className="rounded border border-emerald-200 bg-white p-2 text-emerald-700">
+                    <details className="rounded border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-slate-900 p-2 text-emerald-700">
                       <summary className="cursor-pointer font-medium">Erkannte Spalten ({csvResult.detectedColumns.length})</summary>
                       <ul className="mt-1 space-y-0.5">
                         {csvResult.detectedColumns.map((col, index) => (
@@ -644,7 +644,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                     </details>
                   ) : null}
                   {csvResult.skipped.length > 0 ? (
-                    <details className="rounded border border-amber-200 bg-amber-50 p-2 text-amber-700">
+                    <details className="rounded border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 p-2 text-amber-700">
                       <summary className="cursor-pointer font-medium">Übersprungen ({csvResult.skipped.length})</summary>
                       <ul className="mt-1 space-y-0.5">
                         {csvResult.skipped.map((entry, index) => (
@@ -654,7 +654,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                     </details>
                   ) : null}
                   {csvResult.warnings.length > 0 ? (
-                    <ul className="space-y-1 text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                    <ul className="space-y-1 text-amber-700 bg-amber-50 dark:bg-amber-950/40 p-2 rounded border border-amber-200 dark:border-amber-900">
                       {csvResult.warnings.map((warning, index) => (
                         <li key={`csvwarn-${index}`}>- {warning}</li>
                       ))}
@@ -667,132 +667,132 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
 
             <form onSubmit={handleCreate} className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-slate-700">Profilbild (optional)</Label>
-                <div className="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50/60 p-4">
+                <Label className="text-slate-700 dark:text-slate-300">Profilbild (optional)</Label>
+                <div className="flex items-center gap-4 rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-800/50 p-4">
                   <AvatarUploadCrop value={avatarUrl} onChange={setAvatarUrl} pathPrefix="drivers" />
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Klicke auf den Kreis, um ein Bild hochzuladen und zuzuschneiden.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="driver-name" className="text-slate-700">Name (Anzeige)</Label>
-                <Input id="driver-name" className="border-slate-300 focus-visible:ring-slate-400" value={name} onChange={(event) => setName(event.target.value)} required />
+                <Label htmlFor="driver-name" className="text-slate-700 dark:text-slate-300">Name (Anzeige)</Label>
+                <Input id="driver-name" className="border-slate-300 dark:border-slate-600 focus-visible:ring-slate-400" value={name} onChange={(event) => setName(event.target.value)} required />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="driver-first-name" className="text-slate-700">Vorname</Label>
-                  <Input id="driver-first-name" className="border-slate-300" value={firstName} onChange={(event) => setFirstName(event.target.value)} />
+                  <Label htmlFor="driver-first-name" className="text-slate-700 dark:text-slate-300">Vorname</Label>
+                  <Input id="driver-first-name" className="border-slate-300 dark:border-slate-600" value={firstName} onChange={(event) => setFirstName(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-last-name" className="text-slate-700">Nachname</Label>
-                  <Input id="driver-last-name" className="border-slate-300" value={lastName} onChange={(event) => setLastName(event.target.value)} />
+                  <Label htmlFor="driver-last-name" className="text-slate-700 dark:text-slate-300">Nachname</Label>
+                  <Input id="driver-last-name" className="border-slate-300 dark:border-slate-600" value={lastName} onChange={(event) => setLastName(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-street" className="text-slate-700">Straße</Label>
-                  <Input id="driver-street" className="border-slate-300" value={street} onChange={(event) => setStreet(event.target.value)} />
+                  <Label htmlFor="driver-street" className="text-slate-700 dark:text-slate-300">Straße</Label>
+                  <Input id="driver-street" className="border-slate-300 dark:border-slate-600" value={street} onChange={(event) => setStreet(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-street-number" className="text-slate-700">Straßennr</Label>
-                  <Input id="driver-street-number" className="border-slate-300" value={streetNumber} onChange={(event) => setStreetNumber(event.target.value)} />
+                  <Label htmlFor="driver-street-number" className="text-slate-700 dark:text-slate-300">Straßennr</Label>
+                  <Input id="driver-street-number" className="border-slate-300 dark:border-slate-600" value={streetNumber} onChange={(event) => setStreetNumber(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-postal-code" className="text-slate-700">PLZ</Label>
-                  <Input id="driver-postal-code" className="border-slate-300" value={postalCode} onChange={(event) => setPostalCode(event.target.value)} />
+                  <Label htmlFor="driver-postal-code" className="text-slate-700 dark:text-slate-300">PLZ</Label>
+                  <Input id="driver-postal-code" className="border-slate-300 dark:border-slate-600" value={postalCode} onChange={(event) => setPostalCode(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-city" className="text-slate-700">Ort</Label>
-                  <Input id="driver-city" className="border-slate-300" value={city} onChange={(event) => setCity(event.target.value)} />
+                  <Label htmlFor="driver-city" className="text-slate-700 dark:text-slate-300">Ort</Label>
+                  <Input id="driver-city" className="border-slate-300 dark:border-slate-600" value={city} onChange={(event) => setCity(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-birth-date" className="text-slate-700">Geburtsdatum</Label>
-                  <Input id="driver-birth-date" type="text" className="border-slate-300" value={birthDate} onChange={(event) => setBirthDate(event.target.value)} />
+                  <Label htmlFor="driver-birth-date" className="text-slate-700 dark:text-slate-300">Geburtsdatum</Label>
+                  <Input id="driver-birth-date" type="text" className="border-slate-300 dark:border-slate-600" value={birthDate} onChange={(event) => setBirthDate(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-nationality" className="text-slate-700">Staatsangehörigkeit</Label>
-                  <Input id="driver-nationality" className="border-slate-300" value={nationality} onChange={(event) => setNationality(event.target.value)} />
+                  <Label htmlFor="driver-nationality" className="text-slate-700 dark:text-slate-300">Staatsangehörigkeit</Label>
+                  <Input id="driver-nationality" className="border-slate-300 dark:border-slate-600" value={nationality} onChange={(event) => setNationality(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-marital-status" className="text-slate-700">Familienstand</Label>
-                  <Input id="driver-marital-status" className="border-slate-300" value={maritalStatus} onChange={(event) => setMaritalStatus(event.target.value)} />
+                  <Label htmlFor="driver-marital-status" className="text-slate-700 dark:text-slate-300">Familienstand</Label>
+                  <Input id="driver-marital-status" className="border-slate-300 dark:border-slate-600" value={maritalStatus} onChange={(event) => setMaritalStatus(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-tax-class" className="text-slate-700">Steuerklasse</Label>
-                  <Input id="driver-tax-class" className="border-slate-300" value={taxClass} onChange={(event) => setTaxClass(event.target.value)} />
+                  <Label htmlFor="driver-tax-class" className="text-slate-700 dark:text-slate-300">Steuerklasse</Label>
+                  <Input id="driver-tax-class" className="border-slate-300 dark:border-slate-600" value={taxClass} onChange={(event) => setTaxClass(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-tax-id" className="text-slate-700">Steuer Identifikationsnr</Label>
-                  <Input id="driver-tax-id" className="border-slate-300" value={taxId} onChange={(event) => setTaxId(event.target.value)} />
+                  <Label htmlFor="driver-tax-id" className="text-slate-700 dark:text-slate-300">Steuer Identifikationsnr</Label>
+                  <Input id="driver-tax-id" className="border-slate-300 dark:border-slate-600" value={taxId} onChange={(event) => setTaxId(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-social-security" className="text-slate-700">Sozialversicherungsnr</Label>
+                  <Label htmlFor="driver-social-security" className="text-slate-700 dark:text-slate-300">Sozialversicherungsnr</Label>
                   <Input
                     id="driver-social-security"
-                    className="border-slate-300"
+                    className="border-slate-300 dark:border-slate-600"
                     value={socialSecurityNumber}
                     onChange={(event) => setSocialSecurityNumber(event.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-health-insurance" className="text-slate-700">Krankenkasse</Label>
+                  <Label htmlFor="driver-health-insurance" className="text-slate-700 dark:text-slate-300">Krankenkasse</Label>
                   <Input
                     id="driver-health-insurance"
-                    className="border-slate-300"
+                    className="border-slate-300 dark:border-slate-600"
                     value={healthInsurance}
                     onChange={(event) => setHealthInsurance(event.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-employment-start" className="text-slate-700">Eintritt am</Label>
+                  <Label htmlFor="driver-employment-start" className="text-slate-700 dark:text-slate-300">Eintritt am</Label>
                   <Input
                     id="driver-employment-start"
                     type="text"
-                    className="border-slate-300"
+                    className="border-slate-300 dark:border-slate-600"
                     value={employmentStartDate}
                     onChange={(event) => setEmploymentStartDate(event.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-employed-as" className="text-slate-700">Beschäftigt als</Label>
-                  <Input id="driver-employed-as" className="border-slate-300" value={employedAs} onChange={(event) => setEmployedAs(event.target.value)} />
+                  <Label htmlFor="driver-employed-as" className="text-slate-700 dark:text-slate-300">Beschäftigt als</Label>
+                  <Input id="driver-employed-as" className="border-slate-300 dark:border-slate-600" value={employedAs} onChange={(event) => setEmployedAs(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-bank-name" className="text-slate-700">Name der Bank</Label>
-                  <Input id="driver-bank-name" className="border-slate-300" value={bankName} onChange={(event) => setBankName(event.target.value)} />
+                  <Label htmlFor="driver-bank-name" className="text-slate-700 dark:text-slate-300">Name der Bank</Label>
+                  <Input id="driver-bank-name" className="border-slate-300 dark:border-slate-600" value={bankName} onChange={(event) => setBankName(event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-iban" className="text-slate-700">IBAN</Label>
-                  <Input id="driver-iban" className="border-slate-300" value={iban} onChange={(event) => setIban(event.target.value)} />
+                  <Label htmlFor="driver-iban" className="text-slate-700 dark:text-slate-300">IBAN</Label>
+                  <Input id="driver-iban" className="border-slate-300 dark:border-slate-600" value={iban} onChange={(event) => setIban(event.target.value)} />
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-3 pt-4 border-t border-slate-100">
+              <div className="grid gap-4 md:grid-cols-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <div className="space-y-2">
-                  <Label htmlFor="driver-pschein" className="text-slate-700 font-semibold">P-Schein gültig bis</Label>
+                  <Label htmlFor="driver-pschein" className="text-slate-700 dark:text-slate-300 font-semibold">P-Schein gültig bis</Label>
                   <Input
                     id="driver-pschein"
                     type="text"
-                    className="border-slate-300"
+                    className="border-slate-300 dark:border-slate-600"
                     value={pscheinValidUntil}
                     onChange={(event) => setPscheinValidUntil(event.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-district" className="text-slate-700 font-semibold">Bezirk</Label>
+                  <Label htmlFor="driver-district" className="text-slate-700 dark:text-slate-300 font-semibold">Bezirk</Label>
                   <Input
                     id="driver-district"
-                    className="border-slate-300"
+                    className="border-slate-300 dark:border-slate-600"
                     value={district}
                     onChange={(event) => setDistrict(event.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="driver-shift" className="text-slate-700 font-semibold">Schicht</Label>
+                  <Label htmlFor="driver-shift" className="text-slate-700 dark:text-slate-300 font-semibold">Schicht</Label>
                   <select
                     id="driver-shift"
-                    className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
                     value={currentShift}
                     onChange={(event) => setCurrentShift(event.target.value)}
                   >
@@ -805,12 +805,12 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                 </div>
               </div>
 
-              <div className="space-y-2 pt-4 border-t border-slate-100">
-                <Label htmlFor="driver-note" className="text-slate-700">Notizpunkte</Label>
+              <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <Label htmlFor="driver-note" className="text-slate-700 dark:text-slate-300">Notizpunkte</Label>
                 <div className="flex gap-2">
                   <Input
                     id="driver-note"
-                    className="border-slate-300"
+                    className="border-slate-300 dark:border-slate-600"
                     value={noteInput}
                     onChange={(event) => setNoteInput(event.target.value)}
                     placeholder="z. B. bevorzugt Bezirk Zentrum"
@@ -821,17 +821,17 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                       }
                     }}
                   />
-                  <Button type="button" variant="secondary" onClick={addCreateNote} className="bg-slate-100 hover:bg-slate-200">
+                  <Button type="button" variant="secondary" onClick={addCreateNote} className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700">
                     Hinzufügen
                   </Button>
                 </div>
 
                 {notes.length > 0 ? (
-                  <ul className="space-y-2 mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <ul className="space-y-2 mt-3 rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50 p-3">
                     {notes.map((note, index) => (
-                      <li key={`${note}-${index}`} className="flex items-center justify-between gap-3 text-sm text-slate-700 bg-white border border-slate-200 px-3 py-2 rounded-md shadow-sm">
+                      <li key={`${note}-${index}`} className="flex items-center justify-between gap-3 text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 px-3 py-2 rounded-md shadow-sm">
                         <span>{note}</span>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => removeCreateNote(index)} className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeCreateNote(index)} className="h-7 px-2 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50">
                           Entfernen
                         </Button>
                       </li>
@@ -857,8 +857,8 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
       {/* Driver List */}
       <div className="space-y-3">
         {filteredDrivers.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl border border-slate-200 border-dashed">
-            <p className="text-slate-500">Keine Fahrer gefunden.</p>
+          <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700/60 border-dashed">
+            <p className="text-slate-500 dark:text-slate-400">Keine Fahrer gefunden.</p>
           </div>
         ) : (
           filteredDrivers.map((driver) => {
@@ -867,13 +867,13 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
             return (
               <Card
                 key={driver.id}
-                className={`transition-all duration-200 ${isEditing ? 'border-slate-300 shadow-md ring-1 ring-slate-200' : 'border-slate-200 shadow-sm hover:border-slate-300 hover:shadow-md'}`}
+                className={`transition-all duration-200 ${isEditing ? 'border-slate-300 dark:border-slate-600 shadow-md ring-1 ring-slate-200 dark:ring-slate-700' : 'border-slate-200 dark:border-slate-700/60 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md'}`}
               >
                 {isEditing ? (
                   <CardContent className="p-6 space-y-6">
-                    <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-                      <h3 className="text-lg font-semibold text-slate-900">Fahrer bearbeiten</h3>
-                      <Button variant="ghost" size="sm" onClick={cancelEdit} className="h-8 px-2 text-slate-500">
+                    <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Fahrer bearbeiten</h3>
+                      <Button variant="ghost" size="sm" onClick={cancelEdit} className="h-8 px-2 text-slate-500 dark:text-slate-400">
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -881,111 +881,111 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                     {/* Edit form contents... */}
                     <div className="space-y-5">
                       {/* Persönliche Daten */}
-                      <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-5">
-                        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500">Persönliche Daten</p>
+                      <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/50 p-5">
+                        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Persönliche Daten</p>
                         <div className="mb-4 space-y-1.5">
-                          <Label className="text-slate-700">Profilbild</Label>
+                          <Label className="text-slate-700 dark:text-slate-300">Profilbild</Label>
                           <AvatarUploadCrop value={editAvatarUrl} onChange={setEditAvatarUrl} pathPrefix="drivers" />
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-name-${driver.id}`}>Name (Anzeige)</Label>
-                            <Input id={`edit-name-${driver.id}`} className="bg-white border-slate-300" value={editName} onChange={(event) => setEditName(event.target.value)} />
+                            <Input id={`edit-name-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editName} onChange={(event) => setEditName(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-firstname-${driver.id}`}>Vorname</Label>
-                            <Input id={`edit-firstname-${driver.id}`} className="bg-white border-slate-300" value={editFirstName} onChange={(event) => setEditFirstName(event.target.value)} />
+                            <Input id={`edit-firstname-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editFirstName} onChange={(event) => setEditFirstName(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-lastname-${driver.id}`}>Nachname</Label>
-                            <Input id={`edit-lastname-${driver.id}`} className="bg-white border-slate-300" value={editLastName} onChange={(event) => setEditLastName(event.target.value)} />
+                            <Input id={`edit-lastname-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editLastName} onChange={(event) => setEditLastName(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-birthdate-${driver.id}`}>Geburtsdatum</Label>
-                            <Input id={`edit-birthdate-${driver.id}`} type="date" className="bg-white border-slate-300" value={editBirthDate} onChange={(event) => setEditBirthDate(event.target.value)} />
+                            <Input id={`edit-birthdate-${driver.id}`} type="date" className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editBirthDate} onChange={(event) => setEditBirthDate(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-nationality-${driver.id}`}>Staatsangehörigkeit</Label>
-                            <Input id={`edit-nationality-${driver.id}`} className="bg-white border-slate-300" value={editNationality} onChange={(event) => setEditNationality(event.target.value)} />
+                            <Input id={`edit-nationality-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editNationality} onChange={(event) => setEditNationality(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-marital-${driver.id}`}>Familienstand</Label>
-                            <Input id={`edit-marital-${driver.id}`} className="bg-white border-slate-300" value={editMaritalStatus} onChange={(event) => setEditMaritalStatus(event.target.value)} />
+                            <Input id={`edit-marital-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editMaritalStatus} onChange={(event) => setEditMaritalStatus(event.target.value)} />
                           </div>
                         </div>
                       </div>
 
                       {/* Anschrift */}
-                      <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-5">
-                        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500">Anschrift</p>
+                      <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/50 p-5">
+                        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Anschrift</p>
                         <div className="grid gap-4 md:grid-cols-2">
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-street-${driver.id}`}>Straße</Label>
-                            <Input id={`edit-street-${driver.id}`} className="bg-white border-slate-300" value={editStreet} onChange={(event) => setEditStreet(event.target.value)} />
+                            <Input id={`edit-street-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editStreet} onChange={(event) => setEditStreet(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-streetnr-${driver.id}`}>Hausnummer</Label>
-                            <Input id={`edit-streetnr-${driver.id}`} className="bg-white border-slate-300" value={editStreetNumber} onChange={(event) => setEditStreetNumber(event.target.value)} />
+                            <Input id={`edit-streetnr-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editStreetNumber} onChange={(event) => setEditStreetNumber(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-plz-${driver.id}`}>PLZ</Label>
-                            <Input id={`edit-plz-${driver.id}`} className="bg-white border-slate-300" value={editPostalCode} onChange={(event) => setEditPostalCode(event.target.value)} />
+                            <Input id={`edit-plz-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editPostalCode} onChange={(event) => setEditPostalCode(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-city-${driver.id}`}>Ort</Label>
-                            <Input id={`edit-city-${driver.id}`} className="bg-white border-slate-300" value={editCity} onChange={(event) => setEditCity(event.target.value)} />
+                            <Input id={`edit-city-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editCity} onChange={(event) => setEditCity(event.target.value)} />
                           </div>
                         </div>
                       </div>
 
                       {/* Steuer & Sozialversicherung */}
-                      <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-5">
-                        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500">Steuer &amp; Sozialversicherung</p>
+                      <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/50 p-5">
+                        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Steuer &amp; Sozialversicherung</p>
                         <div className="grid gap-4 md:grid-cols-2">
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-taxclass-${driver.id}`}>Steuerklasse</Label>
-                            <Input id={`edit-taxclass-${driver.id}`} className="bg-white border-slate-300" value={editTaxClass} onChange={(event) => setEditTaxClass(event.target.value)} />
+                            <Input id={`edit-taxclass-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editTaxClass} onChange={(event) => setEditTaxClass(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-taxid-${driver.id}`}>Steuer-Identifikationsnummer</Label>
-                            <Input id={`edit-taxid-${driver.id}`} className="bg-white border-slate-300" value={editTaxId} onChange={(event) => setEditTaxId(event.target.value)} />
+                            <Input id={`edit-taxid-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editTaxId} onChange={(event) => setEditTaxId(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-svnr-${driver.id}`}>Sozialversicherungsnummer</Label>
-                            <Input id={`edit-svnr-${driver.id}`} className="bg-white border-slate-300" value={editSocialSecurityNumber} onChange={(event) => setEditSocialSecurityNumber(event.target.value)} />
+                            <Input id={`edit-svnr-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editSocialSecurityNumber} onChange={(event) => setEditSocialSecurityNumber(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-kk-${driver.id}`}>Krankenkasse</Label>
-                            <Input id={`edit-kk-${driver.id}`} className="bg-white border-slate-300" value={editHealthInsurance} onChange={(event) => setEditHealthInsurance(event.target.value)} />
+                            <Input id={`edit-kk-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editHealthInsurance} onChange={(event) => setEditHealthInsurance(event.target.value)} />
                           </div>
                         </div>
                       </div>
 
                       {/* Beschäftigung */}
-                      <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-5">
-                        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500">Beschäftigung</p>
+                      <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/50 p-5">
+                        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Beschäftigung</p>
                         <div className="grid gap-4 md:grid-cols-2">
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-eintritt-${driver.id}`}>Eintritt am</Label>
-                            <Input id={`edit-eintritt-${driver.id}`} type="date" className="bg-white border-slate-300" value={editEmploymentStartDate} onChange={(event) => setEditEmploymentStartDate(event.target.value)} />
+                            <Input id={`edit-eintritt-${driver.id}`} type="date" className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editEmploymentStartDate} onChange={(event) => setEditEmploymentStartDate(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-employed-${driver.id}`}>Beschäftigt als</Label>
-                            <Input id={`edit-employed-${driver.id}`} className="bg-white border-slate-300" value={editEmployedAs} onChange={(event) => setEditEmployedAs(event.target.value)} />
+                            <Input id={`edit-employed-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editEmployedAs} onChange={(event) => setEditEmployedAs(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
-                            <Label htmlFor={`edit-pschein-${driver.id}`} className="font-semibold text-slate-700">P-Schein gültig bis *</Label>
-                            <Input id={`edit-pschein-${driver.id}`} type="date" className="bg-white border-slate-300" value={editPscheinValidUntil} onChange={(event) => setEditPscheinValidUntil(event.target.value)} />
+                            <Label htmlFor={`edit-pschein-${driver.id}`} className="font-semibold text-slate-700 dark:text-slate-300">P-Schein gültig bis *</Label>
+                            <Input id={`edit-pschein-${driver.id}`} type="date" className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editPscheinValidUntil} onChange={(event) => setEditPscheinValidUntil(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
-                            <Label htmlFor={`edit-district-${driver.id}`} className="font-semibold text-slate-700">Bezirk *</Label>
-                            <Input id={`edit-district-${driver.id}`} className="bg-white border-slate-300" value={editDistrict} onChange={(event) => setEditDistrict(event.target.value)} />
+                            <Label htmlFor={`edit-district-${driver.id}`} className="font-semibold text-slate-700 dark:text-slate-300">Bezirk *</Label>
+                            <Input id={`edit-district-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editDistrict} onChange={(event) => setEditDistrict(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
-                            <Label htmlFor={`edit-shift-${driver.id}`} className="font-semibold text-slate-700">Schicht *</Label>
+                            <Label htmlFor={`edit-shift-${driver.id}`} className="font-semibold text-slate-700 dark:text-slate-300">Schicht *</Label>
                             <select
                               id={`edit-shift-${driver.id}`}
-                              className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                              className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400"
                               value={editCurrentShift}
                               onChange={(event) => setEditCurrentShift(event.target.value)}
                             >
@@ -1000,27 +1000,27 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                       </div>
 
                       {/* Bankverbindung */}
-                      <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-5">
-                        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500">Bankverbindung</p>
+                      <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/50 p-5">
+                        <p className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Bankverbindung</p>
                         <div className="grid gap-4 md:grid-cols-2">
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-bank-${driver.id}`}>Name der Bank</Label>
-                            <Input id={`edit-bank-${driver.id}`} className="bg-white border-slate-300" value={editBankName} onChange={(event) => setEditBankName(event.target.value)} />
+                            <Input id={`edit-bank-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editBankName} onChange={(event) => setEditBankName(event.target.value)} />
                           </div>
                           <div className="space-y-1.5">
                             <Label htmlFor={`edit-iban-${driver.id}`}>IBAN</Label>
-                            <Input id={`edit-iban-${driver.id}`} className="bg-white border-slate-300" value={editIban} onChange={(event) => setEditIban(event.target.value)} />
+                            <Input id={`edit-iban-${driver.id}`} className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600" value={editIban} onChange={(event) => setEditIban(event.target.value)} />
                           </div>
                         </div>
                       </div>
 
                       {/* Notizpunkte */}
-                      <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-5 space-y-3">
-                        <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Notizpunkte</p>
+                      <div className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-800/50 p-5 space-y-3">
+                        <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Notizpunkte</p>
                         <div className="flex gap-2">
                           <Input
                             id={`edit-driver-note-${driver.id}`}
-                            className="bg-white border-slate-300"
+                            className="bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600"
                             value={editNoteInput}
                             onChange={(event) => setEditNoteInput(event.target.value)}
                             placeholder="Neuen Punkt hinzufügen"
@@ -1031,7 +1031,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                               }
                             }}
                           />
-                          <Button type="button" variant="secondary" onClick={addEditNote} className="bg-white border border-slate-200 hover:bg-slate-50">
+                          <Button type="button" variant="secondary" onClick={addEditNote} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-800/70">
                             Hinzufügen
                           </Button>
                         </div>
@@ -1041,21 +1041,21 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                             {editNotes.map((note, index) => (
                               <li
                                 key={`${note}-${index}`}
-                                className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
+                                className="flex items-center justify-between gap-3 rounded-md border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 shadow-sm"
                               >
                                 <span>{note}</span>
-                                <Button type="button" variant="ghost" size="sm" onClick={() => removeEditNote(index)} className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                                <Button type="button" variant="ghost" size="sm" onClick={() => removeEditNote(index)} className="h-7 px-2 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50">
                                   Entfernen
                                 </Button>
                               </li>
                             ))}
                           </ul>
                         ) : (
-                          <p className="text-sm text-slate-500 italic">Noch keine Notizpunkte vorhanden.</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400 italic">Noch keine Notizpunkte vorhanden.</p>
                         )}
                       </div>
 
-                      <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                      <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
                         <Button variant="ghost" onClick={cancelEdit} disabled={isBusy}>
                           Abbrechen
                         </Button>
@@ -1071,20 +1071,20 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                     <div className="space-y-3 flex items-start gap-4">
                       {driver.avatar_url ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={driver.avatar_url} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-slate-200 mt-1" />
+                        <img src={driver.avatar_url} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700 mt-1" />
                       ) : (
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 ring-1 ring-slate-200/50 mt-1">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 ring-1 ring-slate-200/50 dark:ring-slate-700 mt-1">
                           <User className="h-6 w-6" />
                         </div>
                       )}
                       <div>
                         <div className="flex items-center gap-3 mb-1">
-                          <h4 className="font-bold text-lg text-slate-900">
+                          <h4 className="font-bold text-lg text-slate-900 dark:text-slate-100">
                             {[driver.first_name, driver.last_name].filter(Boolean).join(' ') || driver.name}
                           </h4>
                           <Badge variant={shiftVariant(driver.current_shift)} className="px-2 py-0.5">{shiftLabel(driver.current_shift)}</Badge>
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600 font-medium">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-600 dark:text-slate-300 font-medium">
                           <span className="flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                             Bezirk: {driver.district || 'Nicht angegeben'}
@@ -1100,7 +1100,7 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                         {driver.notes && driver.notes.length > 0 ? (
                           <div className="flex gap-2 flex-wrap pt-2">
                             {driver.notes.map((note, index) => (
-                              <span key={`${driver.id}-note-${index}`} className="inline-flex items-center rounded-md bg-slate-100 border border-slate-200 px-2 py-1 text-xs font-medium text-slate-600">
+                              <span key={`${driver.id}-note-${index}`} className="inline-flex items-center rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 px-2 py-1 text-xs font-medium text-slate-600 dark:text-slate-300">
                                 {note}
                               </span>
                             ))}
@@ -1110,26 +1110,26 @@ export function DriversCrud({ initialDrivers }: DriversCrudProps) {
                     </div>
 
                     <div className="flex items-center gap-2 md:self-center">
-                      <Button asChild variant="outline" size="sm" className="bg-white">
+                      <Button asChild variant="outline" size="sm" className="bg-white dark:bg-slate-900">
                         <Link href={`/fahrer/${driver.id}`}>Details</Link>
                       </Button>
                     {canManage && (
                     <>
-                      <Button variant="outline" size="sm" onClick={() => startEdit(driver)} disabled={isBusy} className="bg-white">
+                      <Button variant="outline" size="sm" onClick={() => startEdit(driver)} disabled={isBusy} className="bg-white dark:bg-slate-900">
                         Bearbeiten
                       </Button>
                       {confirmDeleteId === driver.id ? (
-                        <div className="flex items-center gap-2 bg-red-50 p-1 rounded-md border border-red-100">
+                        <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950/40 p-1 rounded-md border border-red-100">
                           <Button variant="destructive" size="sm" onClick={() => void handleDelete(driver.id)} disabled={isBusy}>
                             {showBusySpinner ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                             Wirklich löschen?
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(null)} disabled={isBusy} className="hover:bg-red-100 text-slate-700">
+                          <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(null)} disabled={isBusy} className="hover:bg-red-100 text-slate-700 dark:text-slate-300">
                             Abbrechen
                           </Button>
                         </div>
                       ) : (
-                        <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(driver.id)} disabled={isBusy} className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                        <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(driver.id)} disabled={isBusy} className="text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50">
                           Löschen
                         </Button>
                       )}

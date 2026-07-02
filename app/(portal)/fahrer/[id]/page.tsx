@@ -46,15 +46,15 @@ export default async function DriverDetailPage({ params }: { params: Promise<{ i
 
   return (
     <main className="animate-fade-up space-y-5">
-      <Link href="/fahrer" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800">
+      <Link href="/fahrer" className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800">
         <ArrowLeft className="h-4 w-4" /> Zurück zur Fahrerliste
       </Link>
 
       <div className="flex items-center gap-4">
         <UserAvatar avatarUrl={driver.avatar_url} name={driver.name} size="lg" />
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-slate-900">{driver.name}</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">{driver.name}</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {field(driver.district)} · Schicht: {field(driver.current_shift)}
           </p>
         </div>
@@ -80,7 +80,7 @@ export default async function DriverDetailPage({ params }: { params: Promise<{ i
               <Detail label="Steuerklasse" value={driver.tax_class} />
               <Detail label="IBAN" value={driver.iban} />
             </dl>
-            <div className="mt-4 flex flex-wrap gap-4 border-t border-slate-100 pt-4">
+            <div className="mt-4 flex flex-wrap gap-4 border-t border-slate-100 dark:border-slate-800 pt-4">
               <DriverNumberField driverId={driver.id} field="weekly_target_hours" label="Wochensoll (Std.)" initial={driver.weekly_target_hours} placeholder="z. B. 40" />
               <DriverNumberField driverId={driver.id} field="annual_vacation_days" label="Urlaub/Jahr (Tage)" initial={driver.annual_vacation_days} placeholder="z. B. 28" />
             </div>
@@ -114,19 +114,19 @@ export default async function DriverDetailPage({ params }: { params: Promise<{ i
             {docs.length === 0 ? (
               <p className="text-sm text-slate-400">Keine Fristen hinterlegt.</p>
             ) : (
-              <ul className="divide-y divide-slate-100 rounded-md border border-slate-200 text-sm">
+              <ul className="divide-y divide-slate-100 dark:divide-slate-800 rounded-md border border-slate-200 dark:border-slate-700/60 text-sm">
                 {docs.map((doc) => (
                   <li key={doc.id} className="flex items-center justify-between px-3 py-2">
-                    <span className="text-slate-700">{labelFor(doc.doc_type)}</span>
+                    <span className="text-slate-700 dark:text-slate-300">{labelFor(doc.doc_type)}</span>
                     <span className="flex items-center gap-2">
-                      <span className="text-xs text-slate-500">{doc.due_date}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">{doc.due_date}</span>
                       <Badge variant="secondary">{labelFor(doc.status)}</Badge>
                     </span>
                   </li>
                 ))}
               </ul>
             )}
-            <div className="border-t border-slate-100 pt-3">
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
               <AttachmentList companyId={company.id} scopeType="driver" entityId={driver.id} />
             </div>
           </CardContent>
@@ -147,8 +147,8 @@ export default async function DriverDetailPage({ params }: { params: Promise<{ i
                 <ul className="space-y-1">
                   {absences.slice(0, 5).map((a) => (
                     <li key={a.id} className="flex items-center justify-between">
-                      <span className="text-slate-600">{labelFor(a.type)}</span>
-                      <span className="text-xs text-slate-500">{a.start_date} – {a.end_date}</span>
+                      <span className="text-slate-600 dark:text-slate-300">{labelFor(a.type)}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">{a.start_date} – {a.end_date}</span>
                     </li>
                   ))}
                 </ul>
@@ -162,8 +162,8 @@ export default async function DriverDetailPage({ params }: { params: Promise<{ i
                 <ul className="space-y-1">
                   {shifts.slice(0, 5).map((s) => (
                     <li key={s.id} className="flex items-center justify-between">
-                      <span className="text-slate-600">{s.shift_date} · {labelFor(s.shift_slot)}</span>
-                      <span className="text-xs text-slate-500">{plates.get(s.vehicle_id) ?? '—'}</span>
+                      <span className="text-slate-600 dark:text-slate-300">{s.shift_date} · {labelFor(s.shift_slot)}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">{plates.get(s.vehicle_id) ?? '—'}</span>
                     </li>
                   ))}
                 </ul>
@@ -177,8 +177,8 @@ export default async function DriverDetailPage({ params }: { params: Promise<{ i
                 <ul className="space-y-1">
                   {incidents.slice(0, 5).map((inc) => (
                     <li key={inc.id} className="flex items-center justify-between">
-                      <span className="text-slate-600">{labelFor(inc.incident_type)}</span>
-                      <span className="text-xs text-slate-500">{inc.occurred_on}</span>
+                      <span className="text-slate-600 dark:text-slate-300">{labelFor(inc.incident_type)}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">{inc.occurred_on}</span>
                     </li>
                   ))}
                 </ul>
@@ -195,7 +195,7 @@ function Detail({ label, value }: { label: string; value: string | null | undefi
   return (
     <div>
       <dt className="text-xs text-slate-400">{label}</dt>
-      <dd className="text-slate-700">{value && value.trim() !== '' ? value : '—'}</dd>
+      <dd className="text-slate-700 dark:text-slate-300">{value && value.trim() !== '' ? value : '—'}</dd>
     </div>
   )
 }

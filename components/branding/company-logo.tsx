@@ -5,25 +5,43 @@ interface CompanyLogoProps {
   compact?: boolean
   className?: string
   displayName?: string
+  /** md = App-Chrome (Sidebar/Header), lg = Login/Setup-Seiten. */
+  size?: 'md' | 'lg'
 }
 
-export function CompanyLogo({ compact = false, className, displayName }: CompanyLogoProps) {
+const SIZES = {
+  md: { box: 'h-12 w-[150px]', px: '150px' },
+  lg: { box: 'h-16 w-[210px]', px: '210px' },
+} as const
+
+export function CompanyLogo({ compact = false, className, displayName, size = 'md' }: CompanyLogoProps) {
+  const s = SIZES[size]
   return (
     <div className={cn('inline-flex items-center gap-3', className)}>
-      <div className="relative h-9 w-[92px] shrink-0">
+      <div className={cn('relative shrink-0', s.box)}>
+        {/* Helle & dunkle Variante — die Wortmarke braucht im Dark Mode helle Schrift. */}
         <Image
           src="/brand/logo.svg"
           alt="TAS FLEET Logo"
           fill
-          sizes="92px"
-          className="object-contain object-left"
+          sizes={s.px}
+          className="object-contain object-left dark:hidden"
+          priority
+        />
+        <Image
+          src="/brand/logo-dark.svg"
+          alt=""
+          aria-hidden
+          fill
+          sizes={s.px}
+          className="hidden object-contain object-left dark:block"
           priority
         />
       </div>
 
       {!compact && displayName ? (
         <div>
-          <p className="text-sm font-semibold text-slate-900">{displayName}</p>
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{displayName}</p>
         </div>
       ) : null}
     </div>

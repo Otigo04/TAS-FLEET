@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Menu, X, LayoutDashboard, Users, Car, CalendarDays, ShieldCheck,
-  AlertTriangle, ShieldAlert, CalendarOff, FileText, History, Settings,
+  AlertTriangle, ShieldAlert, CalendarOff, FileText, History, Settings, Euro,
 } from 'lucide-react'
 import { UserAvatar } from '@/components/branding/user-avatar'
 import { cn } from '@/lib/utils'
@@ -25,6 +25,7 @@ const items: NavItem[] = [
   { href: '/compliance',     label: 'Compliance',    icon: ShieldCheck },
   { href: '/incidents',      label: 'Incidents',     icon: AlertTriangle, cap: 'manageIncidents' },
   { href: '/berichte',       label: 'Berichte',      icon: FileText,      cap: 'viewReports' },
+  { href: '/finanzen',       label: 'Finanzen',      icon: Euro,          cap: 'viewReports' },
   { href: '/verlauf',        label: 'Verlauf',       icon: History,       cap: 'viewAudit' },
   { href: '/einstellungen',  label: 'Einstellungen', icon: Settings },
 ]
@@ -78,7 +79,7 @@ export function MobileNavTrigger() {
       type="button"
       aria-label="Navigation öffnen"
       onClick={open}
-      className="vm-only-mobile vm-only-mobile-flex lg:hidden flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 active:bg-slate-100"
+      className="vm-only-mobile vm-only-mobile-flex lg:hidden flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/70 active:bg-slate-100 dark:active:bg-slate-700"
     >
       <Menu className="h-5 w-5" />
     </button>
@@ -108,21 +109,21 @@ function MobileNavDrawer({
       />
 
       <aside
-        className="drawer-panel absolute inset-y-0 left-0 flex h-full w-80 max-w-[90vw] flex-col bg-white shadow-2xl"
+        className="drawer-panel absolute inset-y-0 left-0 flex h-full w-80 max-w-[90vw] flex-col bg-white dark:bg-slate-900 shadow-2xl"
         data-state={state}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 p-4">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 p-4">
           <div className="flex items-center gap-3">
             <UserAvatar avatarUrl={avatarUrl} name={displayName} size="md" />
             <div className="min-w-0">
-              <p className="text-sm font-bold tracking-tight text-brand-700">TAS FLEET</p>
-              {displayName ? <p className="truncate text-sm font-semibold text-slate-900">{displayName}</p> : null}
-              <p className="text-xs text-slate-500">{isSuperadmin ? 'Superadmin' : roleLabel(activeCompany.role)}</p>
+              <p className="text-sm font-bold tracking-tight text-brand-700 dark:text-brand-300">TAS FLEET</p>
+              {displayName ? <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{displayName}</p> : null}
+              <p className="text-xs text-slate-500 dark:text-slate-400">{isSuperadmin ? 'Superadmin' : roleLabel(activeCompany.role)}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/70"
             aria-label="Navigation schließen"
           >
             <X className="h-4 w-4" />
@@ -134,7 +135,7 @@ function MobileNavDrawer({
             <Link
               href="/superadmin"
               onClick={onClose}
-              className="flex items-center gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 mb-2"
+              className="flex items-center gap-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2"
             >
               <ShieldAlert className="h-5 w-5 shrink-0" />
               Superadmin Konsole
@@ -152,7 +153,7 @@ function MobileNavDrawer({
                   'flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-colors',
                   isActive
                     ? 'bg-brand-600 text-white'
-                    : 'text-slate-700 hover:bg-slate-100 active:bg-slate-200',
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200 dark:active:bg-slate-600',
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />

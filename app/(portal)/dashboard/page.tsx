@@ -84,13 +84,13 @@ export default async function DashboardPage() {
     <main className="animate-fade-up space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
-          <p className="text-sm text-slate-500">Willkommen zurück, {displayName}.</p>
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Dashboard</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Willkommen zurück, {displayName}.</p>
         </div>
       </div>
 
       {/* Kennzahlen-Zeile – kompakt, eine Leiste statt großer Kacheln */}
-      <section className="surface-card grid grid-cols-3 divide-x divide-slate-200">
+      <section className="surface-card grid grid-cols-3 divide-x divide-slate-200 dark:divide-slate-700/60">
         <Stat label="Fahrer" value={driversCount} hint="aktive Einträge" />
         <Stat label="Fahrzeuge" value={vehiclesCount} hint={`${activeVehicles} aktiv`} />
         <Stat label="Kritische Termine" value={criticalDates.length} hint="nächste 60 Tage" />
@@ -99,13 +99,13 @@ export default async function DashboardPage() {
       <section className="grid gap-4 lg:grid-cols-2">
         {/* Flottenstatus */}
         <div className="surface-card overflow-hidden">
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2.5">
-            <h2 className="text-sm font-semibold text-slate-800">Flottenstatus</h2>
-            <Link href="/fahrzeuge" className="text-xs font-medium text-brand-700 hover:underline">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700/60 px-4 py-2.5">
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Flottenstatus</h2>
+            <Link href="/fahrzeuge" className="text-xs font-medium text-brand-700 dark:text-brand-300 hover:underline">
               Alle Fahrzeuge
             </Link>
           </div>
-          <ul className="divide-y divide-slate-100 text-sm">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
             <StatusRow label={labelFor('active')} count={activeVehicles} variant="success" />
             <StatusRow label={labelFor('maintenance')} count={maintenanceVehicles} variant="warning" />
             <StatusRow label={labelFor('offline')} count={offlineVehicles} variant="danger" />
@@ -114,21 +114,21 @@ export default async function DashboardPage() {
 
         {/* Kritische Termine */}
         <div className="surface-card overflow-hidden">
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2.5">
-            <h2 className="text-sm font-semibold text-slate-800">Kritische Termine</h2>
-            <Link href="/compliance" className="text-xs font-medium text-brand-700 hover:underline">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700/60 px-4 py-2.5">
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Kritische Termine</h2>
+            <Link href="/compliance" className="text-xs font-medium text-brand-700 dark:text-brand-300 hover:underline">
               Compliance
             </Link>
           </div>
           {criticalDates.length === 0 ? (
-            <p className="px-4 py-6 text-sm text-slate-500">
+            <p className="px-4 py-6 text-sm text-slate-500 dark:text-slate-400">
               Keine Ablaufdaten in den nächsten 60 Tagen.
             </p>
           ) : (
-            <ul className="divide-y divide-slate-100 text-sm">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
               {criticalDates.slice(0, 6).map((item) => (
                 <li key={item.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
-                  <span className="truncate font-medium text-slate-700">{item.title}</span>
+                  <span className="truncate font-medium text-slate-700 dark:text-slate-300">{item.title}</span>
                   <Badge variant={item.days <= 7 ? 'danger' : 'warning'}>{item.days} Tage</Badge>
                 </li>
               ))}
@@ -155,8 +155,8 @@ export default async function DashboardPage() {
 function Stat({ label, value, hint }: { label: string; value: number; hint?: string }) {
   return (
     <div className="px-4 py-3">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-0.5 text-2xl font-semibold tabular-nums text-slate-900">{value}</p>
+      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="mt-0.5 text-2xl font-semibold tabular-nums text-slate-900 dark:text-slate-100">{value}</p>
       {hint ? <p className="text-xs text-slate-400">{hint}</p> : null}
     </div>
   )
@@ -173,7 +173,7 @@ function StatusRow({
 }) {
   return (
     <li className="flex items-center justify-between px-4 py-2.5">
-      <span className="text-slate-700">{label}</span>
+      <span className="text-slate-700 dark:text-slate-300">{label}</span>
       <Badge variant={variant}>{count}</Badge>
     </li>
   )
@@ -183,11 +183,11 @@ function QuickLink({ href, label, hint }: { href: string; label: string; hint: s
   return (
     <Link
       href={href}
-      className="surface-card group flex items-center justify-between px-4 py-3 transition-colors hover:bg-slate-50"
+      className="surface-card group flex items-center justify-between px-4 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/70"
     >
       <div>
-        <p className="text-sm font-semibold text-slate-800">{label}</p>
-        <p className="text-xs text-slate-500">{hint}</p>
+        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{label}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">{hint}</p>
       </div>
       <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5" />
     </Link>

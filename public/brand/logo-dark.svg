@@ -48,7 +48,7 @@
   <text x="118" y="72"
     font-family="'Space Grotesk', 'Helvetica Neue', Arial, sans-serif"
     font-size="62" font-weight="700" letter-spacing="-1.5"
-    fill="#000000">TAS</text>
+    fill="#f1f5f9">TAS</text>
 
   <!-- FLEET subline -->
   <text x="120" y="97"

@@ -167,13 +167,13 @@ export function AvatarUploadCrop({ value, onChange, placeholder, pathPrefix = 'm
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="group relative h-20 w-20 overflow-hidden rounded-full border-2 border-slate-400 bg-slate-100 shadow-sm transition-all hover:border-slate-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
+          className="group relative h-20 w-20 overflow-hidden rounded-full border-2 border-slate-400 bg-slate-100 dark:bg-slate-800 shadow-sm transition-all hover:border-slate-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
         >
           {value ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={value} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-400">
+            <div className="flex h-full w-full items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-400">
               {placeholder ?? <User className="h-8 w-8" />}
             </div>
           )}
@@ -204,13 +204,13 @@ export function AvatarUploadCrop({ value, onChange, placeholder, pathPrefix = 'm
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) handleClose() }}
         >
-          <div className="w-full max-w-[320px] space-y-5 rounded-2xl bg-white p-5 shadow-2xl">
+          <div className="w-full max-w-[320px] space-y-5 rounded-2xl bg-white dark:bg-slate-900 p-5 shadow-2xl">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-slate-900">Bild zuschneiden</h3>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Bild zuschneiden</h3>
               <button
                 type="button"
                 onClick={handleClose}
-                className="rounded-md p-1 text-slate-400 hover:text-slate-600"
+                className="rounded-md p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -219,7 +219,7 @@ export function AvatarUploadCrop({ value, onChange, placeholder, pathPrefix = 'm
             {/* Crop preview — image moves under fixed circular SVG mask */}
             <div
               ref={cropRef}
-              className="relative mx-auto aspect-square w-full max-w-[260px] overflow-hidden rounded-xl bg-slate-200 select-none"
+              className="relative mx-auto aspect-square w-full max-w-[260px] overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-700 select-none"
               style={{ cursor: isDragging ? 'grabbing' : 'grab', touchAction: 'none' }}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}
@@ -280,7 +280,7 @@ export function AvatarUploadCrop({ value, onChange, placeholder, pathPrefix = 'm
 
             {/* Zoom */}
             <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-xs text-slate-500">
+              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <ZoomIn className="h-3.5 w-3.5" />
                 Zoom
               </div>
@@ -295,7 +295,7 @@ export function AvatarUploadCrop({ value, onChange, placeholder, pathPrefix = 'm
               />
             </div>
 
-            {uploadError && <p className="text-sm text-rose-600">{uploadError}</p>}
+            {uploadError && <p className="text-sm text-rose-600 dark:text-rose-400">{uploadError}</p>}
 
             <div className="flex gap-3">
               <Button type="button" variant="outline" className="flex-1" onClick={handleClose} disabled={isUploading}>

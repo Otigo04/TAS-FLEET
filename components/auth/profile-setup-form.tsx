@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface ProfileSetupFormProps {
   initialFirstName?: string
@@ -67,44 +66,46 @@ export function ProfileSetupForm({ initialFirstName = '', initialLastName = '' }
   }
 
   return (
-    <Card className="surface-card w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl">Profil vervollstaendigen</CardTitle>
-        <CardDescription>Vor- und Nachname eintragen</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">Vorname</Label>
-            <Input
-              id="firstName"
-              type="text"
-              placeholder="Max"
-              value={firstName}
-              onChange={(event) => setFirstName(event.target.value)}
-              required
-            />
-          </div>
+    <div className="w-full max-w-sm">
+      <div className="mb-6">
+        <h2 className="text-xl font-bold tracking-tight text-slate-900">Profil vervollständigen</h2>
+        <p className="mt-1 text-sm text-slate-500">Vor- und Nachname eintragen.</p>
+      </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="firstName" className="text-slate-700">Vorname</Label>
+          <Input
+            id="firstName"
+            type="text"
+            placeholder="Max"
+            value={firstName}
+            onChange={(event) => setFirstName(event.target.value)}
+            className="h-11 border-slate-300 bg-white text-slate-900 focus-visible:ring-brand-500/40"
+            required
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Nachname</Label>
-            <Input
-              id="lastName"
-              type="text"
-              placeholder="Mustermann"
-              value={lastName}
-              onChange={(event) => setLastName(event.target.value)}
-              required
-            />
-          </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="lastName" className="text-slate-700">Nachname</Label>
+          <Input
+            id="lastName"
+            type="text"
+            placeholder="Mustermann"
+            value={lastName}
+            onChange={(event) => setLastName(event.target.value)}
+            className="h-11 border-slate-300 bg-white text-slate-900 focus-visible:ring-brand-500/40"
+            required
+          />
+        </div>
 
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? (
+          <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p>
+        ) : null}
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Wird gespeichert...' : 'Speichern und weiter'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        <Button type="submit" className="h-11 w-full text-[15px]" disabled={isLoading}>
+          {isLoading ? 'Wird gespeichert…' : 'Speichern und weiter'}
+        </Button>
+      </form>
+    </div>
   )
 }

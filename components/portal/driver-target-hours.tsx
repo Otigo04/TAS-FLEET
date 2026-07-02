@@ -50,7 +50,7 @@ export function DriverNumberField({ driverId, field, label, initial, placeholder
   return (
     <div className="flex items-end gap-2">
       <div className="space-y-1">
-        <label htmlFor={`field-${field}`} className="text-xs text-slate-500">
+        <label htmlFor={`field-${field}`} className="text-xs text-slate-500 dark:text-slate-400">
           {label} <span className="text-slate-400">— optional</span>
         </label>
         <Input
@@ -63,9 +63,9 @@ export function DriverNumberField({ driverId, field, label, initial, placeholder
         />
       </div>
       <Button type="button" variant="outline" size="sm" onClick={() => void handleSave()} disabled={saving}>
-        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <Check className="h-4 w-4 text-brand-700" /> : 'Speichern'}
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <Check className="h-4 w-4 text-brand-700 dark:text-brand-300" /> : 'Speichern'}
       </Button>
-      {error && <p className="text-xs text-rose-600">{error}</p>}
+      {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
     </div>
   )
 }

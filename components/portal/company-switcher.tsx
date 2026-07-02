@@ -71,8 +71,8 @@ export function CompanySwitcher() {
   // Single-company users don't need a switcher — just show the name.
   if (companies.length <= 1) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm font-medium text-slate-700">
-        <CompanyAvatar company={activeCompany} className="h-6 w-6 bg-slate-100 text-slate-400 ring-1 ring-slate-200" />
+      <div className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 px-2.5 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300">
+        <CompanyAvatar company={activeCompany} className="h-6 w-6 bg-slate-100 dark:bg-slate-800 text-slate-400 ring-1 ring-slate-200 dark:ring-slate-700" />
         <span className="hidden xs:inline max-w-[120px] truncate sm:max-w-[160px]">{activeCompany.name}</span>
       </div>
     )
@@ -100,13 +100,13 @@ export function CompanySwitcher() {
         aria-haspopup="menu"
         aria-expanded={open}
         className={cn(
-          'group flex items-center gap-2 rounded-lg border bg-white px-2.5 py-1.5 text-sm font-medium text-slate-700 transition-all disabled:opacity-60',
+          'group flex items-center gap-2 rounded-lg border bg-white dark:bg-slate-900 px-2.5 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 transition-all disabled:opacity-60',
           open
             ? 'border-emerald-400 ring-2 ring-emerald-500/20'
-            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50',
+            : 'border-slate-200 dark:border-slate-700/60 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/70',
         )}
       >
-        <CompanyAvatar company={activeCompany} className="h-6 w-6 bg-slate-100 text-slate-400 ring-1 ring-slate-200" />
+        <CompanyAvatar company={activeCompany} className="h-6 w-6 bg-slate-100 dark:bg-slate-800 text-slate-400 ring-1 ring-slate-200 dark:ring-slate-700" />
         <span className="hidden xs:inline max-w-[120px] truncate sm:max-w-[160px]">{activeCompany.name}</span>
         <ChevronsUpDown className={cn('h-4 w-4 shrink-0 text-slate-400 transition-transform', open && 'text-emerald-500')} />
       </button>
@@ -126,7 +126,7 @@ export function CompanySwitcher() {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Unternehmen wechseln
                 </p>
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-slate-300">
+                <span className="rounded-full bg-white/10 dark:bg-slate-900/90 px-2 py-0.5 text-[11px] font-medium text-slate-300">
                   {companies.length}
                 </span>
               </div>
@@ -151,7 +151,7 @@ export function CompanySwitcher() {
                           'h-9 w-9 ring-1',
                           isActive
                             ? 'bg-emerald-500/20 text-emerald-300 ring-emerald-400/40'
-                            : 'bg-white/5 text-slate-400 ring-white/10',
+                            : 'bg-white/5 dark:bg-slate-900/90 text-slate-400 ring-white/10',
                         )}
                       />
                       <span className="flex min-w-0 flex-col">

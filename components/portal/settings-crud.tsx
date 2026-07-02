@@ -186,7 +186,7 @@ function SettingsCrudInner({
   return (
     <div className="space-y-6 animate-fade-up-delay">
       {/* Tab bar */}
-      <div className="flex gap-1 rounded-xl bg-slate-100 p-1 w-fit">
+      <div className="flex gap-1 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 w-fit">
         {([
           { id: 'account' as Tab, label: 'Account' },
           ...(canManageSettings ? [{ id: 'werte' as Tab, label: 'Werte & Status' }] : []),
@@ -198,8 +198,8 @@ function SettingsCrudInner({
             className={cn(
               'rounded-lg px-5 py-2 text-sm font-medium transition-all',
               activeTab === tab.id
-                ? 'bg-white shadow text-slate-900'
-                : 'text-slate-500 hover:text-slate-900',
+                ? 'bg-white dark:bg-slate-900 shadow text-slate-900 dark:text-slate-100'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white',
             )}
           >
             {tab.label}
@@ -218,11 +218,11 @@ function SettingsCrudInner({
               <CardDescription>Dein Nutzerbild und Anzeigename</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
-              <div className="flex flex-col items-center gap-4 rounded-xl border border-slate-200 bg-slate-50/60 p-6 text-center">
+              <div className="flex flex-col items-center gap-4 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-800/50 p-6 text-center">
                 <AvatarUploadCrop value={profileAvatar} onChange={handleAvatarChange} pathPrefix="profiles" />
                 <div>
-                  <p className="text-lg font-bold text-slate-900">{fullName}</p>
-                  <p className="text-sm text-slate-500">{email}</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-slate-100">{fullName}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{email}</p>
                   <Badge variant="secondary" className="mt-2">
                     {roleDisplay}
                   </Badge>
@@ -232,8 +232,8 @@ function SettingsCrudInner({
                     <Loader2 className="h-3 w-3 animate-spin" /> Wird gespeichert…
                   </p>
                 )}
-                {avatarSaved && <p className="text-xs text-emerald-600 font-medium">Profilbild gespeichert ✓</p>}
-                {avatarError && <p className="text-xs text-red-600">{avatarError}</p>}
+                {avatarSaved && <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Profilbild gespeichert ✓</p>}
+                {avatarError && <p className="text-xs text-red-600 dark:text-red-400">{avatarError}</p>}
               </div>
             </CardContent>
           </Card>
@@ -245,7 +245,7 @@ function SettingsCrudInner({
                 <CardTitle>Accountdetails</CardTitle>
                 <CardDescription>Deine persönlichen Accountinformationen</CardDescription>
               </CardHeader>
-              <CardContent className="divide-y divide-slate-100">
+              <CardContent className="divide-y divide-slate-100 dark:divide-slate-800">
                 {[
                   { icon: User, label: 'Name', value: fullName },
                   { icon: Mail, label: 'E-Mail', value: email },
@@ -263,12 +263,12 @@ function SettingsCrudInner({
                   },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-center gap-4 py-3.5">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
-                      <p className="truncate text-sm font-medium text-slate-900">{value}</p>
+                      <p className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">{value}</p>
                     </div>
                   </div>
                 ))}
@@ -299,18 +299,18 @@ function SettingsCrudInner({
                     </Button>
                   </div>
                   {pwMsg && (
-                    <p className={cn('text-sm', pwMsg.ok ? 'text-brand-700' : 'text-rose-600')}>{pwMsg.text}</p>
+                    <p className={cn('text-sm', pwMsg.ok ? 'text-brand-700 dark:text-brand-300' : 'text-rose-600 dark:text-rose-400')}>{pwMsg.text}</p>
                   )}
                 </form>
 
-                <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                       <Clock className="h-4 w-4" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-900">Aktive Sitzungen</p>
-                      <p className="text-xs text-slate-500">Auf allen Geräten abmelden</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Aktive Sitzungen</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Auf allen Geräten abmelden</p>
                     </div>
                   </div>
                   <Button type="button" variant="outline" size="sm" onClick={() => void handleSignOutEverywhere()}>
@@ -328,21 +328,21 @@ function SettingsCrudInner({
               <CardContent className="overflow-x-auto">
                 <table className="w-full border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-slate-200">
-                      <th className="py-2 pr-3 text-left font-medium text-slate-500">Berechtigung</th>
+                    <tr className="border-b border-slate-200 dark:border-slate-700/60">
+                      <th className="py-2 pr-3 text-left font-medium text-slate-500 dark:text-slate-400">Berechtigung</th>
                       {COMPANY_ROLES.map((r) => (
-                        <th key={r} className="px-2 py-2 text-center font-medium text-slate-500">{roleLabel(r)}</th>
+                        <th key={r} className="px-2 py-2 text-center font-medium text-slate-500 dark:text-slate-400">{roleLabel(r)}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {CAPABILITIES.map((cap) => (
-                      <tr key={cap} className="border-b border-slate-100">
-                        <td className="py-2 pr-3 text-slate-700">{CAPABILITY_LABELS[cap]}</td>
+                      <tr key={cap} className="border-b border-slate-100 dark:border-slate-800">
+                        <td className="py-2 pr-3 text-slate-700 dark:text-slate-300">{CAPABILITY_LABELS[cap]}</td>
                         {COMPANY_ROLES.map((r) => (
                           <td key={r} className="px-2 py-2 text-center">
                             {can(r, cap) ? (
-                              <span className="text-brand-700">✓</span>
+                              <span className="text-brand-700 dark:text-brand-300">✓</span>
                             ) : (
                               <span className="text-slate-300">—</span>
                             )}
@@ -362,7 +362,7 @@ function SettingsCrudInner({
       {activeTab === 'werte' && (
         <div className="space-y-4">
           {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">{error}</div>
+            <div className="rounded-md border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-600 dark:text-red-400">{error}</div>
           )}
           <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
             {SETTINGS_CATEGORIES.map((cat) => {
@@ -383,7 +383,7 @@ function SettingsCrudInner({
                           if (e.key === 'Enter') { e.preventDefault(); void handleAdd(cat.key) }
                         }}
                         disabled={isBusy}
-                        className="border-slate-300"
+                        className="border-slate-300 dark:border-slate-600"
                       />
                       <Button
                         onClick={() => void handleAdd(cat.key)}
@@ -400,17 +400,17 @@ function SettingsCrudInner({
                     </div>
 
                     {values.length === 0 ? (
-                      <p className="rounded-lg border border-dashed border-slate-200 p-4 text-center text-sm italic text-slate-400">
+                      <p className="rounded-lg border border-dashed border-slate-200 dark:border-slate-700/60 p-4 text-center text-sm italic text-slate-400">
                         Noch keine Werte konfiguriert.
                       </p>
                     ) : (
-                      <ul className="overflow-hidden rounded-lg border border-slate-200 bg-white divide-y divide-slate-100">
+                      <ul className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
                         {values.map((val) => (
                           <li
                             key={val}
-                            className="flex items-center justify-between px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            className="flex items-center justify-between px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/70 transition-colors"
                           >
-                            <span className="font-medium text-slate-900">{labelFor(val)}</span>
+                            <span className="font-medium text-slate-900 dark:text-slate-100">{labelFor(val)}</span>
                             <button
                               type="button"
                               onClick={() => void handleRemove(cat.key, val)}
@@ -436,7 +436,7 @@ function SettingsCrudInner({
 
 export function SettingsCrud(props: SettingsCrudProps) {
   return (
-    <Suspense fallback={<div className="h-12 animate-pulse rounded-xl bg-slate-100" />}>
+    <Suspense fallback={<div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />}>
       <SettingsCrudInner {...props} />
     </Suspense>
   )

@@ -89,15 +89,15 @@ export function PresenceIndicator({ userId, displayName, avatarUrl }: PresenceIn
         <div
           key={u.key}
           title={`${u.name} bearbeitet gerade ${sectionLabel(u.path)}`}
-          className="animate-fade-up flex items-center gap-2 rounded-full border border-slate-200 bg-white/95 py-1.5 pl-1.5 pr-3.5 shadow-lg backdrop-blur"
+          className="animate-fade-up flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700/60 bg-white/95 dark:bg-slate-900/90 py-1.5 pl-1.5 pr-3.5 shadow-lg backdrop-blur"
         >
           <span className="relative inline-flex shrink-0">
             <UserAvatar avatarUrl={u.avatarUrl} name={u.name} size="sm" />
             <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
           </span>
           <span className="text-xs leading-tight">
-            <span className="font-semibold text-slate-900">{u.name}</span>
-            <span className="block text-[11px] text-slate-500">bearbeitet {sectionLabel(u.path)}</span>
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{u.name}</span>
+            <span className="block text-[11px] text-slate-500 dark:text-slate-400">bearbeitet {sectionLabel(u.path)}</span>
           </span>
         </div>
       ))}

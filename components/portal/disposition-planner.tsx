@@ -265,7 +265,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
           <CardDescription>Fahrer zu Fahrzeugen zuweisen</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-6 p-3 sm:p-4 bg-slate-50 rounded-lg border border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mb-6 p-3 sm:p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700/60">
             <div className="space-y-1.5">
               <Label htmlFor="shift-date">Datum</Label>
               <Input id="shift-date" type="date" value={date} onChange={e => setDate(e.target.value)} />
@@ -274,7 +274,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
               <Label htmlFor="shift-slot">Schicht</Label>
               <select
                 id="shift-slot"
-                className="flex h-10 min-w-[160px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 min-w-[160px] rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={slot}
                 onChange={e => setSlot(e.target.value)}
               >
@@ -289,7 +289,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
                 <Label htmlFor="shift-zone">Zone</Label>
                 <select
                   id="shift-zone"
-                  className="flex h-10 min-w-[160px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                  className="flex h-10 min-w-[160px] rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                   value={zone}
                   onChange={e => setZone(e.target.value)}
                 >
@@ -301,18 +301,18 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
             )}
           </div>
 
-          {error ? <p className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded border border-red-200">{error}</p> : null}
-          {info ? <p className="mb-4 text-sm text-brand-700 bg-brand-50 p-3 rounded border border-brand-200">{info}</p> : null}
+          {error ? <p className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 p-3 rounded border border-red-200 dark:border-red-900">{error}</p> : null}
+          {info ? <p className="mb-4 text-sm text-brand-700 dark:text-brand-300 bg-brand-50 dark:bg-brand-950/40 p-3 rounded border border-brand-200 dark:border-brand-800">{info}</p> : null}
 
           {/* Werkzeuge: PDF-Aushang, Tag kopieren, Wochenübersicht */}
-          <div className="mb-6 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-white p-3">
+          <div className="mb-6 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-3">
             <Button type="button" variant="outline" size="sm" onClick={() => void handleDayPdf()} disabled={pdfBusy}>
               {pdfBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
               Dienstplan (PDF)
             </Button>
             <div className="flex items-end gap-2">
               <div className="space-y-1">
-                <Label htmlFor="copy-target" className="text-xs text-slate-500">Tag kopieren nach</Label>
+                <Label htmlFor="copy-target" className="text-xs text-slate-500 dark:text-slate-400">Tag kopieren nach</Label>
                 <Input id="copy-target" type="date" value={copyTarget} onChange={e => setCopyTarget(e.target.value)} className="w-40" />
               </div>
               <Button type="button" variant="outline" size="sm" onClick={() => void handleCopyDay()} disabled={isBusy}>
@@ -335,12 +335,12 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
                       type="button"
                       key={d}
                       onClick={() => setDate(d)}
-                      className={`rounded-md border p-2 text-left transition-colors ${isSelected ? 'border-brand-500 bg-brand-50' : 'border-slate-200 bg-white hover:bg-slate-50'}`}
+                      className={`rounded-md border p-2 text-left transition-colors ${isSelected ? 'border-brand-500 bg-brand-50 dark:bg-brand-950/40' : 'border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/70'}`}
                     >
-                      <p className="text-xs font-semibold text-slate-700">
+                      <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                         {new Date(`${d}T00:00:00Z`).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', timeZone: 'UTC' })}
                       </p>
-                      <p className="mt-1 text-lg font-semibold tabular-nums text-slate-900">{dayShifts.length}</p>
+                      <p className="mt-1 text-lg font-semibold tabular-nums text-slate-900 dark:text-slate-100">{dayShifts.length}</p>
                       <p className="text-[11px] text-slate-400">Zuweisungen</p>
                     </button>
                   )
@@ -356,26 +356,26 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
               const availableDrivers = drivers.filter(d => !assignedDriverIds.includes(d.id))
 
               return (
-                <div key={vehicle.id} className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
-                  <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                <div key={vehicle.id} className="rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 shadow-sm overflow-hidden flex flex-col">
+                  <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {vehicle.avatar_url ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={vehicle.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200" />
+                        <img src={vehicle.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700" />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-slate-500 ring-1 ring-slate-200/50">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 ring-1 ring-slate-200/50 dark:ring-slate-700">
                           <Car className="h-4 w-4" />
                         </div>
                       )}
                       <div>
-                        <h4 className="font-bold text-slate-900 leading-tight">{vehicle.license_plate}</h4>
-                        <p className="text-xs text-slate-500">{vehicle.model}</p>
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 leading-tight">{vehicle.license_plate}</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{vehicle.model}</p>
                       </div>
                     </div>
                     <Badge variant={assigned.length > 0 ? "success" : "secondary"}>{assigned.length} Fahrer</Badge>
                   </div>
 
-                  <div className="p-4 flex-1 space-y-3 bg-white">
+                  <div className="p-4 flex-1 space-y-3 bg-white dark:bg-slate-900">
                     {assigned.length === 0 ? (
                       <p className="text-sm text-slate-400 italic">Keine Fahrer zugewiesen.</p>
                     ) : (
@@ -383,22 +383,22 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
                         {assigned.map(assignment => {
                           const driver = drivers.find(d => d.id === assignment.driver_id)
                           return (
-                            <li key={assignment.id} className="flex items-center justify-between text-sm bg-slate-50 border border-slate-100 px-3 py-2 rounded-lg">
+                            <li key={assignment.id} className="flex items-center justify-between text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 px-3 py-2 rounded-lg">
                               <div className="flex items-center gap-2">
                                 {driver?.avatar_url ? (
                                   /* eslint-disable-next-line @next/next/no-img-element */
-                                  <img src={driver.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover ring-1 ring-slate-200" />
+                                  <img src={driver.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700" />
                                 ) : (
-                                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 text-slate-500 ring-1 ring-slate-200">
+                                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 ring-1 ring-slate-200 dark:ring-slate-700">
                                     <User className="h-3.5 w-3.5" />
                                   </span>
                                 )}
-                                <span className="font-medium text-slate-700">{driver?.name ?? 'Unbekannt'}</span>
+                                <span className="font-medium text-slate-700 dark:text-slate-300">{driver?.name ?? 'Unbekannt'}</span>
                                 {showAllSlots && (
                                   <Badge variant="secondary">{shiftLabel(assignment.shift_slot)}</Badge>
                                 )}
                                 {assignment.uber_zone && assignment.uber_zone !== 'Standard' ? (
-                                  <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-500">{assignment.uber_zone}</span>
+                                  <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[11px] text-slate-500 dark:text-slate-400">{assignment.uber_zone}</span>
                                 ) : null}
                               </div>
                               <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50" onClick={() => void unassignDriver(assignment.id)} disabled={isBusy}>
@@ -411,9 +411,9 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
                     )}
                   </div>
 
-                  <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+                  <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
                     <select
-                      className="flex h-9 w-full rounded-md border border-slate-200 bg-white px-3 py-1 text-sm text-slate-600 focus:outline-none focus:ring-1 focus:ring-slate-300"
+                      className="flex h-9 w-full rounded-md border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 px-3 py-1 text-sm text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300"
                       onChange={e => {
                         void assignDriver(vehicle.id, e.target.value)
                         e.target.value = ''

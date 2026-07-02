@@ -18,8 +18,8 @@ export default async function SchichtplanungPage() {
   return (
     <main className="space-y-6">
       <div className="animate-fade-up">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Schichtzettel / Stundenzettel</h1>
-        <p className="mt-1 text-slate-600">Wöchentliche Arbeitszeiten erfassen und exportieren.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Schichtzettel / Stundenzettel</h1>
+        <p className="mt-1 text-slate-600 dark:text-slate-300">Wöchentliche Arbeitszeiten erfassen und exportieren.</p>
       </div>
 
       <ShiftPlanner initialShifts={shifts} drivers={drivers} />

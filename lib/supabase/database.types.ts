@@ -563,6 +563,45 @@ export interface Database {
         }
         Relationships: []
       }
+      finance_entries: {
+        Row: {
+          id: string
+          company_id: string
+          entry_date: string
+          kind: 'einnahme' | 'ausgabe'
+          category: string
+          description: string | null
+          amount_eur: number
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          entry_date: string
+          kind: 'einnahme' | 'ausgabe'
+          category?: string
+          description?: string | null
+          amount_eur: number
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          entry_date?: string
+          kind?: 'einnahme' | 'ausgabe'
+          category?: string
+          description?: string | null
+          amount_eur?: number
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notification_reads: {
         Row: {
           user_id: string

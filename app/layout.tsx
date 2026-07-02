@@ -16,8 +16,17 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#2f6a45',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#0891b2' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b1220' },
+  ],
 }
+
+/**
+ * Setzt die .dark-Klasse VOR dem ersten Paint (kein Theme-Flash).
+ * Gespeicherte Wahl (localStorage) gewinnt, sonst Systempräferenz.
+ */
+const themeInitScript = `(function(){try{var t=localStorage.getItem('tas-fleet-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`
 
 export default function RootLayout({
   children,
@@ -25,7 +34,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="de">
+    <html lang="de" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className={`${inter.variable} font-sans`}>{children}</body>
     </html>
   )

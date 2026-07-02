@@ -26,8 +26,8 @@ export default async function IncidentsPage() {
   return (
     <main className="space-y-6">
       <div className="animate-fade-up">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Incident-Log</h1>
-        <p className="mt-1 text-slate-600">Vorfälle dokumentieren.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Incident-Log</h1>
+        <p className="mt-1 text-slate-600 dark:text-slate-300">Vorfälle dokumentieren.</p>
       </div>
 
       <section className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3">

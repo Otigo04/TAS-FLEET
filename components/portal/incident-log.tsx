@@ -213,7 +213,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
               <Label htmlFor="incident-type">Typ</Label>
               <select
                 id="incident-type"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={incidentType}
                 onChange={(e) => setIncidentType(e.target.value)}
               >
@@ -234,7 +234,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
               <Label htmlFor="incident-severity">Priorität</Label>
               <select
                 id="incident-severity"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={severity}
                 onChange={(e) => setSeverity(e.target.value)}
               >
@@ -250,7 +250,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
               <Label htmlFor="incident-status">Status</Label>
               <select
                 id="incident-status"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
@@ -266,7 +266,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
               <Label htmlFor="incident-driver">Fahrer (optional)</Label>
               <select
                 id="incident-driver"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={driverId}
                 onChange={(e) => setDriverId(e.target.value)}
               >
@@ -283,7 +283,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
               <Label htmlFor="incident-vehicle">Fahrzeug (optional)</Label>
               <select
                 id="incident-vehicle"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={vehicleId}
                 onChange={(e) => setVehicleId(e.target.value)}
               >
@@ -354,7 +354,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
         <CardContent>
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
             <select
-              className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
             >
@@ -367,7 +367,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
             </select>
 
             <select
-              className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -380,14 +380,14 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
             </select>
           </div>
 
-          {error ? <p className="mb-3 text-sm text-red-600">{error}</p> : null}
+          {error ? <p className="mb-3 text-sm text-red-600 dark:text-red-400">{error}</p> : null}
 
           {filteredIncidents.length === 0 ? (
-            <p className="text-sm text-slate-500">Keine Incidents vorhanden.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Keine Incidents vorhanden.</p>
           ) : (
             <ul className="space-y-3">
               {filteredIncidents.map((incident) => (
-                <li key={incident.id} className="rounded-lg border border-slate-200/80 bg-white/70 p-4">
+                <li key={incident.id} className="rounded-lg border border-slate-200/80 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/90 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
@@ -396,16 +396,16 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
                         </Badge>
                         <Badge variant="secondary">{labelFor(incident.incident_type)}</Badge>
                       </div>
-                      <p className="mt-2 text-sm font-semibold text-slate-900">{incident.description}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-slate-100">{incident.description}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         {incident.occurred_on} · Fahrer: {driverName(incident.driver_id)} · Fahrzeug: {vehicleLabel(incident.vehicle_id)}
                       </p>
-                      <p className="text-xs text-slate-500">Kosten: {incident.cost_eur.toFixed(2)} EUR</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Kosten: {incident.cost_eur.toFixed(2)} EUR</p>
                     </div>
 
                     <div className="flex items-center gap-2">
                       <select
-                        className="h-9 rounded-md border border-slate-300 bg-white px-2 text-sm"
+                        className="h-9 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 text-sm"
                         value={incident.status}
                         onChange={(e) => void handleStatusUpdate(incident.id, e.target.value)}
                       >
@@ -435,7 +435,7 @@ export function IncidentLog({ initialIncidents, drivers, vehicles, settings }: I
                   </div>
 
                   {companyId && (
-                    <div className="mt-3 border-t border-slate-100 pt-3">
+                    <div className="mt-3 border-t border-slate-100 dark:border-slate-800 pt-3">
                       <AttachmentList
                         companyId={companyId}
                         scopeType="incident"

@@ -23,13 +23,13 @@ export function ViewModeSlider() {
     <div
       role="group"
       aria-label="Ansichtsmodus"
-      className="relative flex items-center rounded-full border border-slate-200 bg-slate-100/80 p-0.5"
+      className="relative flex items-center rounded-full border border-slate-200 dark:border-slate-700/60 bg-slate-100/80 dark:bg-slate-800 p-0.5"
     >
       {/* Gleitender Hintergrund-Pill */}
       <span
         aria-hidden
         className={cn(
-          'pointer-events-none absolute bottom-0.5 left-0.5 top-0.5 w-9 rounded-full bg-white shadow-sm ring-1 ring-slate-200/70 transition-transform duration-300',
+          'pointer-events-none absolute bottom-0.5 left-0.5 top-0.5 w-9 rounded-full bg-white dark:bg-slate-900 shadow-sm ring-1 ring-slate-200/70 dark:ring-slate-700 transition-transform duration-300',
           active === 'desktop' ? 'translate-x-9' : 'translate-x-0',
         )}
         style={{ transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)' }}
@@ -47,7 +47,7 @@ export function ViewModeSlider() {
             title={label}
             className={cn(
               'relative z-10 flex h-8 w-9 items-center justify-center rounded-full transition-colors',
-              isActive ? 'text-emerald-600' : 'text-slate-400 hover:text-slate-600',
+              isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300',
             )}
           >
             <Icon className="h-4 w-4" strokeWidth={isActive ? 2.4 : 1.8} />

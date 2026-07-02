@@ -18,8 +18,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   if (!query.trim()) {
     return (
       <main className="space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Suchergebnisse</h1>
-        <p className="text-slate-600">Bitte gib einen Suchbegriff ein.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Suchergebnisse</h1>
+        <p className="text-slate-600 dark:text-slate-300">Bitte gib einen Suchbegriff ein.</p>
       </main>
     )
   }
@@ -43,8 +43,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <main className="space-y-6">
       <div className="animate-fade-up">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Suchergebnisse</h1>
-        <p className="mt-1 text-slate-600">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Suchergebnisse</h1>
+        <p className="mt-1 text-slate-600 dark:text-slate-300">
           Ergebnisse für: <span className="font-semibold">&quot;{query}&quot;</span>
         </p>
       </div>
@@ -56,17 +56,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </CardHeader>
           <CardContent>
             {drivers.length === 0 ? (
-              <p className="text-sm text-slate-500">Keine Fahrer gefunden.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Keine Fahrer gefunden.</p>
             ) : (
               <ul className="space-y-3">
                 {drivers.map((driver) => (
                   <li
                     key={driver.id}
-                    className="rounded-lg border border-slate-200 bg-white p-3 flex justify-between items-center"
+                    className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-3 flex justify-between items-center"
                   >
                     <div>
-                      <p className="font-medium text-slate-900">{driver.name}</p>
-                      <p className="text-xs text-slate-500">{driver.district || 'Kein Bezirk'}</p>
+                      <p className="font-medium text-slate-900 dark:text-slate-100">{driver.name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{driver.district || 'Kein Bezirk'}</p>
                     </div>
                     <Link href="/fahrer" className="text-sm text-sky-600 hover:underline">
                       Zum Fahrer
@@ -84,22 +84,22 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </CardHeader>
           <CardContent>
             {vehicles.length === 0 ? (
-              <p className="text-sm text-slate-500">Keine Fahrzeuge gefunden.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Keine Fahrzeuge gefunden.</p>
             ) : (
               <ul className="space-y-3">
                 {vehicles.map((vehicle) => (
                   <li
                     key={vehicle.id}
-                    className="rounded-lg border border-slate-200 bg-white p-3 flex justify-between items-center"
+                    className="rounded-lg border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-3 flex justify-between items-center"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-slate-900">{vehicle.license_plate}</p>
+                        <p className="font-medium text-slate-900 dark:text-slate-100">{vehicle.license_plate}</p>
                         <Badge variant="secondary" className="text-xs">
                           {labelFor(vehicle.status)}
                         </Badge>
                       </div>
-                      <p className="text-xs text-slate-500">{vehicle.model}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{vehicle.model}</p>
                     </div>
                     <Link href="/fahrzeuge" className="text-sm text-sky-600 hover:underline">
                       Zum Fahrzeug

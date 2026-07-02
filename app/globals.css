@@ -8,17 +8,43 @@
   --portal-bg-2: #f4f6f8;
   --portal-ink: #0f172a;
   --portal-muted: #64748b;
-  --portal-accent: #2f6a45;
-  --portal-accent-2: #2f6a45;
+  --portal-accent: #0891b2;
+  --portal-accent-2: #06b6d4;
   --portal-surface: #ffffff;
   --portal-border: #e2e8f0;
-  --portal-ring: rgba(47, 106, 69, 0.35);
+  --portal-border-hover: #cbd5e1;
+  --portal-ring: rgba(8, 145, 178, 0.4);
+  --portal-skeleton: #e8edf4;
+}
+
+/* Dunkles Theme: tiefes Slate mit Cyan-Akzent. Kontraste bewusst hoch
+   (Text mind. slate-300 auf slate-900), damit alles lesbar bleibt. */
+.dark {
+  color-scheme: dark;
+  --portal-bg: #0b1220;
+  --portal-bg-2: #0b1220;
+  --portal-ink: #e2e8f0;
+  --portal-muted: #94a3b8;
+  --portal-accent: #22d3ee;
+  --portal-accent-2: #06b6d4;
+  --portal-surface: #101a2c;
+  --portal-border: #22304a;
+  --portal-border-hover: #33455f;
+  --portal-ring: rgba(34, 211, 238, 0.45);
+  --portal-skeleton: #1b2739;
 }
 
 body {
   font-family: var(--font-inter), 'Segoe UI', system-ui, sans-serif;
   background: var(--portal-bg);
-  @apply text-ink antialiased;
+  color: var(--portal-ink);
+  @apply antialiased;
+}
+
+/* Sanfter Übergang beim Umschalten des Themes (nur Farben, kein Layout). */
+html.theme-transition body,
+html.theme-transition .surface-card {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
 /* ---------- Animations ---------- */
@@ -41,6 +67,11 @@ body {
   from { opacity: 0; transform: translateY(-6px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+@keyframes countPulse {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
 
 .animate-fade-up        { animation: fadeUp 0.28s ease-out both; }
 .animate-fade-up-delay  { animation: fadeUp 0.28s ease-out 0.04s both; }
@@ -49,13 +80,14 @@ body {
 .animate-fade-in        { animation: fadeIn 0.4s ease-out both; }
 .animate-scale-in       { animation: scaleIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .animate-dropdown-in    { animation: dropdownIn 0.18s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-count-pulse    { animation: countPulse 0.4s ease-out both; }
 /* Invisible for 0.5s, then fades in — so quick loads never flash a spinner. */
 .animate-delayed-appear { opacity: 0; animation: fadeIn 0.35s ease-out 0.5s forwards; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up, .animate-fade-up-delay, .animate-fade-up-delay-2,
   .animate-fade-up-delay-3, .animate-fade-in, .animate-scale-in,
-  .animate-dropdown-in, .animate-delayed-appear {
+  .animate-dropdown-in, .animate-delayed-appear, .animate-count-pulse {
     animation: none;
   }
   /* Without its fade-in animation, the loading screen must still be visible. */
@@ -68,10 +100,17 @@ body {
   border: 1px solid var(--portal-border);
   border-radius: 0.5rem;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  transition: border-color 0.15s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 .surface-card:hover {
-  border-color: #cbd5e1;
+  border-color: var(--portal-border-hover);
+  box-shadow: 0 4px 16px -6px rgba(8, 145, 178, 0.14), 0 1px 3px rgba(15, 23, 42, 0.07);
+}
+
+/* Interaktive Karten (Links/Buttons als Karte) heben sich leicht an. */
+a.surface-card:hover,
+button.surface-card:hover {
+  transform: translateY(-1px);
 }
 
 /* Dezente Akzentkante für hervorgehobene Karten */
@@ -84,18 +123,18 @@ body {
   position: absolute;
   inset: 0 0 auto 0;
   height: 2px;
-  background: var(--portal-accent);
+  background: linear-gradient(90deg, var(--portal-accent), var(--portal-accent-2));
 }
 
 /* ---------- Bits ---------- */
 .status-pulse {
-  box-shadow: inset 0 0 0 1px rgba(5, 150, 105, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(8, 145, 178, 0.3);
 }
 
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: #e8edf4;
+  background: var(--portal-skeleton);
 }
 .skeleton::after {
   content: '';
@@ -105,6 +144,9 @@ body {
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
   animation: shimmer 1.5s infinite;
 }
+.dark .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+}
 
 /* Focus visibility for keyboard users across the app */
 :where(button, a, input, select, textarea):focus-visible {
@@ -112,6 +154,13 @@ body {
   outline-offset: 2px;
 }
 
+/* Leichtes Feedback beim Drücken von Buttons (nur Geräte mit Hover). */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  button:not(:disabled):active,
+  [role='button']:not(:disabled):active {
+    transform: scale(0.98);
+  }
+}
 
 /* ---------- Mobile ---------- */
 
@@ -189,6 +238,7 @@ body {
 @media print {
   body {
     background: #fff !important;
+    color: #0f172a !important;
   }
   /* App-Chrome (Sidebar, Header, Footer, Präsenz, Steuerleisten) ausblenden –
      via display:none, damit der Bericht im normalen Fluss bleibt und über

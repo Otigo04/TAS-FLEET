@@ -89,20 +89,20 @@ export function DriverNotes({ companyId, driverId, userId, authorName, legacyNot
           onChange={(e) => setBody(e.target.value)}
           placeholder="Notiz hinzufügen…"
           rows={2}
-          className="flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
+          className="flex-1 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40"
         />
         <Button type="button" onClick={() => void handleAdd()} disabled={saving || !body.trim()} className="self-start">
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         </Button>
       </div>
 
-      {error && <p className="text-xs text-rose-600">{error}</p>}
+      {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
 
       <ul className="space-y-2">
         {notes.map((note) => (
-          <li key={note.id} className="group rounded-md border border-slate-200 bg-white p-3">
+          <li key={note.id} className="group rounded-md border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 p-3">
             <div className="flex items-start justify-between gap-2">
-              <p className="whitespace-pre-wrap text-sm text-slate-700">{note.body}</p>
+              <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{note.body}</p>
               <button
                 type="button"
                 onClick={() => void handleDelete(note.id)}
@@ -119,8 +119,8 @@ export function DriverNotes({ companyId, driverId, userId, authorName, legacyNot
         ))}
 
         {legacyNotes.map((text, i) => (
-          <li key={`legacy-${i}`} className="rounded-md border border-dashed border-slate-200 bg-slate-50 p-3">
-            <p className="whitespace-pre-wrap text-sm text-slate-600">{text}</p>
+          <li key={`legacy-${i}`} className="rounded-md border border-dashed border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50 p-3">
+            <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{text}</p>
             <p className="mt-1 text-xs text-slate-400">Ältere Notiz</p>
           </li>
         ))}

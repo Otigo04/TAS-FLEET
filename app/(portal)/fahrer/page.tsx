@@ -25,8 +25,8 @@ export default async function FahrerPage() {
   return (
     <main className="space-y-6">
       <div className="animate-fade-up">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Fahrer</h1>
-        <p className="mt-1 text-slate-600">Fahrerdaten verwalten.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Fahrer</h1>
+        <p className="mt-1 text-slate-600 dark:text-slate-300">Fahrerdaten verwalten.</p>
       </div>
 
       <section className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3">
@@ -36,7 +36,7 @@ export default async function FahrerPage() {
             <CardDescription>Einträge</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-slate-900">{driverRows.length}</p>
+            <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{driverRows.length}</p>
           </CardContent>
         </Card>
         <Card className="surface-card animate-fade-up-delay-2">
@@ -45,7 +45,7 @@ export default async function FahrerPage() {
             <CardDescription>Nächste 30 Tage</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-slate-900">{expiringSoon}</p>
+            <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{expiringSoon}</p>
           </CardContent>
         </Card>
         <Card className="surface-card animate-fade-up-delay-3">
@@ -54,7 +54,7 @@ export default async function FahrerPage() {
             <CardDescription>Mit Notizen</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-slate-900">{withNotes}</p>
+            <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{withNotes}</p>
           </CardContent>
         </Card>
       </section>

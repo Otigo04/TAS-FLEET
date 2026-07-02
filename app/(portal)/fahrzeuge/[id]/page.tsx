@@ -33,12 +33,12 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
 
   return (
     <main className="animate-fade-up space-y-5">
-      <Link href="/fahrzeuge" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800">
+      <Link href="/fahrzeuge" className="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800">
         <ArrowLeft className="h-4 w-4" /> Zurück zur Fahrzeugliste
       </Link>
 
       <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100">
+        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-slate-200 dark:border-slate-700/60 bg-slate-100 dark:bg-slate-800">
           {vehicle.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={vehicle.avatar_url} alt="" className="h-full w-full object-cover" />
@@ -47,8 +47,8 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
           )}
         </div>
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-slate-900">{vehicle.license_plate}</h1>
-          <p className="flex items-center gap-2 text-sm text-slate-500">
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">{vehicle.license_plate}</h1>
+          <p className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             {vehicle.model}
             <Badge variant={vehicle.status === 'active' ? 'success' : vehicle.status === 'maintenance' ? 'warning' : 'danger'}>
               {labelFor(vehicle.status)}

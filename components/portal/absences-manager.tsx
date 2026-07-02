@@ -181,7 +181,7 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
               <Label htmlFor="absence-driver">Fahrer</Label>
               <select
                 id="absence-driver"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={driverId}
                 onChange={(e) => setDriverId(e.target.value)}
                 required
@@ -198,7 +198,7 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
               <Label htmlFor="absence-type">Art</Label>
               <select
                 id="absence-type"
-                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={type}
                 onChange={(e) => setType(e.target.value as AbsenceType)}
               >
@@ -226,7 +226,7 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
               <Input id="absence-reason" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="z. B. Jahresurlaub" />
             </div>
 
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            {error ? <p className="text-sm text-red-600 dark:text-red-400">{error}</p> : null}
 
             <div className="flex gap-2">
               <Button type="submit" className="flex-1" disabled={isBusy || drivers.length === 0}>
@@ -242,16 +242,16 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
           </form>
 
           {vacationSummary.length > 0 && (
-            <div className="mt-6 border-t border-slate-100 pt-4">
+            <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-4">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Resturlaub {new Date().getFullYear()}
               </p>
               <ul className="space-y-1.5">
                 {vacationSummary.map((v) => (
                   <li key={v.id} className="flex items-center justify-between text-sm">
-                    <span className="text-slate-700">{v.name}</span>
+                    <span className="text-slate-700 dark:text-slate-300">{v.name}</span>
                     <span className="tabular-nums">
-                      <span className={v.remaining < 0 ? 'font-semibold text-rose-600' : 'font-semibold text-slate-900'}>
+                      <span className={v.remaining < 0 ? 'font-semibold text-rose-600 dark:text-rose-400' : 'font-semibold text-slate-900 dark:text-slate-100'}>
                         {v.remaining}
                       </span>
                       <span className="text-slate-400"> / {v.quota} Tage</span>
@@ -288,18 +288,18 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
         </CardHeader>
         <CardContent>
           {absences.length === 0 ? (
-            <p className="text-sm text-slate-500">Keine Abwesenheiten erfasst.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Keine Abwesenheiten erfasst.</p>
           ) : (
             <ul className="space-y-3">
               {absences.map((absence) => {
                 const active = isAbsentToday(absence)
                 return (
-                  <li key={absence.id} className="rounded-lg border border-slate-200/80 bg-white/70 p-4">
+                  <li key={absence.id} className="rounded-lg border border-slate-200/80 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/90 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-slate-400" />
-                          <span className="text-sm font-semibold text-slate-900">{driverName(absence.driver_id)}</span>
+                          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{driverName(absence.driver_id)}</span>
                           <Badge variant={typeVariant(absence.type)}>{labelFor(absence.type)}</Badge>
                           {active ? (
                             <Badge variant="warning" className="gap-1">
@@ -308,7 +308,7 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
                             </Badge>
                           ) : null}
                         </div>
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                           {new Date(absence.start_date).toLocaleDateString('de-DE')} – {new Date(absence.end_date).toLocaleDateString('de-DE')}
                           {absence.reason ? ` · ${absence.reason}` : ''}
                         </p>
@@ -400,7 +400,7 @@ function AbsenceCalendar({
         </div>
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={() => shiftMonth(-1)}>‹</Button>
-          <span className="text-sm font-medium tabular-nums text-slate-700">
+          <span className="text-sm font-medium tabular-nums text-slate-700 dark:text-slate-300">
             {new Date(year, mon - 1, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
           </span>
           <Button type="button" variant="outline" size="sm" onClick={() => shiftMonth(1)}>›</Button>
@@ -414,7 +414,7 @@ function AbsenceCalendar({
             <table className="w-full border-collapse text-xs">
               <thead>
                 <tr>
-                  <th className="sticky left-0 bg-white px-2 py-1 text-left font-medium text-slate-500">Fahrer</th>
+                  <th className="sticky left-0 bg-white dark:bg-slate-900 px-2 py-1 text-left font-medium text-slate-500 dark:text-slate-400">Fahrer</th>
                   {Array.from({ length: daysInMonth }, (_, i) => (
                     <th key={i} className="w-5 px-0 py-1 text-center font-normal text-slate-400">{i + 1}</th>
                   ))}
@@ -422,18 +422,18 @@ function AbsenceCalendar({
               </thead>
               <tbody>
                 {rows.map(([driverId, list]) => (
-                  <tr key={driverId} className="border-t border-slate-100">
-                    <td className="sticky left-0 bg-white px-2 py-1 font-medium text-slate-700 whitespace-nowrap">{driverName(driverId)}</td>
+                  <tr key={driverId} className="border-t border-slate-100 dark:border-slate-800">
+                    <td className="sticky left-0 bg-white dark:bg-slate-900 px-2 py-1 font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">{driverName(driverId)}</td>
                     {Array.from({ length: daysInMonth }, (_, i) => (
                       <td key={i} className="px-0 py-1">
-                        <div className={`mx-auto h-4 w-4 rounded-sm ${colorFor(list, i + 1) || 'bg-slate-50'}`} />
+                        <div className={`mx-auto h-4 w-4 rounded-sm ${colorFor(list, i + 1) || 'bg-slate-50 dark:bg-slate-800/50'}`} />
                       </td>
                     ))}
                   </tr>
                 ))}
               </tbody>
             </table>
-            <div className="mt-3 flex gap-4 text-xs text-slate-500">
+            <div className="mt-3 flex gap-4 text-xs text-slate-500 dark:text-slate-400">
               <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-sky-400" /> Urlaub</span>
               <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-rose-400" /> Krankheit</span>
               <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-amber-400" /> Sonstiges</span>
