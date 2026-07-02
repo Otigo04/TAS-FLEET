@@ -12,7 +12,7 @@ export function CompanyLogo({ compact = false, className, displayName }: Company
     <div className={cn('inline-flex items-center gap-3', className)}>
       <div className="relative h-9 w-[92px] shrink-0">
         <Image
-          src="/brand/logo.png"
+          src="/brand/logo.svg"
           alt="TAS FLEET Logo"
           fill
           sizes="92px"
