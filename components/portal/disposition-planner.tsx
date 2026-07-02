@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Loader2, User, Car, X, FileDown, Copy, CalendarRange } from 'lucide-react'
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+// pdf-lib wird erst beim PDF-Export dynamisch geladen (kleineres Initial-Bundle).
 import type { Database } from '@/lib/supabase/database.types'
 import { createClient } from '@/lib/supabase/client'
 import { useDelayedLoading } from '@/lib/use-delayed-loading'
@@ -43,11 +43,14 @@ interface ShiftPlannerProps {
 }
 
 const SHIFT_SLOTS = ['Frueh', 'Spaet', 'Nacht'] as const
+/** Filterwert für "alle Schichten anzeigen" — kein DB-Code, nur UI-Zustand. */
+const ALL_SLOTS = 'alle'
 
 function shiftLabel(slot: string) {
   if (slot === 'Frueh') return 'Frühschicht'
   if (slot === 'Spaet') return 'Spätschicht'
   if (slot === 'Nacht') return 'Nachtschicht'
+  if (slot === ALL_SLOTS) return 'Alle Schichten'
   return slot
 }
 
@@ -57,7 +60,8 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
 
   const [shifts, setShifts] = useState<ShiftRow[]>(initialShifts)
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
-  const [slot, setSlot] = useState<string>('Frueh')
+  const [slot, setSlot] = useState<string>(ALL_SLOTS)
+  const showAllSlots = slot === ALL_SLOTS
   const [zone, setZone] = useState<string>(uberZones[0] ?? 'Standard')
 
   // Fahrer, die am gewählten Tag abwesend sind (Urlaub/Krankheit), können
@@ -110,9 +114,12 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase, companyId])
 
-  const currentShifts = shifts.filter((s) => s.shift_date === date && s.shift_slot === slot)
+  const currentShifts = shifts.filter(
+    (s) => s.shift_date === date && (showAllSlots || s.shift_slot === slot),
+  )
 
   async function assignDriver(vehicleId: string, driverId: string) {
     if (!driverId) return
@@ -205,6 +212,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
     setPdfBusy(true)
     setError(null)
     try {
+      const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib')
       const pdf = await PDFDocument.create()
       const page = pdf.addPage([595, 842])
       const bold = await pdf.embedFont(StandardFonts.HelveticaBold)
@@ -270,6 +278,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
                 value={slot}
                 onChange={e => setSlot(e.target.value)}
               >
+                <option value={ALL_SLOTS}>{shiftLabel(ALL_SLOTS)}</option>
                 {SHIFT_SLOTS.map(s => (
                   <option key={s} value={s}>{shiftLabel(s)}</option>
                 ))}
@@ -385,6 +394,9 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
                                   </span>
                                 )}
                                 <span className="font-medium text-slate-700">{driver?.name ?? 'Unbekannt'}</span>
+                                {showAllSlots && (
+                                  <Badge variant="secondary">{shiftLabel(assignment.shift_slot)}</Badge>
+                                )}
                                 {assignment.uber_zone && assignment.uber_zone !== 'Standard' ? (
                                   <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-500">{assignment.uber_zone}</span>
                                 ) : null}
@@ -406,10 +418,13 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
                         void assignDriver(vehicle.id, e.target.value)
                         e.target.value = ''
                       }}
-                      disabled={isBusy}
+                      disabled={isBusy || showAllSlots}
+                      title={showAllSlots ? 'Zum Zuweisen zuerst eine konkrete Schicht wählen' : undefined}
                       value=""
                     >
-                      <option value="" disabled>+ Fahrer hinzufügen...</option>
+                      <option value="" disabled>
+                        {showAllSlots ? 'Zum Zuweisen Schicht wählen…' : '+ Fahrer hinzufügen...'}
+                      </option>
                       {availableDrivers.map(d => {
                         const absent = absentDriverIds.has(d.id)
                         const expired = expiredPscheinIds.has(d.id)

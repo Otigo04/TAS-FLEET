@@ -42,7 +42,7 @@ export default async function FahrerPage() {
         <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
             <CardTitle>P-Schein Warnung</CardTitle>
-            <CardDescription>Naechste 30 Tage</CardDescription>
+            <CardDescription>Nächste 30 Tage</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-slate-900">{expiringSoon}</p>

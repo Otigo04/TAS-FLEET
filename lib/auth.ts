@@ -32,6 +32,20 @@ export function isProfileComplete(profile: Profile | null) {
   return Boolean(profile?.first_name?.trim() && profile?.last_name?.trim())
 }
 
+/**
+ * Das Profil des eingeloggten Nutzers, per React cache() über den Request
+ * dedupliziert — Layout und Page teilen sich EINE Profil-Query.
+ */
+const getOwnProfile = cache(async (userId: string) => {
+  const supabase = await createClient()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('id, first_name, last_name, avatar_url, role, created_at')
+    .eq('id', userId)
+    .maybeSingle()
+  return profile
+})
+
 export async function requireUser() {
   const supabase = await createClient()
   const user = await getAuthUser()
@@ -40,11 +54,7 @@ export async function requireUser() {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, avatar_url, role, created_at')
-    .eq('id', user.id)
-    .maybeSingle()
+  const profile = await getOwnProfile(user.id)
 
   return { supabase, user, profile }
 }
@@ -60,18 +70,10 @@ export async function requireCompletedUser() {
 }
 
 export async function redirectIfAuthenticated() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id, first_name, last_name, avatar_url, role, created_at')
-      .eq('id', user.id)
-      .maybeSingle()
-
+    const profile = await getOwnProfile(user.id)
     redirect(isProfileComplete(profile) ? '/dashboard' : '/profile-setup')
   }
 }

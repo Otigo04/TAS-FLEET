@@ -26,6 +26,7 @@ export default async function EinstellungenPage() {
         email={user.email ?? ''}
         role={profile?.role ?? 'admin'}
         avatarUrl={profileResult.data?.avatar_url ?? null}
+        lastSignInAt={user.last_sign_in_at ?? null}
       />
     </div>
   )

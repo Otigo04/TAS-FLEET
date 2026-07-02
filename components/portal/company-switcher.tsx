@@ -7,6 +7,7 @@ import { setActiveCompany } from '@/actions/tenant-actions'
 import { useTenant } from '@/components/portal/tenant-provider'
 import { LoadingScreen } from '@/components/portal/loading-screen'
 import type { UserCompany } from '@/lib/tenant'
+import { roleLabel } from '@/lib/roles'
 import { cn } from '@/lib/utils'
 
 /** Square company logo (data URL) with an initials/icon fallback. */
@@ -157,7 +158,7 @@ export function CompanySwitcher() {
                         <span className={cn('truncate text-sm font-semibold', isActive ? 'text-white' : 'text-slate-200')}>
                           {company.name}
                         </span>
-                        <span className="text-xs capitalize text-slate-400">{company.role}</span>
+                        <span className="text-xs text-slate-400">{roleLabel(company.role)}</span>
                       </span>
                       {isActive && (
                         <span className="ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-slate-950">

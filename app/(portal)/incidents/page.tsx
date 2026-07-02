@@ -19,7 +19,7 @@ export default async function IncidentsPage() {
   const vehicles = vehiclesResult.data ?? []
   const settings = settingsResult.data ?? []
 
-  const openIncidents = incidents.filter((entry) => entry.status !== 'resolved').length
+  const openIncidents = incidents.filter((entry) => entry.status !== 'resolved' && entry.status !== 'closed').length
   const highPriority = incidents.filter((entry) => entry.severity === 'high').length
   const totalCost = incidents.reduce((sum, entry) => sum + entry.cost_eur, 0)
 
@@ -27,13 +27,13 @@ export default async function IncidentsPage() {
     <main className="space-y-6">
       <div className="animate-fade-up">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Incident-Log</h1>
-        <p className="mt-1 text-slate-600">Vorfalle dokumentieren.</p>
+        <p className="mt-1 text-slate-600">Vorfälle dokumentieren.</p>
       </div>
 
       <section className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3">
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader>
-            <CardTitle>Offene Faelle</CardTitle>
+            <CardTitle>Offene Fälle</CardTitle>
             <CardDescription>Offen</CardDescription>
           </CardHeader>
           <CardContent>
@@ -42,8 +42,8 @@ export default async function IncidentsPage() {
         </Card>
         <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader>
-            <CardTitle>Hohe Prioritaet</CardTitle>
-            <CardDescription>Prioritaet hoch</CardDescription>
+            <CardTitle>Hohe Priorität</CardTitle>
+            <CardDescription>Priorität hoch</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{highPriority}</p>

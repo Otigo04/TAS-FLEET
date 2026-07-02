@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Loader2, Save, Check, Download } from 'lucide-react'
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+// pdf-lib wird erst beim PDF-Export dynamisch geladen (kleineres Initial-Bundle).
 import type { Database } from '@/lib/supabase/database.types'
 import { useDelayedLoading } from '@/lib/use-delayed-loading'
 import { createClient } from '@/lib/supabase/client'
@@ -464,6 +464,7 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
     setIsPdfBusy(true)
 
     try {
+      const { PDFDocument, StandardFonts, rgb } = await import('pdf-lib')
       const pdfDoc = await PDFDocument.create()
       const page = pdfDoc.addPage([595, 842])
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Loader2, Plus, User, Mail, ShieldCheck, Phone, Building2, Clock } from 'lucide-react'
+import { Loader2, Plus, User, Mail, ShieldCheck, Building2, Clock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
 import { useDelayedLoading } from '@/lib/use-delayed-loading'
@@ -37,6 +37,7 @@ interface SettingsCrudProps {
   email: string
   role: string
   avatarUrl: string | null
+  lastSignInAt: string | null
 }
 
 function SettingsCrudInner({
@@ -46,6 +47,7 @@ function SettingsCrudInner({
   lastName,
   email,
   avatarUrl: initialAvatarUrl,
+  lastSignInAt,
 }: SettingsCrudProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -248,8 +250,17 @@ function SettingsCrudInner({
                   { icon: User, label: 'Name', value: fullName },
                   { icon: Mail, label: 'E-Mail', value: email },
                   { icon: ShieldCheck, label: 'Rolle', value: roleDisplay },
-                  { icon: Building2, label: 'Abteilung', value: 'Flottenmanagement' },
-                  { icon: Phone, label: 'Telefon', value: '+49 151 000 0000' },
+                  { icon: Building2, label: 'Unternehmen', value: activeCompany.name },
+                  {
+                    icon: Clock,
+                    label: 'Letzte Anmeldung',
+                    value: lastSignInAt
+                      ? new Date(lastSignInAt).toLocaleString('de-DE', {
+                          day: '2-digit', month: '2-digit', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit',
+                        }) + ' Uhr'
+                      : '–',
+                  },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-center gap-4 py-3.5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">

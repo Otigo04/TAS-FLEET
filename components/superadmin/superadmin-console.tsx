@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import type { AdminCompany, AdminUser } from '@/lib/superadmin'
 import type { CompanyRole } from '@/lib/supabase/database.types'
+import { COMPANY_ROLES, roleLabel } from '@/lib/roles'
 import {
   createCompanyAsAdmin, renameCompany, deleteCompany, setCompanyLogo,
   createUser, updateUser, assignMembership, removeMembership, deleteUser,
@@ -15,7 +16,9 @@ import {
 import { AvatarUploadCrop } from '@/components/ui/avatar-upload-crop'
 
 type Tab = 'companies' | 'users'
-const ROLES: CompanyRole[] = ['owner', 'admin', 'member']
+// Anzeige immer als deutsche Rollenbezeichnung (Geschäftsführer usw.) —
+// die DB-Codes bleiben als <option value> erhalten.
+const ROLES = COMPANY_ROLES
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
@@ -305,7 +308,7 @@ function UsersPanel({ users, companies }: { users: AdminUser[]; companies: Admin
             </Field>
             <Field label="Rolle">
               <select value={role} onChange={(e) => setRole(e.target.value as CompanyRole)} className={inputCls} disabled={!companyId}>
-                {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                {ROLES.map((r) => <option key={r} value={r}>{roleLabel(r)}</option>)}
               </select>
             </Field>
           </div>
@@ -362,7 +365,7 @@ function UsersPanel({ users, companies }: { users: AdminUser[]; companies: Admin
                       <p className="truncate text-xs text-slate-400">
                         {name}
                         {u.memberships.length > 0 && ' · '}
-                        {u.memberships.map((m) => `${m.companyName} (${m.role})`).join(', ')}
+                        {u.memberships.map((m) => `${m.companyName} (${roleLabel(m.role)})`).join(', ')}
                       </p>
                     </div>
                     <button
@@ -458,7 +461,7 @@ function UserEditPanel({
                     onChange={(e) => run(() => assignMembership({ userId: user.id, companyId: m.companyId, role: e.target.value as CompanyRole }))}
                     className="rounded-md border border-white/15 bg-slate-900 px-2 py-1 text-xs text-white focus:border-amber-400 focus:outline-none"
                   >
-                    {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                    {ROLES.map((r) => <option key={r} value={r}>{roleLabel(r)}</option>)}
                   </select>
                   <IconBtn title="Aus Unternehmen entfernen" danger onClick={() => run(() => removeMembership({ userId: user.id, companyId: m.companyId }))}>
                     <X className="h-4 w-4" />
@@ -476,7 +479,7 @@ function UserEditPanel({
               {availableCompanies.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <select value={addRole} onChange={(e) => setAddRole(e.target.value as CompanyRole)} className={`${inputCls} w-auto`}>
-              {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+              {ROLES.map((r) => <option key={r} value={r}>{roleLabel(r)}</option>)}
             </select>
             <button
               type="button"
