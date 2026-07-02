@@ -106,6 +106,7 @@ const COLUMN_TO_FIELD: Record<string, DriverField | 'name' | 'shift'> = {
 }
 
 // Bekannte Zusatzspalten -> als Notiz mit lesbarem Label.
+// Bewusst NUR UUID, E-Mail, Telefon — Status/Echtzeit u. Ä. sind Rauschen.
 const COLUMN_TO_NOTE: Record<string, string> = {
   'mobilnummer': 'Telefon',
   'telefon': 'Telefon',
@@ -115,8 +116,6 @@ const COLUMN_TO_NOTE: Record<string, string> = {
   'e mail': 'E-Mail',
   'email': 'E-Mail',
   'e mail adresse': 'E-Mail',
-  'status': 'Status',
-  'echtzeit': 'Echtzeit-Status',
   'fahrer uuid': 'Fahrer-UUID',
   'uuid': 'Fahrer-UUID',
 }
@@ -127,6 +126,8 @@ const IGNORED_COLUMNS = new Set([
   'unternehmen',
   'company',
   'zuletzt online',
+  'status',
+  'echtzeit',
 ])
 
 function detectDelimiter(headerLine: string): string {
