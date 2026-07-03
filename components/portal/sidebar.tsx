@@ -37,6 +37,7 @@ const items: NavItem[] = [
     subItems: [
       { tab: 'account', label: 'Account' },
       { tab: 'werte', label: 'Werte & Status', cap: 'manageSettings' },
+      { tab: 'mitglieder', label: 'Mitglieder', cap: 'manageMembers' },
     ],
   },
 ]

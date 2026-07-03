@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Download } from 'lucide-react'
 import { useActiveCompanyId } from '@/components/portal/tenant-provider'
+import { SearchableSelect } from '@/components/ui/searchable-select'
 import { labelFor } from '@/lib/labels'
 import { downloadCsv, todayStamp } from '@/lib/export'
 
@@ -179,19 +180,16 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div className="space-y-2">
               <Label htmlFor="absence-driver">Fahrer</Label>
-              <select
+              <SearchableSelect
                 id="absence-driver"
-                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                 value={driverId}
-                onChange={(e) => setDriverId(e.target.value)}
-                required
-              >
-                {drivers.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {[d.first_name, d.last_name].filter(Boolean).join(' ') || d.name}
-                  </option>
-                ))}
-              </select>
+                onChange={setDriverId}
+                placeholder="Fahrer wählen …"
+                options={drivers.map((d) => ({
+                  value: d.id,
+                  label: [d.first_name, d.last_name].filter(Boolean).join(' ') || d.name,
+                }))}
+              />
             </div>
 
             <div className="space-y-2">

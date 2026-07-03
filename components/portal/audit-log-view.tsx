@@ -25,12 +25,25 @@ const LABELLED_FIELDS = new Set([
   'shift_slot',
 ])
 
+// Felder, deren Wert eine URL/ein Bild ist – im Verlauf nie den Rohwert
+// (oft mehrere tausend Zeichen data:image/... oder Storage-URL) zeigen.
+const IMAGE_FIELDS = new Set(['avatar_url', 'logo_url', 'photo_url', 'image_url'])
+const MAX_VALUE_LENGTH = 80
+
 function formatValue(key: string, value: unknown): string {
   if (value === null || value === undefined || value === '') return '—'
   if (Array.isArray(value)) return value.length ? value.join(', ') : '—'
   if (typeof value === 'boolean') return value ? 'Ja' : 'Nein'
   if (LABELLED_FIELDS.has(key)) return labelFor(String(value))
-  return String(value)
+
+  const str = String(value)
+
+  // Bild-/Datei-Felder oder eingebettete Bilddaten: nur ein kurzes Label.
+  if (IMAGE_FIELDS.has(key) || str.startsWith('data:')) return 'Bild'
+
+  // Beliebig lange Werte hart kappen, damit die Zeile nicht ausufert.
+  if (str.length > MAX_VALUE_LENGTH) return `${str.slice(0, MAX_VALUE_LENGTH)}…`
+  return str
 }
 
 type Json = Record<string, unknown>
@@ -184,11 +197,11 @@ export function AuditLogView({ initialEntries }: AuditLogViewProps) {
                       {fields.map((key) => (
                         <li key={key} className="flex flex-wrap items-center gap-1.5">
                           <span className="font-medium text-slate-600 dark:text-slate-300">{fieldLabel(key)}:</span>
-                          <span className="text-slate-400 line-through">
+                          <span className="break-all text-slate-400 line-through">
                             {formatValue(key, (entry.old_data as Json)?.[key])}
                           </span>
                           <span className="text-slate-400">→</span>
-                          <span className="font-medium text-slate-900 dark:text-slate-100">
+                          <span className="break-all font-medium text-slate-900 dark:text-slate-100">
                             {formatValue(key, (entry.new_data as Json)?.[key])}
                           </span>
                         </li>

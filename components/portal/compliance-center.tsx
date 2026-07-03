@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Download } from 'lucide-react'
 import { useActiveCompanyId, useCan } from '@/components/portal/tenant-provider'
 import { AttachmentList } from '@/components/portal/attachments'
+import { SearchableSelect } from '@/components/ui/searchable-select'
 import { labelFor } from '@/lib/labels'
 import { downloadCsv, todayStamp } from '@/lib/export'
 
@@ -201,36 +202,24 @@ export function ComplianceCenter({ initialDocuments, drivers, vehicles, settings
             {scopeType === 'driver' ? (
               <div className="space-y-2">
                 <Label htmlFor="doc-driver">Fahrer</Label>
-                <select
+                <SearchableSelect
                   id="doc-driver"
-                  className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                   value={driverId}
-                  onChange={(e) => setDriverId(e.target.value)}
-                  required
-                >
-                  {drivers.map((driver) => (
-                    <option key={driver.id} value={driver.id}>
-                      {driver.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setDriverId}
+                  placeholder="Fahrer wählen …"
+                  options={drivers.map((driver) => ({ value: driver.id, label: driver.name }))}
+                />
               </div>
             ) : (
               <div className="space-y-2">
                 <Label htmlFor="doc-vehicle">Fahrzeug</Label>
-                <select
+                <SearchableSelect
                   id="doc-vehicle"
-                  className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm"
                   value={vehicleId}
-                  onChange={(e) => setVehicleId(e.target.value)}
-                  required
-                >
-                  {vehicles.map((vehicle) => (
-                    <option key={vehicle.id} value={vehicle.id}>
-                      {vehicle.license_plate}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setVehicleId}
+                  placeholder="Fahrzeug wählen …"
+                  options={vehicles.map((vehicle) => ({ value: vehicle.id, label: vehicle.license_plate }))}
+                />
               </div>
             )}
 

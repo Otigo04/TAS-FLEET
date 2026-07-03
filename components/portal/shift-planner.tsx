@@ -6,12 +6,13 @@ import { Loader2, Save, Check, Download } from 'lucide-react'
 import type { Database } from '@/lib/supabase/database.types'
 import { useDelayedLoading } from '@/lib/use-delayed-loading'
 import { createClient } from '@/lib/supabase/client'
-import { useActiveCompanyId } from '@/components/portal/tenant-provider'
+import { useActiveCompanyId, useTenant } from '@/components/portal/tenant-provider'
 import { parseHourValue, formatHours } from '@/lib/timesheet'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { SearchableSelect } from '@/components/ui/searchable-select'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type ShiftRow = Database['public']['Tables']['shift_assignments']['Row']
@@ -155,6 +156,44 @@ function safePdfText(value: string) {
   return value.replace(/\s+/g, ' ').trim()
 }
 
+/**
+ * Lädt das Firmenlogo und bettet es in das PDF ein. pdf-lib versteht nur
+ * PNG und JPEG – WebP, HTTP-Fehler oder CORS-Probleme führen zu `null`,
+ * sodass der PDF-Export ohne Logo (statt mit einem Absturz) weiterläuft.
+ */
+async function loadPdfLogo(
+  pdfDoc: Awaited<ReturnType<typeof import('pdf-lib')['PDFDocument']['create']>>,
+  logoUrl: string | null,
+) {
+  if (!logoUrl) return null
+  try {
+    let bytes: Uint8Array
+    let isPng: boolean
+
+    if (logoUrl.startsWith('data:')) {
+      const match = logoUrl.match(/^data:image\/(png|jpe?g|webp);base64,(.*)$/i)
+      if (!match) return null
+      const format = match[1].toLowerCase()
+      if (format === 'webp') return null
+      isPng = format === 'png'
+      const binary = atob(match[2])
+      bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0))
+    } else {
+      const response = await fetch(logoUrl)
+      if (!response.ok) return null
+      const contentType = (response.headers.get('content-type') ?? '').toLowerCase()
+      const lowerUrl = logoUrl.toLowerCase()
+      if (contentType.includes('webp') || lowerUrl.endsWith('.webp')) return null
+      isPng = contentType.includes('png') || lowerUrl.endsWith('.png')
+      bytes = new Uint8Array(await response.arrayBuffer())
+    }
+
+    return isPng ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes)
+  } catch {
+    return null
+  }
+}
+
 function buildRowsFromShifts(
   baseRows: WeeklyTimesheetRow[],
   shifts: ShiftRow[],
@@ -204,6 +243,7 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
 
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
+  const { activeCompany } = useTenant()
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [savedAt, setSavedAt] = useState<number | null>(null)
@@ -470,31 +510,60 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
       const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
 
-      page.drawText('Stundenbuch für Arbeit', {
-        x: 18,
-        y: 804,
-        size: 20,
+      // Firmenlogo (falls vorhanden) einbetten. pdf-lib unterstützt nur PNG/JPEG;
+      // WebP und Fehler werden still übersprungen, der Rest der PDF bleibt intakt.
+      const embeddedLogo = await loadPdfLogo(pdfDoc, activeCompany.logoUrl)
+
+      let headerTextX = 18
+      if (embeddedLogo) {
+        const maxHeight = 34
+        const scale = Math.min(maxHeight / embeddedLogo.height, 96 / embeddedLogo.width)
+        const width = embeddedLogo.width * scale
+        const height = embeddedLogo.height * scale
+        page.drawImage(embeddedLogo, { x: 18, y: 806 - height, width, height })
+        headerTextX = 18 + width + 12
+      }
+
+      page.drawText(safePdfText(activeCompany.name), {
+        x: headerTextX,
+        y: 806,
+        size: 15,
         font: boldFont,
         color: rgb(0.08, 0.11, 0.16),
+      })
+      page.drawText('Wöchentlicher Stundenzettel', {
+        x: headerTextX,
+        y: 790,
+        size: 10,
+        font: regularFont,
+        color: rgb(0.42, 0.46, 0.5),
+      })
+
+      // Trennlinie unter dem Kopfbereich.
+      page.drawLine({
+        start: { x: 18, y: 778 },
+        end: { x: 577, y: 778 },
+        thickness: 0.8,
+        color: rgb(0.8, 0.83, 0.86),
       })
 
       page.drawText(`Mitarbeiter: ${safePdfText(selectedDriver?.name ?? '-')}`, {
         x: 18,
-        y: 784,
+        y: 760,
         size: 10,
         font: regularFont,
         color: rgb(0.18, 0.21, 0.25),
       })
       page.drawText(`Woche: ${safePdfText(selectedWeek)}`, {
         x: 250,
-        y: 784,
+        y: 760,
         size: 10,
         font: regularFont,
         color: rgb(0.18, 0.21, 0.25),
       })
 
       const tableX = 14
-      const tableTopY = 765
+      const tableTopY = 740
       const rowHeight = 22
       const columnWidths = [32, 66, 52, 52, 46, 62, 66, 177]
       const lineColor = rgb(0.4, 0.45, 0.5)
@@ -517,8 +586,11 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
 
           const rawText = cells[index] ?? ''
           const text = safePdfText(rawText)
+          // Die Summenzeile trägt links das Label "Stunden gesamt" – nicht kürzen,
+          // damit es nicht wie bisher zu "Stunden Gesa..." abgeschnitten wird.
+          const noTruncate = isFooter && index === 1
           const maxChars = index === 7 ? 28 : 12
-          const compact = text.length > maxChars ? `${text.slice(0, maxChars)}...` : text
+          const compact = !noTruncate && text.length > maxChars ? `${text.slice(0, maxChars)}...` : text
 
           page.drawText(compact, {
             x: x + 3,
@@ -540,7 +612,21 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
         currentY -= rowHeight
       }
 
-      drawRow(currentY, ['', 'Stunden Gesamt', '', '', '', totalWorkHours, '', ''], false, true)
+      drawRow(currentY, ['', 'Stunden gesamt', '', '', '', totalWorkHours, '', ''], false, true)
+
+      // Dezenter Fußzeilen-Hinweis auf jeder erzeugten PDF.
+      const generatedAt = new Date().toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+      page.drawText(safePdfText(`Erstellt mit TAS FLEET · ${activeCompany.name} · ${generatedAt}`), {
+        x: 18,
+        y: 24,
+        size: 8,
+        font: regularFont,
+        color: rgb(0.55, 0.58, 0.62),
+      })
 
       const bytes = await pdfDoc.save()
       const buffer = new ArrayBuffer(bytes.length)
@@ -582,19 +668,13 @@ export function ShiftPlanner({ initialShifts, drivers }: ShiftPlannerProps) {
               <Label htmlFor="timesheet-driver" className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Mitarbeiter
               </Label>
-              <select
+              <SearchableSelect
                 id="timesheet-driver"
-                className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm shadow-sm"
                 value={selectedDriverId}
-                onChange={(event) => setSelectedDriverId(event.target.value)}
-                required
-              >
-                {drivers.map((driver) => (
-                  <option key={driver.id} value={driver.id}>
-                    {driver.name}
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedDriverId}
+                placeholder="Mitarbeiter wählen …"
+                options={drivers.map((driver) => ({ value: driver.id, label: driver.name }))}
+              />
             </div>
 
             <div className="space-y-1.5">
