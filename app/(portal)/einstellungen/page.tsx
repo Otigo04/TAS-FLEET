@@ -1,14 +1,22 @@
 import { SettingsCrud } from '@/components/portal/settings-crud'
 import { requireCompletedUser } from '@/lib/auth'
 import { requireActiveCompany } from '@/lib/tenant'
+import { getCurrentSuperadmin } from '@/lib/superadmin'
+import { can } from '@/lib/roles'
+import { listCompanyMembers } from '@/actions/member-actions'
 
 export default async function EinstellungenPage() {
   const { supabase, user, profile } = await requireCompletedUser()
   const company = await requireActiveCompany()
+  const { isSuperadmin } = await getCurrentSuperadmin()
 
-  const [settingsResult, profileResult] = await Promise.all([
+  // Die Mitgliederverwaltung ist dem Geschäftsführer (owner) vorbehalten.
+  const canManageMembers = can(company.role, 'manageMembers', isSuperadmin)
+
+  const [settingsResult, profileResult, members] = await Promise.all([
     supabase.from('settings').select('*').eq('company_id', company.id),
     supabase.from('profiles').select('avatar_url').eq('id', user.id).single(),
+    canManageMembers ? listCompanyMembers(company.id) : Promise.resolve([]),
   ])
 
   return (
@@ -27,6 +35,7 @@ export default async function EinstellungenPage() {
         role={profile?.role ?? 'admin'}
         avatarUrl={profileResult.data?.avatar_url ?? null}
         lastSignInAt={user.last_sign_in_at ?? null}
+        members={members}
       />
     </div>
   )

@@ -12,12 +12,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input'
 import { AvatarUploadCrop } from '@/components/ui/avatar-upload-crop'
 import { useActiveCompanyId, useCan, useTenant } from '@/components/portal/tenant-provider'
+import { MembersManager } from '@/components/portal/members-manager'
+import type { CompanyMember } from '@/actions/member-actions'
 import { labelFor } from '@/lib/labels'
 import { roleLabel, can, CAPABILITIES, CAPABILITY_LABELS, COMPANY_ROLES } from '@/lib/roles'
 import { cn } from '@/lib/utils'
 
 type SettingsRow = Database['public']['Tables']['settings']['Row']
-type Tab = 'account' | 'werte'
+type Tab = 'account' | 'werte' | 'mitglieder'
 
 const SETTINGS_CATEGORIES = [
   { key: 'vehicle_statuses', label: 'Fahrzeug-Status', description: 'z. B. Aktiv, In Wartung, Außer Betrieb' },
@@ -38,6 +40,7 @@ interface SettingsCrudProps {
   role: string
   avatarUrl: string | null
   lastSignInAt: string | null
+  members: CompanyMember[]
 }
 
 function SettingsCrudInner({
@@ -48,26 +51,33 @@ function SettingsCrudInner({
   email,
   avatarUrl: initialAvatarUrl,
   lastSignInAt,
+  members,
 }: SettingsCrudProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
   const canManageSettings = useCan('manageSettings')
+  const canManageMembers = useCan('manageMembers')
   const { activeCompany, isSuperadmin } = useTenant()
   const roleDisplay = isSuperadmin ? 'Superadmin' : roleLabel(activeCompany.role)
 
-  const urlTab = searchParams.get('tab')
-  const [activeTab, setActiveTab] = useState<Tab>(
-    urlTab === 'werte' && canManageSettings ? 'werte' : 'account',
-  )
+  // Erlaubt einen Tab nur, wenn die zugehörige Berechtigung vorliegt.
+  const resolveTab = (tab: string | null): Tab => {
+    if (tab === 'werte' && canManageSettings) return 'werte'
+    if (tab === 'mitglieder' && canManageMembers) return 'mitglieder'
+    return 'account'
+  }
 
-  // Sync state when URL changes (sidebar navigation). The "Werte & Status"
-  // tab is reserved for roles with the manageSettings capability.
+  const [activeTab, setActiveTab] = useState<Tab>(() => resolveTab(searchParams.get('tab')))
+
+  // Sync state when URL changes (sidebar navigation). Tabs sind an die
+  // jeweilige Berechtigung gebunden (Werte & Status → manageSettings,
+  // Mitglieder → manageMembers, nur der Geschäftsführer).
   useEffect(() => {
-    const wantsWerte = searchParams.get('tab') === 'werte'
-    setActiveTab(wantsWerte && canManageSettings ? 'werte' : 'account')
-  }, [searchParams, canManageSettings])
+    setActiveTab(resolveTab(searchParams.get('tab')))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, canManageSettings, canManageMembers])
 
   function handleTabChange(tab: Tab) {
     setActiveTab(tab)
@@ -189,6 +199,7 @@ function SettingsCrudInner({
       <div className="flex gap-1 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 w-fit">
         {([
           { id: 'account' as Tab, label: 'Account' },
+          ...(canManageMembers ? [{ id: 'mitglieder' as Tab, label: 'Mitglieder' }] : []),
           ...(canManageSettings ? [{ id: 'werte' as Tab, label: 'Werte & Status' }] : []),
         ]).map((tab) => (
           <button
@@ -356,6 +367,11 @@ function SettingsCrudInner({
             </Card>
           </div>
         </div>
+      )}
+
+      {/* ── Mitglieder Tab (nur Geschäftsführer) ── */}
+      {activeTab === 'mitglieder' && canManageMembers && (
+        <MembersManager companyId={companyId} initialMembers={members} />
       )}
 
       {/* ── Werte & Status Tab ── */}
