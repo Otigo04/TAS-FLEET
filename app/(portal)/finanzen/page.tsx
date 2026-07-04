@@ -1,20 +1,40 @@
 import { requireCompletedUser } from '@/lib/auth'
 import { requireCapability } from '@/lib/tenant'
-import { FinanceManager } from '@/components/portal/finance-manager'
+import { FinanceWorkspace } from '@/components/portal/finance-workspace'
 
 export default async function FinanzenPage() {
   const { supabase } = await requireCompletedUser()
   // Finanzdaten sind sensibel: nur Rollen mit Berichts-Recht (owner/admin).
   const company = await requireCapability('viewReports')
 
-  const [entriesResult, settingsResult] = await Promise.all([
+  const [entriesResult, settingsResult, vehiclesResult, fuelResult, revenueResult] = await Promise.all([
     supabase
       .from('finance_entries')
       .select('*')
       .eq('company_id', company.id)
       .order('entry_date', { ascending: false })
       .limit(2000),
-    supabase.from('settings').select('*').eq('company_id', company.id).eq('key', 'finance_config'),
+    supabase
+      .from('settings')
+      .select('*')
+      .eq('company_id', company.id)
+      .in('key', ['finance_config', 'fuel_ratio_config']),
+    supabase
+      .from('vehicles')
+      .select('*')
+      .eq('company_id', company.id)
+      .order('license_plate', { ascending: true }),
+    supabase
+      .from('vehicle_costs')
+      .select('*')
+      .eq('company_id', company.id)
+      .eq('cost_type', 'tank')
+      .limit(5000),
+    supabase
+      .from('vehicle_revenue')
+      .select('*')
+      .eq('company_id', company.id)
+      .limit(5000),
   ])
 
   return (
@@ -22,13 +42,16 @@ export default async function FinanzenPage() {
       <div className="animate-fade-up">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Finanzen</h1>
         <p className="mt-1 text-slate-600 dark:text-slate-300">
-          GuV / EÜR: Gewinnermittlung mit Steuerschätzung (Gewerbesteuer, Körperschaftsteuer, Soli).
+          GuV / EÜR mit Steuerschätzung und Tank-zu-Umsatz-Auswertung je Fahrzeug.
         </p>
       </div>
 
-      <FinanceManager
+      <FinanceWorkspace
         initialEntries={entriesResult.data ?? []}
         initialSettings={settingsResult.data ?? []}
+        initialVehicles={vehiclesResult.data ?? []}
+        initialFuelCosts={fuelResult.data ?? []}
+        initialRevenue={revenueResult.data ?? []}
       />
     </main>
   )

@@ -121,6 +121,7 @@ export function VehicleDetail({ vehicle, companyId, canEdit, incidents }: Vehicl
 
   const [cDate, setCDate] = useState('')
   const [cCategory, setCCategory] = useState('')
+  const [cCostType, setCCostType] = useState<'tank' | 'reparatur' | 'sonstiges'>('sonstiges')
   const [cAmount, setCAmount] = useState('')
   const [cNote, setCNote] = useState('')
 
@@ -131,10 +132,11 @@ export function VehicleDetail({ vehicle, companyId, canEdit, incidents }: Vehicl
       vehicle_id: vehicle.id,
       cost_date: cDate,
       category: cCategory.trim(),
+      cost_type: cCostType,
       amount_eur: cAmount ? Number(cAmount.replace(',', '.')) : 0,
       note: cNote.trim() || null,
     })
-    setCDate(''); setCCategory(''); setCAmount(''); setCNote('')
+    setCDate(''); setCCategory(''); setCCostType('sonstiges'); setCAmount(''); setCNote('')
   }
 
   const maintenanceTotal = maintenance.reduce((s, m) => s + Number(m.cost_eur ?? 0), 0)
@@ -230,6 +232,16 @@ export function VehicleDetail({ vehicle, companyId, canEdit, incidents }: Vehicl
             <div className="grid gap-2 rounded-md border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/50 p-3 sm:grid-cols-2">
               <Input type="date" value={cDate} onChange={(e) => setCDate(e.target.value)} />
               <Input placeholder="Kategorie (z. B. Tanken)" value={cCategory} onChange={(e) => setCCategory(e.target.value)} />
+              <select
+                value={cCostType}
+                onChange={(e) => setCCostType(e.target.value as 'tank' | 'reparatur' | 'sonstiges')}
+                className="flex h-9 w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                aria-label="Kostenart"
+              >
+                <option value="sonstiges">Sonstiges</option>
+                <option value="tank">Tank / Laden</option>
+                <option value="reparatur">Reparatur / Wartung</option>
+              </select>
               <Input placeholder="Betrag €" inputMode="decimal" value={cAmount} onChange={(e) => setCAmount(e.target.value)} />
               <Input placeholder="Notiz" value={cNote} onChange={(e) => setCNote(e.target.value)} />
               <Button type="button" size="sm" className="sm:col-span-2" onClick={() => void addCost()} disabled={!cDate || !cCategory.trim()}>

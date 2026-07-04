@@ -705,6 +705,7 @@ export interface Database {
           vehicle_id: string
           cost_date: string
           category: string
+          cost_type: string
           amount_eur: number
           note: string | null
           created_at: string
@@ -715,6 +716,7 @@ export interface Database {
           vehicle_id: string
           cost_date: string
           category: string
+          cost_type?: string
           amount_eur?: number
           note?: string | null
           created_at?: string
@@ -725,9 +727,46 @@ export interface Database {
           vehicle_id?: string
           cost_date?: string
           category?: string
+          cost_type?: string
           amount_eur?: number
           note?: string | null
           created_at?: string
+        }
+        Relationships: []
+      }
+      vehicle_revenue: {
+        Row: {
+          id: string
+          company_id: string
+          vehicle_id: string
+          revenue_date: string
+          amount_eur: number
+          note: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          vehicle_id: string
+          revenue_date: string
+          amount_eur?: number
+          note?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          vehicle_id?: string
+          revenue_date?: string
+          amount_eur?: number
+          note?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
