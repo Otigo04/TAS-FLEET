@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils'
 import { useTenant } from '@/components/portal/tenant-provider'
 import { can, roleLabel, type Capability } from '@/lib/roles'
 import { useAnimatedDisclosure } from '@/components/portal/use-animated-disclosure'
+import { ThemeToggle } from '@/components/portal/theme-toggle'
+import { ViewModeSlider } from '@/components/portal/view-mode-slider'
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; cap?: Capability }
 
@@ -163,6 +165,15 @@ function MobileNavDrawer({
           })}
         </nav>
 
+        <div className="border-t border-slate-100 dark:border-slate-800 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Ansicht &amp; Design</span>
+            <div className="flex items-center gap-2">
+              <ViewModeSlider />
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
         <div className="mobile-safe-bottom" />
       </aside>
     </div>

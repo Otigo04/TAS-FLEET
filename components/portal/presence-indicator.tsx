@@ -84,7 +84,7 @@ export function PresenceIndicator({ userId, displayName, avatarUrl }: PresenceIn
   if (online.length === 0) return null
 
   return (
-    <div className="no-print fixed bottom-4 right-4 z-40 flex max-w-[80vw] flex-col items-end gap-2">
+    <div className="no-print fixed bottom-20 lg:bottom-4 right-4 z-40 flex max-w-[80vw] flex-col items-end gap-2">
       {online.map((u) => (
         <div
           key={u.key}
