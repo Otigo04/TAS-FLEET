@@ -348,7 +348,7 @@ export function AbsencesManager({ initialAbsences, drivers }: AbsencesManagerPro
   )
 }
 
-/** Monats-Team-Kalender: Zeile je Fahrer mit Abwesenheiten, Tage farbcodiert. */
+/** Team-Kalender: Monatsraster (Zeile je Fahrer) oder interaktiver Jahresüberblick. */
 function AbsenceCalendar({
   absences,
   driverName,
@@ -356,14 +356,95 @@ function AbsenceCalendar({
   absences: AbsenceRow[]
   driverName: (id: string) => string
 }) {
+  const [view, setView] = useState<'monat' | 'jahr'>('jahr')
   const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7)) // YYYY-MM
+  const [year, setYear] = useState(() => new Date().getFullYear())
 
+  return (
+    <Card className="surface-card">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <CardTitle>Team-Kalender</CardTitle>
+          <CardDescription>{view === 'monat' ? 'Abwesenheiten im Monat' : 'Jahresüberblick — über einen Tag fahren für Details'}</CardDescription>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 p-1">
+            {(['monat', 'jahr'] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setView(v)}
+                className={
+                  'rounded-md px-3 py-1 text-xs font-medium transition-all ' +
+                  (view === v
+                    ? 'bg-white dark:bg-slate-900 shadow text-slate-900 dark:text-slate-100'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white')
+                }
+              >
+                {v === 'monat' ? 'Monat' : 'Jahr'}
+              </button>
+            ))}
+          </div>
+          {view === 'monat' ? (
+            <MonthNav month={month} setMonth={setMonth} />
+          ) : (
+            <YearNav year={year} setYear={setYear} />
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {view === 'monat' ? (
+          <AbsenceMonthGrid absences={absences} driverName={driverName} month={month} />
+        ) : (
+          <AbsenceYearGrid absences={absences} driverName={driverName} year={year} />
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function MonthNav({ month, setMonth }: { month: string; setMonth: (m: string) => void }) {
+  const [year, mon] = month.split('-').map(Number)
+  function shiftMonth(delta: number) {
+    const d = new Date(year, mon - 1 + delta, 1)
+    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <Button type="button" variant="outline" size="sm" onClick={() => shiftMonth(-1)}>‹</Button>
+      <span className="min-w-[9rem] text-center text-sm font-medium tabular-nums text-slate-700 dark:text-slate-300">
+        {new Date(year, mon - 1, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
+      </span>
+      <Button type="button" variant="outline" size="sm" onClick={() => shiftMonth(1)}>›</Button>
+    </div>
+  )
+}
+
+function YearNav({ year, setYear }: { year: number; setYear: (y: number) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      <Button type="button" variant="outline" size="sm" onClick={() => setYear(year - 1)}>‹</Button>
+      <span className="min-w-[4rem] text-center text-sm font-medium tabular-nums text-slate-700 dark:text-slate-300">{year}</span>
+      <Button type="button" variant="outline" size="sm" onClick={() => setYear(year + 1)}>›</Button>
+    </div>
+  )
+}
+
+/** Monatsraster: Zeile je Fahrer, Tage farbcodiert. */
+function AbsenceMonthGrid({
+  absences,
+  driverName,
+  month,
+}: {
+  absences: AbsenceRow[]
+  driverName: (id: string) => string
+  month: string
+}) {
   const [year, mon] = month.split('-').map(Number)
   const daysInMonth = new Date(year, mon, 0).getDate()
   const monthStart = `${month}-01`
   const monthEnd = `${month}-${String(daysInMonth).padStart(2, '0')}`
 
-  // Fahrer mit mindestens einer Abwesenheit im Monat.
   const rows = useMemo(() => {
     const relevant = absences.filter((a) => a.start_date <= monthEnd && a.end_date >= monthStart)
     const byDriver = new Map<string, AbsenceRow[]>()
@@ -384,61 +465,170 @@ function AbsenceCalendar({
     return 'bg-amber-400'
   }
 
-  function shiftMonth(delta: number) {
-    const d = new Date(year, mon - 1 + delta, 1)
-    setMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+  if (rows.length === 0) {
+    return <p className="text-sm text-slate-400">Keine Abwesenheiten in diesem Monat.</p>
   }
 
   return (
-    <Card className="surface-card">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Team-Kalender</CardTitle>
-          <CardDescription>Abwesenheiten im Monat</CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => shiftMonth(-1)}>‹</Button>
-          <span className="text-sm font-medium tabular-nums text-slate-700 dark:text-slate-300">
-            {new Date(year, mon - 1, 1).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
-          </span>
-          <Button type="button" variant="outline" size="sm" onClick={() => shiftMonth(1)}>›</Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {rows.length === 0 ? (
-          <p className="text-sm text-slate-400">Keine Abwesenheiten in diesem Monat.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-xs">
-              <thead>
-                <tr>
-                  <th className="sticky left-0 bg-white dark:bg-slate-900 px-2 py-1 text-left font-medium text-slate-500 dark:text-slate-400">Fahrer</th>
-                  {Array.from({ length: daysInMonth }, (_, i) => (
-                    <th key={i} className="w-5 px-0 py-1 text-center font-normal text-slate-400">{i + 1}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map(([driverId, list]) => (
-                  <tr key={driverId} className="border-t border-slate-100 dark:border-slate-800">
-                    <td className="sticky left-0 bg-white dark:bg-slate-900 px-2 py-1 font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">{driverName(driverId)}</td>
-                    {Array.from({ length: daysInMonth }, (_, i) => (
-                      <td key={i} className="px-0 py-1">
-                        <div className={`mx-auto h-4 w-4 rounded-sm ${colorFor(list, i + 1) || 'bg-slate-50 dark:bg-slate-800/50'}`} />
-                      </td>
-                    ))}
-                  </tr>
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse text-xs">
+        <thead>
+          <tr>
+            <th className="sticky left-0 bg-white dark:bg-slate-900 px-2 py-1 text-left font-medium text-slate-500 dark:text-slate-400">Fahrer</th>
+            {Array.from({ length: daysInMonth }, (_, i) => (
+              <th key={i} className="w-5 px-0 py-1 text-center font-normal text-slate-400">{i + 1}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(([driverId, list]) => (
+            <tr key={driverId} className="border-t border-slate-100 dark:border-slate-800">
+              <td className="sticky left-0 bg-white dark:bg-slate-900 px-2 py-1 font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">{driverName(driverId)}</td>
+              {Array.from({ length: daysInMonth }, (_, i) => (
+                <td key={i} className="px-0 py-1">
+                  <div className={`mx-auto h-4 w-4 rounded-sm ${colorFor(list, i + 1) || 'bg-slate-50 dark:bg-slate-800/50'}`} />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <CalendarLegend />
+    </div>
+  )
+}
+
+interface DayHit {
+  absence: AbsenceRow
+  driver: string
+}
+
+/** Interaktiver Jahresüberblick: 12 Mini-Monate, Tage farbcodiert, Hover-Popover mit Details. */
+function AbsenceYearGrid({
+  absences,
+  driverName,
+  year,
+}: {
+  absences: AbsenceRow[]
+  driverName: (id: string) => string
+  year: number
+}) {
+  const [hover, setHover] = useState<{ date: string; hits: DayHit[]; top: number; left: number } | null>(null)
+
+  const yearStart = `${year}-01-01`
+  const yearEnd = `${year}-12-31`
+  const relevant = useMemo(
+    () => absences.filter((a) => a.start_date <= yearEnd && a.end_date >= yearStart),
+    [absences, yearStart, yearEnd],
+  )
+
+  // Für jeden Tag: welche Abwesenheiten greifen (über alle Fahrer)?
+  function hitsFor(dateStr: string): DayHit[] {
+    return relevant
+      .filter((a) => a.start_date <= dateStr && dateStr <= a.end_date)
+      .map((a) => ({ absence: a, driver: driverName(a.driver_id) }))
+  }
+
+  function dominantColor(hits: DayHit[]): string {
+    if (hits.some((h) => h.absence.type === 'krankheit')) return 'bg-rose-400 hover:bg-rose-500'
+    if (hits.some((h) => h.absence.type === 'urlaub')) return 'bg-sky-400 hover:bg-sky-500'
+    return 'bg-amber-400 hover:bg-amber-500'
+  }
+
+  function typeColor(type: AbsenceType): string {
+    if (type === 'krankheit') return 'bg-rose-400'
+    if (type === 'urlaub') return 'bg-sky-400'
+    return 'bg-amber-400'
+  }
+
+  const months = Array.from({ length: 12 }, (_, m) => m)
+  const weekdayLabels = ['M', 'D', 'M', 'D', 'F', 'S', 'S']
+
+  return (
+    <div className="relative">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {months.map((m) => {
+          const daysInMonth = new Date(year, m + 1, 0).getDate()
+          // Wochentag des 1. (Mo=0 … So=6).
+          const firstWeekday = (new Date(year, m, 1).getDay() + 6) % 7
+          const monthName = new Date(year, m, 1).toLocaleDateString('de-DE', { month: 'long' })
+          return (
+            <div key={m} className="rounded-lg border border-slate-200 dark:border-slate-700/60 p-2.5">
+              <p className="mb-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300">{monthName}</p>
+              <div className="grid grid-cols-7 gap-1">
+                {weekdayLabels.map((w, i) => (
+                  <span key={`w${i}`} className="text-center text-[9px] font-medium text-slate-300 dark:text-slate-600">{w}</span>
                 ))}
-              </tbody>
-            </table>
-            <div className="mt-3 flex gap-4 text-xs text-slate-500 dark:text-slate-400">
-              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-sky-400" /> Urlaub</span>
-              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-rose-400" /> Krankheit</span>
-              <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-amber-400" /> Sonstiges</span>
+                {Array.from({ length: firstWeekday }, (_, i) => <span key={`pad${i}`} />)}
+                {Array.from({ length: daysInMonth }, (_, i) => {
+                  const day = i + 1
+                  const dateStr = `${year}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                  const hits = hitsFor(dateStr)
+                  const has = hits.length > 0
+                  return (
+                    <div
+                      key={day}
+                      onMouseEnter={(e) => {
+                        if (!has) return
+                        const r = e.currentTarget.getBoundingClientRect()
+                        setHover({ date: dateStr, hits, top: r.bottom + 6, left: r.left })
+                      }}
+                      onMouseLeave={() => setHover(null)}
+                      className={
+                        'flex aspect-square items-center justify-center rounded-[3px] text-[9px] transition-colors ' +
+                        (has
+                          ? `${dominantColor(hits)} cursor-default font-semibold text-white`
+                          : 'bg-slate-50 text-slate-400 dark:bg-slate-800/50 dark:text-slate-600')
+                      }
+                    >
+                      {day}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )
+        })}
+      </div>
+
+      <CalendarLegend />
+
+      {hover && (
+        <div
+          className="pointer-events-none fixed z-50 w-64 rounded-lg border border-slate-200 bg-white p-3 text-xs shadow-xl dark:border-slate-700 dark:bg-slate-900"
+          style={{ top: Math.min(hover.top, (typeof window !== 'undefined' ? window.innerHeight : 800) - 200), left: Math.min(hover.left, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 270) }}
+        >
+          <p className="mb-2 font-semibold text-slate-900 dark:text-slate-100">
+            {new Date(`${hover.date}T00:00:00`).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+          </p>
+          <ul className="space-y-1.5">
+            {hover.hits.map((h) => (
+              <li key={h.absence.id} className="flex items-start gap-2">
+                <span className={`mt-0.5 h-2.5 w-2.5 shrink-0 rounded-sm ${typeColor(h.absence.type)}`} />
+                <span className="min-w-0">
+                  <span className="font-medium text-slate-900 dark:text-slate-100">{h.driver}</span>
+                  <span className="text-slate-500 dark:text-slate-400"> · {labelFor(h.absence.type)}</span>
+                  <br />
+                  <span className="text-slate-400">
+                    {new Date(`${h.absence.start_date}T00:00:00`).toLocaleDateString('de-DE')} – {new Date(`${h.absence.end_date}T00:00:00`).toLocaleDateString('de-DE')}
+                  </span>
+                  {h.absence.reason ? <><br /><span className="text-slate-400 italic">{h.absence.reason}</span></> : null}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CalendarLegend() {
+  return (
+    <div className="mt-3 flex gap-4 text-xs text-slate-500 dark:text-slate-400">
+      <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-sky-400" /> Urlaub</span>
+      <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-rose-400" /> Krankheit</span>
+      <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-amber-400" /> Sonstiges</span>
+    </div>
   )
 }

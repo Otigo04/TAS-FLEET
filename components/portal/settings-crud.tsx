@@ -29,6 +29,7 @@ const SETTINGS_CATEGORIES = [
   { key: 'incident_severities', label: 'Vorfall-Prioritäten', description: 'z. B. Niedrig, Mittel, Hoch' },
   { key: 'incident_statuses', label: 'Vorfall-Status', description: 'z. B. Offen, In Bearbeitung, Gelöst' },
   { key: 'uber_zones', label: 'Uber-Zonen', description: 'Auswählbare Zonen in der Disposition, z. B. Innenstadt, Flughafen' },
+  { key: 'shift_names', label: 'Schichtnamen', description: 'Schichten in Disposition & Fahrern, z. B. Früh, Spät, Nacht, Tagschicht' },
 ]
 
 interface SettingsCrudProps {

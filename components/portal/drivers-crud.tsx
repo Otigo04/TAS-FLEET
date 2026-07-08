@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useActiveCompanyId, useCan } from '@/components/portal/tenant-provider'
+import { labelFor } from '@/lib/labels'
 
 type DriverRow = Database['public']['Tables']['drivers']['Row']
 type DriverInsert = Database['public']['Tables']['drivers']['Insert']
@@ -20,15 +21,13 @@ type DriverUpdate = Database['public']['Tables']['drivers']['Update']
 
 interface DriversCrudProps {
   initialDrivers: DriverRow[]
+  shiftSlots: string[]
 }
 
-const shifts = ['Frueh', 'Spaet', 'Nacht']
 const PAGE_SIZE = 12
 
 function shiftLabel(shift: string) {
-  if (shift === 'Frueh') return 'Früh'
-  if (shift === 'Spaet') return 'Spät'
-  return shift
+  return labelFor(shift)
 }
 
 function shiftVariant(shift: string): 'secondary' | 'warning' | 'danger' {
@@ -37,7 +36,8 @@ function shiftVariant(shift: string): 'secondary' | 'warning' | 'danger' {
   return 'danger'
 }
 
-export function DriversCrud({ initialDrivers }: DriversCrudProps) {
+export function DriversCrud({ initialDrivers, shiftSlots }: DriversCrudProps) {
+  const shifts = shiftSlots.length > 0 ? shiftSlots : ['Frueh', 'Spaet', 'Nacht']
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
   const canManage = useCan('manageMasterData')

@@ -68,6 +68,64 @@ export function estimateTaxes(
   }
 }
 
+// =====================================================================
+// Umsatzsteuer (USt) / Vorsteuer / Zahllast
+//
+// amount_eur einer Buchung ist BRUTTO. Aus dem USt-Satz je Buchung wird
+// Netto und USt-Anteil abgeleitet. Einnahmen liefern vereinnahmte USt
+// (Ausgangssteuer), Ausgaben liefern abziehbare Vorsteuer. Die Zahllast
+// ans Finanzamt ist USt − Vorsteuer (negativ = Vorsteuer-Überhang/Erstattung).
+// =====================================================================
+
+/** Übliche deutsche USt-Sätze (Regelsatz, ermäßigt, steuerfrei/0). */
+export const VAT_RATES = [19, 7, 0] as const
+
+/** Nettobetrag aus Brutto und USt-Satz (Prozent). */
+export function netFromGross(gross: number, vatRatePercent: number): number {
+  return gross / (1 + vatRatePercent / 100)
+}
+
+/** USt-Anteil aus Brutto und USt-Satz (Prozent). */
+export function vatFromGross(gross: number, vatRatePercent: number): number {
+  return gross - netFromGross(gross, vatRatePercent)
+}
+
+export interface VatSummary {
+  einnahmenBrutto: number
+  einnahmenNetto: number
+  ausgabenBrutto: number
+  ausgabenNetto: number
+  umsatzsteuer: number // vereinnahmt aus Einnahmen (Ausgangssteuer)
+  vorsteuer: number    // abziehbar aus Ausgaben
+  zahllast: number     // Umsatzsteuer − Vorsteuer (>0 = an FA zahlen)
+}
+
+/**
+ * Aggregiert USt/Vorsteuer/Zahllast über eine Menge Buchungen.
+ * Jede Buchung: kind ('einnahme' | 'ausgabe'), amount_eur (brutto), vat_rate (%).
+ */
+export function summarizeVat(
+  entries: { kind: 'einnahme' | 'ausgabe'; amount_eur: number; vat_rate: number }[],
+): VatSummary {
+  let einnahmenBrutto = 0, einnahmenNetto = 0, umsatzsteuer = 0
+  let ausgabenBrutto = 0, ausgabenNetto = 0, vorsteuer = 0
+  for (const e of entries) {
+    const gross = Number(e.amount_eur)
+    const rate = Number(e.vat_rate) || 0
+    const net = netFromGross(gross, rate)
+    const vat = gross - net
+    if (e.kind === 'einnahme') {
+      einnahmenBrutto += gross; einnahmenNetto += net; umsatzsteuer += vat
+    } else {
+      ausgabenBrutto += gross; ausgabenNetto += net; vorsteuer += vat
+    }
+  }
+  return {
+    einnahmenBrutto, einnahmenNetto, ausgabenBrutto, ausgabenNetto,
+    umsatzsteuer, vorsteuer, zahllast: umsatzsteuer - vorsteuer,
+  }
+}
+
 export function formatEur(value: number): string {
   return value.toLocaleString('de-DE', {
     style: 'currency',

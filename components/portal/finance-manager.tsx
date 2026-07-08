@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import {
-  ArrowDownCircle, ArrowUpCircle, FileDown, Landmark, Loader2, Plus, Trash2, TrendingUp,
+  ArrowDownCircle, ArrowUpCircle, FileDown, Landmark, Loader2, Percent, Plus, Trash2, TrendingUp,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
@@ -14,7 +14,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useActiveCompanyId, useCan, useTenant } from '@/components/portal/tenant-provider'
 import {
-  DEFAULT_HEBESATZ, LEGAL_FORM_LABELS, estimateTaxes, formatEur, type LegalForm,
+  DEFAULT_HEBESATZ, LEGAL_FORM_LABELS, VAT_RATES, estimateTaxes, formatEur,
+  summarizeVat, vatFromGross, type LegalForm,
 } from '@/lib/taxes'
 import { cn } from '@/lib/utils'
 
@@ -32,6 +33,8 @@ const AUSGABE_KATEGORIEN = [
 interface FinanceConfig {
   legal_form: LegalForm
   hebesatz: number
+  // Kleinunternehmer nach §19 UStG: kein USt-Ausweis, keine Vorsteuer, keine Zahllast.
+  kleinunternehmer: boolean
 }
 
 function parseConfig(settings: SettingsRow[]): FinanceConfig {
@@ -40,6 +43,7 @@ function parseConfig(settings: SettingsRow[]): FinanceConfig {
   return {
     legal_form: v.legal_form === 'personengesellschaft' ? 'personengesellschaft' : 'kapitalgesellschaft',
     hebesatz: typeof v.hebesatz === 'number' && v.hebesatz > 0 ? v.hebesatz : DEFAULT_HEBESATZ,
+    kleinunternehmer: v.kleinunternehmer === true,
   }
 }
 
@@ -116,6 +120,7 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
   const [formCategory, setFormCategory] = useState(EINNAHME_KATEGORIEN[0])
   const [formAmount, setFormAmount] = useState('')
   const [formNote, setFormNote] = useState('')
+  const [formVatRate, setFormVatRate] = useState<number>(19)
 
   const kategorien = formKind === 'einnahme' ? EINNAHME_KATEGORIEN : AUSGABE_KATEGORIEN
 
@@ -139,6 +144,7 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
       kind: formKind,
       category: formCategory,
       amount_eur: Math.round(amount * 100) / 100,
+      vat_rate: config.kleinunternehmer ? 0 : formVatRate,
       description: formNote.trim() || null,
     })
     if (insertError) setError(insertError.message)
@@ -165,12 +171,14 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
     return entries.filter((e) => e.entry_date.startsWith(prefix))
   }, [entries, period, month, year])
 
-  const einnahmen = periodEntries
-    .filter((e) => e.kind === 'einnahme')
-    .reduce((sum, e) => sum + Number(e.amount_eur), 0)
-  const ausgaben = periodEntries
-    .filter((e) => e.kind === 'ausgabe')
-    .reduce((sum, e) => sum + Number(e.amount_eur), 0)
+  // USt-Aufstellung (Brutto/Netto/USt/Vorsteuer/Zahllast) über den Zeitraum.
+  const vat = useMemo(() => summarizeVat(periodEntries), [periodEntries])
+  const vatActive = !config.kleinunternehmer
+
+  // EÜR/Gewinnermittlung: bei Regelbesteuerung auf Nettobasis (USt ist
+  // durchlaufender Posten), bei Kleinunternehmer sind Brutto = Netto.
+  const einnahmen = vat.einnahmenNetto
+  const ausgaben = vat.ausgabenNetto
   const gewinn = einnahmen - ausgaben
 
   // Steuern beziehen sich auf das Jahresergebnis; bei Monatssicht wird der
@@ -271,8 +279,8 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
 
   <h2>Übersicht (EÜR)</h2>
   <div class="cards">
-    <div class="card"><div class="label">Einnahmen</div><div class="value pos">${esc(formatEur(einnahmen))}</div></div>
-    <div class="card"><div class="label">Ausgaben</div><div class="value neg">${esc(formatEur(ausgaben))}</div></div>
+    <div class="card"><div class="label">${vatActive ? 'Einnahmen (netto)' : 'Einnahmen'}</div><div class="value pos">${esc(formatEur(einnahmen))}</div></div>
+    <div class="card"><div class="label">${vatActive ? 'Ausgaben (netto)' : 'Ausgaben'}</div><div class="value neg">${esc(formatEur(ausgaben))}</div></div>
     <div class="card accent"><div class="label">Gewinn / Verlust</div><div class="value ${gewinn >= 0 ? 'pos' : 'neg'}">${esc(formatEur(gewinn))}</div></div>
     <div class="card"><div class="label">Steuern (geschätzt)</div><div class="value">${esc(formatEur(anteilig(taxes.steuernGesamt)))}</div></div>
   </div>
@@ -286,6 +294,16 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
     </tbody>
   </table>
   <p class="disclaimer">Vereinfachte Schätzung ohne Gewähr — ersetzt keine Steuerberatung.</p>
+
+  ${vatActive ? `
+  <h2>Umsatzsteuer</h2>
+  <table>
+    <tbody>
+      <tr><td>Umsatzsteuer (vereinnahmt, aus ${esc(formatEur(vat.einnahmenBrutto))} brutto)</td><td class="num">${esc(formatEur(vat.umsatzsteuer))}</td></tr>
+      <tr><td>Vorsteuer (abziehbar, aus ${esc(formatEur(vat.ausgabenBrutto))} brutto)</td><td class="num">−${esc(formatEur(vat.vorsteuer))}</td></tr>
+      <tr class="tax-total"><td>${vat.zahllast >= 0 ? 'USt-Zahllast ans Finanzamt' : 'Vorsteuer-Überhang (Erstattung)'}</td><td class="num">${esc(formatEur(Math.abs(vat.zahllast)))}</td></tr>
+    </tbody>
+  </table>` : ''}
 
   <h2>Buchungen (${periodEntries.length})</h2>
   <table>
@@ -360,7 +378,7 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
         <Card className="surface-card animate-fade-up-delay">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1.5">
-              <ArrowUpCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> Einnahmen
+              <ArrowUpCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> {vatActive ? 'Einnahmen (netto)' : 'Einnahmen'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -370,7 +388,7 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
         <Card className="surface-card animate-fade-up-delay-2">
           <CardHeader className="pb-2">
             <CardDescription className="flex items-center gap-1.5">
-              <ArrowDownCircle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" /> Ausgaben
+              <ArrowDownCircle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" /> {vatActive ? 'Ausgaben (netto)' : 'Ausgaben'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -405,6 +423,53 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
           </CardContent>
         </Card>
       </section>
+
+      {/* ── Umsatzsteuer-Voranmeldung ── */}
+      {vatActive && (
+        <section className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
+          <Card className="surface-card animate-fade-up-delay">
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-1.5">
+                <Percent className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> Umsatzsteuer (vereinnahmt)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{formatEur(vat.umsatzsteuer)}</p>
+              <p className="mt-0.5 text-xs text-slate-400">aus {formatEur(vat.einnahmenBrutto)} brutto</p>
+            </CardContent>
+          </Card>
+          <Card className="surface-card animate-fade-up-delay-2">
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-1.5">
+                <Percent className="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" /> Vorsteuer (abziehbar)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-slate-100">{formatEur(vat.vorsteuer)}</p>
+              <p className="mt-0.5 text-xs text-slate-400">aus {formatEur(vat.ausgabenBrutto)} brutto</p>
+            </CardContent>
+          </Card>
+          <Card className="surface-card surface-card-accent animate-fade-up-delay-3 col-span-2 lg:col-span-1">
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-1.5">
+                <Landmark className="h-3.5 w-3.5 text-brand-600 dark:text-brand-300" />
+                {vat.zahllast >= 0 ? 'USt-Zahllast' : 'Vorsteuer-Überhang'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className={cn(
+                'text-2xl font-bold tabular-nums',
+                vat.zahllast >= 0 ? 'text-slate-900 dark:text-slate-100' : 'text-emerald-700 dark:text-emerald-400',
+              )}>
+                {formatEur(Math.abs(vat.zahllast))}
+              </p>
+              <p className="mt-0.5 text-xs text-slate-400">
+                {vat.zahllast >= 0 ? 'ans Finanzamt' : 'Erstattung vom Finanzamt'}
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.4fr_1fr]">
         {/* ── Buchungen ── */}
@@ -453,12 +518,27 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="fin-amount" className="text-xs">Betrag (EUR)</Label>
+                  <Label htmlFor="fin-amount" className="text-xs">Betrag (EUR{vatActive ? ', brutto' : ''})</Label>
                   <Input
                     id="fin-amount" inputMode="decimal" placeholder="0,00" value={formAmount}
                     onChange={(e) => setFormAmount(e.target.value)} required
                   />
                 </div>
+                {vatActive && (
+                  <div className="space-y-1">
+                    <Label htmlFor="fin-vat" className="text-xs">USt-Satz</Label>
+                    <select
+                      id="fin-vat"
+                      value={formVatRate}
+                      onChange={(e) => setFormVatRate(Number(e.target.value))}
+                      className="flex h-10 w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100"
+                    >
+                      {VAT_RATES.map((r) => (
+                        <option key={r} value={r}>{r === 0 ? 'steuerfrei (0 %)' : `${r} %`}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="space-y-1">
                   <Label htmlFor="fin-note" className="text-xs">Beschreibung (optional)</Label>
                   <Input id="fin-note" value={formNote} onChange={(e) => setFormNote(e.target.value)} placeholder="z. B. Tankrechnung" />
@@ -495,6 +575,9 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
                       <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                         {new Date(`${entry.entry_date}T00:00:00`).toLocaleDateString('de-DE')}
                         {entry.description ? ` · ${entry.description}` : ''}
+                        {vatActive && Number(entry.vat_rate) > 0
+                          ? ` · ${entry.vat_rate} % USt (${formatEur(vatFromGross(Number(entry.amount_eur), Number(entry.vat_rate)))})`
+                          : ''}
                       </p>
                     </div>
                     <span className={cn(
@@ -606,6 +689,18 @@ export function FinanceManager({ initialEntries, initialSettings }: FinanceManag
                     onBlur={() => void saveConfig(config)}
                   />
                 </div>
+                <label className="flex items-start gap-2 rounded-md border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900 px-3 py-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={config.kleinunternehmer}
+                    onChange={(e) => void saveConfig({ ...config, kleinunternehmer: e.target.checked })}
+                    className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600"
+                  />
+                  <span className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+                    <span className="font-medium text-slate-900 dark:text-slate-100">Kleinunternehmer (§19 UStG)</span>
+                    <br />Kein USt-Ausweis, keine Vorsteuer, keine Zahllast.
+                  </span>
+                </label>
                 {configSaved && (
                   <Badge variant="success">Gespeichert ✓</Badge>
                 )}

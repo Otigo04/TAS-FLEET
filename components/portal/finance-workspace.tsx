@@ -10,21 +10,16 @@ import { cn } from '@/lib/utils'
 type FinanceRow = Database['public']['Tables']['finance_entries']['Row']
 type SettingsRow = Database['public']['Tables']['settings']['Row']
 type VehicleRow = Database['public']['Tables']['vehicles']['Row']
-type CostRow = Database['public']['Tables']['vehicle_costs']['Row']
-type RevenueRow = Database['public']['Tables']['vehicle_revenue']['Row']
-
 type Tab = 'guv' | 'tank'
 
 interface FinanceWorkspaceProps {
   initialEntries: FinanceRow[]
   initialSettings: SettingsRow[]
   initialVehicles: VehicleRow[]
-  initialFuelCosts: CostRow[]
-  initialRevenue: RevenueRow[]
 }
 
 export function FinanceWorkspace({
-  initialEntries, initialSettings, initialVehicles, initialFuelCosts, initialRevenue,
+  initialEntries, initialSettings, initialVehicles,
 }: FinanceWorkspaceProps) {
   const [tab, setTab] = useState<Tab>('guv')
 
@@ -59,8 +54,6 @@ export function FinanceWorkspace({
       ) : (
         <FuelRatioManager
           initialVehicles={initialVehicles}
-          initialFuelCosts={initialFuelCosts}
-          initialRevenue={initialRevenue}
           initialSettings={initialSettings}
         />
       )}

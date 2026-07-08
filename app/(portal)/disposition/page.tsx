@@ -1,6 +1,7 @@
 import { requireUser } from '@/lib/auth'
 import { requireActiveCompany } from '@/lib/tenant'
 import { DispositionPlanner } from '@/components/portal/disposition-planner'
+import { resolveShiftSlots } from '@/lib/shifts'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 export default async function DispositionPage() {
@@ -12,14 +13,17 @@ export default async function DispositionPage() {
     supabase.from('vehicles').select('*').eq('company_id', company.id).order('license_plate'),
     supabase.from('shift_assignments').select('*').eq('company_id', company.id).order('shift_date', { ascending: true }),
     supabase.from('absences').select('*').eq('company_id', company.id),
-    supabase.from('settings').select('*').eq('company_id', company.id).eq('key', 'uber_zones').maybeSingle(),
+    supabase.from('settings').select('*').eq('company_id', company.id).in('key', ['uber_zones', 'shift_names']),
   ])
 
   const drivers = driversResult.data ?? []
   const vehicles = vehiclesResult.data ?? []
   const shifts = shiftsResult.data ?? []
   const absences = absencesResult.data ?? []
-  const uberZones = Array.isArray(settingsResult.data?.value) ? (settingsResult.data!.value as string[]) : []
+  const settingsRows = settingsResult.data ?? []
+  const uberZonesRow = settingsRows.find((r) => r.key === 'uber_zones')
+  const uberZones = Array.isArray(uberZonesRow?.value) ? (uberZonesRow!.value as string[]) : []
+  const shiftSlots = resolveShiftSlots(settingsRows.find((r) => r.key === 'shift_names')?.value)
 
   return (
     <main className="space-y-6">
@@ -58,7 +62,7 @@ export default async function DispositionPage() {
         </Card>
       </section>
 
-      <DispositionPlanner initialShifts={shifts} drivers={drivers} vehicles={vehicles} absences={absences} uberZones={uberZones} />
+      <DispositionPlanner initialShifts={shifts} drivers={drivers} vehicles={vehicles} absences={absences} uberZones={uberZones} shiftSlots={shiftSlots} />
     </main>
   )
 }

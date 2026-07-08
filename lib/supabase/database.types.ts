@@ -232,7 +232,7 @@ export interface Database {
           id: string
           company_id: string
           shift_date: string
-          shift_slot: 'Frueh' | 'Spaet' | 'Nacht'
+          shift_slot: string
           driver_id: string
           vehicle_id: string
           uber_zone: string
@@ -244,7 +244,7 @@ export interface Database {
           id?: string
           company_id: string
           shift_date: string
-          shift_slot: 'Frueh' | 'Spaet' | 'Nacht'
+          shift_slot: string
           driver_id: string
           vehicle_id: string
           uber_zone: string
@@ -256,7 +256,7 @@ export interface Database {
           id?: string
           company_id?: string
           shift_date?: string
-          shift_slot?: 'Frueh' | 'Spaet' | 'Nacht'
+          shift_slot?: string
           driver_id?: string
           vehicle_id?: string
           uber_zone?: string
@@ -572,6 +572,7 @@ export interface Database {
           category: string
           description: string | null
           amount_eur: number
+          vat_rate: number
           created_by: string | null
           created_at: string
           updated_at: string
@@ -584,6 +585,7 @@ export interface Database {
           category?: string
           description?: string | null
           amount_eur: number
+          vat_rate?: number
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -596,6 +598,7 @@ export interface Database {
           category?: string
           description?: string | null
           amount_eur?: number
+          vat_rate?: number
           created_by?: string | null
           created_at?: string
           updated_at?: string

@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SearchableSelect } from '@/components/ui/searchable-select'
+import { LoadingScreen } from '@/components/portal/loading-screen'
 import { useActiveCompanyId, useCan, useTenant } from '@/components/portal/tenant-provider'
 import { formatEur } from '@/lib/taxes'
 import { downloadCsv, todayStamp } from '@/lib/export'
@@ -66,13 +67,11 @@ interface VehicleStat {
 
 interface FuelRatioManagerProps {
   initialVehicles: VehicleRow[]
-  initialFuelCosts: CostRow[]
-  initialRevenue: RevenueRow[]
   initialSettings: SettingsRow[]
 }
 
 export function FuelRatioManager({
-  initialVehicles, initialFuelCosts, initialRevenue, initialSettings,
+  initialVehicles, initialSettings,
 }: FuelRatioManagerProps) {
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
@@ -80,8 +79,9 @@ export function FuelRatioManager({
   const canManageSettings = useCan('manageSettings')
 
   const [vehicles] = useState<VehicleRow[]>(initialVehicles)
-  const [fuelCosts, setFuelCosts] = useState<CostRow[]>(initialFuelCosts)
-  const [revenue, setRevenue] = useState<RevenueRow[]>(initialRevenue)
+  const [fuelCosts, setFuelCosts] = useState<CostRow[]>([])
+  const [revenue, setRevenue] = useState<RevenueRow[]>([])
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isBusy, setIsBusy] = useState(false)
   const showBusy = useDelayedLoading(isBusy)
@@ -123,9 +123,11 @@ export function FuelRatioManager({
     if (revRes.error) { setError(revRes.error.message); return }
     setFuelCosts(costsRes.data ?? [])
     setRevenue(revRes.data ?? [])
+    setLoading(false)
   }
 
   useEffect(() => {
+    void refresh()
     const channel = supabase
       .channel('fuel-ratio-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'vehicle_costs' }, () => void refresh())
@@ -353,6 +355,10 @@ export function FuelRatioManager({
     lvl === 'crit' ? 'danger' : lvl === 'warn' ? 'warning' : lvl === 'good' ? 'success' : 'secondary'
 
   const pctText = (r: number | null) => (r === null ? '—' : `${r.toFixed(1).replace('.', ',')} %`)
+
+  if (loading) {
+    return <LoadingScreen label="Tank- & Umsatzdaten werden geladen…" />
+  }
 
   return (
     <div className="space-y-6">

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useActiveCompanyId } from '@/components/portal/tenant-provider'
+import { labelFor } from '@/lib/labels'
 
 function addDaysIso(iso: string, delta: number) {
   const d = new Date(`${iso}T00:00:00Z`)
@@ -40,21 +41,18 @@ interface ShiftPlannerProps {
   vehicles: VehicleRow[]
   absences: AbsenceRow[]
   uberZones: string[]
+  shiftSlots: string[]
 }
 
-const SHIFT_SLOTS = ['Frueh', 'Spaet', 'Nacht'] as const
 /** Filterwert für "alle Schichten anzeigen" — kein DB-Code, nur UI-Zustand. */
 const ALL_SLOTS = 'alle'
 
 function shiftLabel(slot: string) {
-  if (slot === 'Frueh') return 'Frühschicht'
-  if (slot === 'Spaet') return 'Spätschicht'
-  if (slot === 'Nacht') return 'Nachtschicht'
   if (slot === ALL_SLOTS) return 'Alle Schichten'
-  return slot
+  return labelFor(slot)
 }
 
-export function DispositionPlanner({ initialShifts, drivers, vehicles, absences, uberZones }: ShiftPlannerProps) {
+export function DispositionPlanner({ initialShifts, drivers, vehicles, absences, uberZones, shiftSlots }: ShiftPlannerProps) {
   const supabase = useMemo(() => createClient(), [])
   const companyId = useActiveCompanyId()
 
@@ -142,7 +140,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
     const { error: insertError } = await supabase.from('shift_assignments').insert({
       company_id: companyId,
       shift_date: date,
-      shift_slot: slot as 'Frueh' | 'Spaet' | 'Nacht',
+      shift_slot: slot,
       vehicle_id: vehicleId,
       driver_id: driverId,
       uber_zone: zone || 'Standard',
@@ -222,7 +220,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
       page.drawText(`Datum: ${date}`, { x: 40, y: 778, size: 11, font: reg, color: rgb(0.3, 0.34, 0.4) })
 
       let y = 745
-      for (const slotName of SHIFT_SLOTS) {
+      for (const slotName of shiftSlots) {
         const slotShifts = shifts.filter(s => s.shift_date === date && s.shift_slot === slotName)
         page.drawText(shiftLabel(slotName), { x: 40, y, size: 13, font: bold, color: rgb(0.12, 0.4, 0.27) })
         y -= 18
@@ -279,7 +277,7 @@ export function DispositionPlanner({ initialShifts, drivers, vehicles, absences,
                 onChange={e => setSlot(e.target.value)}
               >
                 <option value={ALL_SLOTS}>{shiftLabel(ALL_SLOTS)}</option>
-                {SHIFT_SLOTS.map(s => (
+                {shiftSlots.map(s => (
                   <option key={s} value={s}>{shiftLabel(s)}</option>
                 ))}
               </select>

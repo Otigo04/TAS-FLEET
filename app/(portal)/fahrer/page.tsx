@@ -1,19 +1,29 @@
 import { requireUser } from '@/lib/auth'
 import { requireActiveCompany } from '@/lib/tenant'
 import { DriversCrud } from '@/components/portal/drivers-crud'
+import { resolveShiftSlots } from '@/lib/shifts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function FahrerPage() {
   const { supabase } = await requireUser()
   const company = await requireActiveCompany()
 
-  const { data: drivers } = await supabase
-    .from('drivers')
-    .select('*')
-    .eq('company_id', company.id)
-    .order('created_at', { ascending: false })
+  const [{ data: drivers }, { data: shiftSetting }] = await Promise.all([
+    supabase
+      .from('drivers')
+      .select('*')
+      .eq('company_id', company.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('settings')
+      .select('value')
+      .eq('company_id', company.id)
+      .eq('key', 'shift_names')
+      .maybeSingle(),
+  ])
 
   const driverRows = drivers ?? []
+  const shiftSlots = resolveShiftSlots(shiftSetting?.value)
   const expiringSoon = driverRows.filter((driver) => {
     if (!driver.pschein_valid_until) return false
     const ms = new Date(driver.pschein_valid_until).getTime() - Date.now()
@@ -59,7 +69,7 @@ export default async function FahrerPage() {
         </Card>
       </section>
 
-      <DriversCrud initialDrivers={driverRows} />
+      <DriversCrud initialDrivers={driverRows} shiftSlots={shiftSlots} />
     </main>
   )
 }

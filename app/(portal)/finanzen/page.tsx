@@ -7,7 +7,7 @@ export default async function FinanzenPage() {
   // Finanzdaten sind sensibel: nur Rollen mit Berichts-Recht (owner/admin).
   const company = await requireCapability('viewReports')
 
-  const [entriesResult, settingsResult, vehiclesResult, fuelResult, revenueResult] = await Promise.all([
+  const [entriesResult, settingsResult, vehiclesResult] = await Promise.all([
     supabase
       .from('finance_entries')
       .select('*')
@@ -24,17 +24,6 @@ export default async function FinanzenPage() {
       .select('*')
       .eq('company_id', company.id)
       .order('license_plate', { ascending: true }),
-    supabase
-      .from('vehicle_costs')
-      .select('*')
-      .eq('company_id', company.id)
-      .eq('cost_type', 'tank')
-      .limit(5000),
-    supabase
-      .from('vehicle_revenue')
-      .select('*')
-      .eq('company_id', company.id)
-      .limit(5000),
   ])
 
   return (
@@ -50,8 +39,6 @@ export default async function FinanzenPage() {
         initialEntries={entriesResult.data ?? []}
         initialSettings={settingsResult.data ?? []}
         initialVehicles={vehiclesResult.data ?? []}
-        initialFuelCosts={fuelResult.data ?? []}
-        initialRevenue={revenueResult.data ?? []}
       />
     </main>
   )
