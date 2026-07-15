@@ -34,7 +34,11 @@ export async function updateSession(request: NextRequest) {
     if (error instanceof AuthApiError && error.code === 'refresh_token_not_found') {
       await supabase.auth.signOut()
     } else {
-      throw error
+      // Session refresh is best-effort: a transient Auth API failure must not
+      // 500 every route. Page-level guards (requireUser) re-validate the user
+      // and redirect to /login when there is genuinely no session.
+      // eslint-disable-next-line no-console
+      console.error('[middleware] session refresh failed:', error)
     }
   }
 

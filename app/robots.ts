@@ -1,0 +1,11 @@
+import type { MetadataRoute } from 'next'
+
+// Private, auth-gated portal — keep it out of search indexes entirely.
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: {
+      userAgent: '*',
+      disallow: '/',
+    },
+  }
+}
